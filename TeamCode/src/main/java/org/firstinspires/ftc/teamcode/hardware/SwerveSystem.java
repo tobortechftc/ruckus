@@ -194,8 +194,8 @@ public class SwerveSystem {
         if (isAuto) {
             use_imu = true;
             use_imu2 = false;
-            use_range_sensor = true;
-            use_proximity_sensor = true;
+            use_range_sensor = false;
+            use_proximity_sensor = false;
         } else {
             use_imu = false;
             use_imu2 = false;
