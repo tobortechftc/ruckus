@@ -108,22 +108,22 @@ public class SwerveSystem {
     public final static double LEFT_SV_DIFF = 0.004;
     public final static double RIGHT_SV_DIFF = 0.004;
     final static double SERVO_FL_FORWARD_POSITION = 0.5;
-    final static double SERVO_FR_FORWARD_POSITION = 0.4533;
-    final static double SERVO_BL_FORWARD_POSITION = 0.48;
-    final static double SERVO_BR_FORWARD_POSITION = 0.49;
+    final static double SERVO_FR_FORWARD_POSITION = 0.5;
+    final static double SERVO_BL_FORWARD_POSITION = 0.5;
+    final static double SERVO_BR_FORWARD_POSITION = 0.5;
 
     /* variables for newbot */
-    public static double NB_CRAB_DIFF_INC_FL = 0.4373;
-    public static double NB_CRAB_DIFF_DEC_FR = 0.4612;
-    public static double NB_CRAB_DIFF_INC_BL = 0.4413;
-    public static double NB_CRAB_DIFF_DEC_BR = 0.4872;
+    public static double NB_CRAB_DIFF_INC_FL = 0.5;
+    public static double NB_CRAB_DIFF_DEC_FR = 0.5;
+    public static double NB_CRAB_DIFF_INC_BL = 0.5;
+    public static double NB_CRAB_DIFF_DEC_BR = 0.5;
     public static double NB_LEFT_SV_DIFF = 0.001;
     public static double NB_RIGHT_SV_DIFF = 0.001;
 
-    final static double NB_SERVO_FL_FORWARD_POSITION = 0.5278;
-    final static double NB_SERVO_FR_FORWARD_POSITION = 0.4478;
-    final static double NB_SERVO_BL_FORWARD_POSITION = 0.4178;
-    final static double NB_SERVO_BR_FORWARD_POSITION = 0.5589;
+    final static double NB_SERVO_FL_FORWARD_POSITION = 0.5;
+    final static double NB_SERVO_FR_FORWARD_POSITION = 0.5;
+    final static double NB_SERVO_BL_FORWARD_POSITION = 0.5;
+    final static double NB_SERVO_BR_FORWARD_POSITION = 0.5;
 
     static double SERVO_FL_STRAFE_POSITION = SERVO_FL_FORWARD_POSITION + CRAB_DIFF_INC - LEFT_SV_DIFF;
     static double SERVO_FR_STRAFE_POSITION = SERVO_FR_FORWARD_POSITION - CRAB_DIFF_DEC + RIGHT_SV_DIFF;
@@ -1113,12 +1113,12 @@ public class SwerveSystem {
     public void snake_servo_adj(){
         if(enoughToSnake) {
             if(isSnakingLeft) {
-                leftServoAngle = 1 - (thetaOneCalc);
-                rightServoAngle = 1 - (thetaTwoCalc);
+                leftServoAngle = (thetaOneCalc);
+                rightServoAngle = (thetaTwoCalc);
             }
             else{
-                leftServoAngle = thetaTwoCalc;
-                rightServoAngle = thetaOneCalc;
+                leftServoAngle = 1 - thetaTwoCalc;
+                rightServoAngle = 1 - thetaOneCalc;
             }
             servoPosFL = 1 - (leftServoAngle);
             servoPosFR = 1 - (rightServoAngle);

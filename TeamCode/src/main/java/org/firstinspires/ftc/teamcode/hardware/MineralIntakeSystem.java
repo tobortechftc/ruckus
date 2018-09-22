@@ -52,15 +52,14 @@ public class MineralIntakeSystem {
     }
 
     void init(HardwareMap hwMap) {
-
-        sv_intake_gate = hwMap.servo.get("sv_intake_gate");
-        sv_intake_gate.setPosition(SV_INTAKE_GATE_INIT);
-
         if (use_intake) {
             mt_intake_left = hwMap.dcMotor.get("mtIntakeLeft");
             mt_intake_left.setDirection(DcMotor.Direction.REVERSE);
             mt_intake_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             mt_intake_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            sv_intake_gate = hwMap.servo.get("sv_intake_gate");
+            sv_intake_gate.setPosition(SV_INTAKE_GATE_INIT);
 
             mt_intake_right = hwMap.dcMotor.get("mtIntakeRight");
             // mt_glyph_slider.setDirection(DcMotor.Direction.REVERSE);
