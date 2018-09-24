@@ -216,11 +216,11 @@ public class TeleopV1 extends SwerveUtilLOP {
                         //double pw_dir = (gamepad1.left_stick_x>0.1?-1.0:1.0);
                         //while (Math.abs(gamepad1.left_stick_x+gamepad1.right_stick_x)>0.2) {
                         while (gamepad1.left_bumper || gamepad1.right_bumper) {
-                            double pw_dir = (gamepad1.left_bumper ? 1.0:-1.0);
+                            double pw_dir = (gamepad1.left_bumper ? -1.0:1.0);
                             robot.swerve.motorFrontLeft.setPower(-robot.swerve.drivePowerRatio*pw_dir);
                             robot.swerve.motorFrontRight.setPower(robot.swerve.drivePowerRatio*pw_dir);
-                            robot.swerve.motorBackLeft.setPower(-robot.swerve.drivePowerRatio*pw_dir);
-                            robot.swerve.motorBackRight.setPower(robot.swerve.drivePowerRatio*pw_dir);
+                            robot.swerve.motorBackLeft.setPower(robot.swerve.drivePowerRatio*pw_dir);
+                            robot.swerve.motorBackRight.setPower(-robot.swerve.drivePowerRatio*pw_dir);
                         }
                         robot.swerve.driveTT(0,0);
                     } else if (Math.abs(gamepad1.left_stick_y)>0.1) {

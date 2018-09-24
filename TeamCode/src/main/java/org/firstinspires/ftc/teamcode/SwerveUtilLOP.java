@@ -558,8 +558,8 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         }
         if (robot.isTesting){
             telemetry.addData("11. CRAB_LEFT_DIFF/CRAB_RIGHT_DIFF = ", "%.4f/%.4f", robot.swerve.NB_LEFT_SV_DIFF, robot.swerve.NB_RIGHT_SV_DIFF);
-            telemetry.addData("12. CRAB_90_DIFF_DEC_FR/BR = ", "%.4f/%.4f",robot.swerve.NB_CRAB_DIFF_DEC_FR, robot.swerve.NB_CRAB_DIFF_DEC_BR);
-            telemetry.addData("13. CRAB_90_DIFF_INC_FL/BL = ", "%.4f/%.4f", robot.swerve.NB_CRAB_DIFF_INC_FL, robot.swerve.NB_CRAB_DIFF_INC_BL);
+            telemetry.addData("12. CRAB_90_DIFF_DEC_FR/BR = ", "%.4f/%.4f",robot.swerve.NB_CRAB_DIFF_INC_FR, robot.swerve.NB_CRAB_DIFF_DEC_BR);
+            telemetry.addData("13. CRAB_90_DIFF_INC_FL/BL = ", "%.4f/%.4f", robot.swerve.NB_CRAB_DIFF_DEC_FL, robot.swerve.NB_CRAB_DIFF_INC_BL);
 
         }
         telemetry.update();

@@ -20,8 +20,8 @@ public class TuneUp extends SwerveUtilLOP {
         enable_hardware_for_teleop();
         robot.servo_tune_up = true; // enable servo tune up
         robot.swerve.use_imu = true;
-        robot.swerve.use_range_sensor = true;
-        robot.swerve.use_proximity_sensor = true;
+        robot.swerve.use_range_sensor = false;
+        robot.swerve.use_proximity_sensor = false;
         // set_verbose();  // uncomment this line to debug
 
         init_and_test();
@@ -139,12 +139,12 @@ public class TuneUp extends SwerveUtilLOP {
                     //Start of Crab adjust code
                     if(gamepad1.y) { // FL
                         if (gamepad1.dpad_up){
-                            robot.swerve.NB_CRAB_DIFF_INC_FL += INCREMENT;
+                            robot.swerve.NB_CRAB_DIFF_DEC_FL += INCREMENT;
                             needsUpdate = true;
                         }
 
                         else if (gamepad1.dpad_down){
-                            robot.swerve.NB_CRAB_DIFF_INC_FL -= INCREMENT;
+                            robot.swerve.NB_CRAB_DIFF_DEC_FL -= INCREMENT;
                             needsUpdate = true;
                         }
                     }
@@ -161,12 +161,12 @@ public class TuneUp extends SwerveUtilLOP {
                     }
                     else if (gamepad1.b){ // FR
                         if (gamepad1.dpad_up){
-                            robot.swerve.NB_CRAB_DIFF_DEC_FR += INCREMENT;
+                            robot.swerve.NB_CRAB_DIFF_INC_FR += INCREMENT;
                             needsUpdate = true;
                         }
 
                         else if (gamepad1.dpad_down){
-                            robot.swerve.NB_CRAB_DIFF_DEC_FR -= INCREMENT;
+                            robot.swerve.NB_CRAB_DIFF_INC_FR -= INCREMENT;
                             needsUpdate = true;
                         }
                     }

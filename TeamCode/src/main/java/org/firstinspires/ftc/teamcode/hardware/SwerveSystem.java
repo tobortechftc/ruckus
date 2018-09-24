@@ -4,6 +4,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -59,20 +60,15 @@ public class SwerveSystem {
     final static double INIT_DRIVE_RATIO_BL = 1.0; //control veering by lowering left motor power
     final static double INIT_DRIVE_RATIO_BR = 0.982; //control veering by lowering right motor power
 
-    final static double WIDTH_BETWEEN_WHEELS = 12;
-    final static double LENGTH_BETWEEN_WHEELS = 12;
-    final static double NB_WIDTH_BETWEEN_WHEELS = 12;
-    final static double NB_LENGTH_BETWEEN_WHEELS = 11;
+    final static double NB_WIDTH_BETWEEN_WHEELS = 11.75;
+    final static double NB_LENGTH_BETWEEN_WHEELS = 10.75;
     final static double DISTANCE_TO_CENTER_OF_GLYPH = 5.9;
     final static double NB_DISTANCE_FOR_ORBIT = 6.5;
     final static double MIN_TURNING_RADIUS = 13;
     final static double MAX_TURNING_RADIUS = 100;
-    final static double THETA_FRONT = (Math.atan(DISTANCE_TO_CENTER_OF_GLYPH / (0.5 * WIDTH_BETWEEN_WHEELS))) * (180/Math.PI);
-    final static double THETA_BACK = (Math.atan((DISTANCE_TO_CENTER_OF_GLYPH + LENGTH_BETWEEN_WHEELS) / (0.5 * WIDTH_BETWEEN_WHEELS))) * (180/Math.PI);
     final static double NB_THETA_FRONT = (Math.atan(NB_DISTANCE_FOR_ORBIT / (0.5 * NB_WIDTH_BETWEEN_WHEELS))) * (180/Math.PI);
     final static double NB_THETA_BACK = (Math.atan((NB_DISTANCE_FOR_ORBIT + NB_LENGTH_BETWEEN_WHEELS) / (0.5 * NB_WIDTH_BETWEEN_WHEELS))) * (180/Math.PI);
-    static double SPOT_TURN_ANGLE_OFFSET = (Math.atan((0.5*LENGTH_BETWEEN_WHEELS)/(0.5*WIDTH_BETWEEN_WHEELS))) * (1/(Math.PI));
-    static double NB_SPOT_TURN_ANGLE_OFFSET = (Math.atan((0.5*NB_LENGTH_BETWEEN_WHEELS)/(0.5*NB_WIDTH_BETWEEN_WHEELS))) * (1/(Math.PI));
+    static double NB_SPOT_TURN_ANGLE_OFFSET = (Math.atan((0.32*NB_LENGTH_BETWEEN_WHEELS)/(0.32*NB_WIDTH_BETWEEN_WHEELS))) * (1.0/(Math.PI));
 
     public double motorPowerLeft;
     public double motorPowerRight;
@@ -103,42 +99,33 @@ public class SwerveSystem {
     public Servo servoBackLeft = null;
     public Servo servoBackRight = null;
 
-    final static double CRAB_DIFF_INC = 0.4663;
-    final static double CRAB_DIFF_DEC = 0.4762;
-    public final static double LEFT_SV_DIFF = 0.004;
-    public final static double RIGHT_SV_DIFF = 0.004;
-    final static double SERVO_FL_FORWARD_POSITION = 0.5;
-    final static double SERVO_FR_FORWARD_POSITION = 0.5;
-    final static double SERVO_BL_FORWARD_POSITION = 0.5;
-    final static double SERVO_BR_FORWARD_POSITION = 0.5;
-
     /* variables for newbot */
-    public static double NB_CRAB_DIFF_INC_FL = 0.5;
-    public static double NB_CRAB_DIFF_DEC_FR = 0.5;
-    public static double NB_CRAB_DIFF_INC_BL = 0.5;
-    public static double NB_CRAB_DIFF_DEC_BR = 0.5;
-    public static double NB_LEFT_SV_DIFF = 0.001;
-    public static double NB_RIGHT_SV_DIFF = 0.001;
+    public static double NB_CRAB_DIFF_DEC_FL = 0.317;
+    public static double NB_CRAB_DIFF_INC_FR = 0.316;
+    public static double NB_CRAB_DIFF_INC_BL = 0.316;
+    public static double NB_CRAB_DIFF_DEC_BR = 0.317;
+    public static double NB_LEFT_SV_DIFF = 0.000;
+    public static double NB_RIGHT_SV_DIFF = 0.000;
 
-    final static double NB_SERVO_FL_FORWARD_POSITION = 0.5;
-    final static double NB_SERVO_FR_FORWARD_POSITION = 0.5;
-    final static double NB_SERVO_BL_FORWARD_POSITION = 0.5;
-    final static double NB_SERVO_BR_FORWARD_POSITION = 0.5;
+    final static double NB_SERVO_FL_FORWARD_POSITION = 0.5189;
+    final static double NB_SERVO_FR_FORWARD_POSITION = 0.5106;
+    final static double NB_SERVO_BL_FORWARD_POSITION = 0.4833;
+    final static double NB_SERVO_BR_FORWARD_POSITION = 0.4861;
 
-    static double SERVO_FL_STRAFE_POSITION = SERVO_FL_FORWARD_POSITION + CRAB_DIFF_INC - LEFT_SV_DIFF;
-    static double SERVO_FR_STRAFE_POSITION = SERVO_FR_FORWARD_POSITION - CRAB_DIFF_DEC + RIGHT_SV_DIFF;
-    static double SERVO_BL_STRAFE_POSITION = SERVO_BL_FORWARD_POSITION + CRAB_DIFF_INC - LEFT_SV_DIFF;
-    static double SERVO_BR_STRAFE_POSITION = SERVO_BR_FORWARD_POSITION - CRAB_DIFF_DEC + RIGHT_SV_DIFF;
+    static double SERVO_FL_STRAFE_POSITION = NB_SERVO_FL_FORWARD_POSITION - NB_CRAB_DIFF_DEC_FL - NB_LEFT_SV_DIFF;
+    static double SERVO_FR_STRAFE_POSITION = NB_SERVO_FR_FORWARD_POSITION + NB_CRAB_DIFF_INC_FR + NB_RIGHT_SV_DIFF;
+    static double SERVO_BL_STRAFE_POSITION = NB_SERVO_BL_FORWARD_POSITION + NB_CRAB_DIFF_INC_BL - NB_LEFT_SV_DIFF;
+    static double SERVO_BR_STRAFE_POSITION = NB_SERVO_BR_FORWARD_POSITION - NB_CRAB_DIFF_DEC_BR + NB_RIGHT_SV_DIFF;
 
-    static double SERVO_FL_TURN_POSITION = SERVO_FL_FORWARD_POSITION - (SPOT_TURN_ANGLE_OFFSET);
-    static double SERVO_FR_TURN_POSITION = SERVO_FR_FORWARD_POSITION + (SPOT_TURN_ANGLE_OFFSET);
-    static double SERVO_BL_TURN_POSITION = SERVO_BL_FORWARD_POSITION + (SPOT_TURN_ANGLE_OFFSET);
-    static double SERVO_BR_TURN_POSITION = SERVO_BR_FORWARD_POSITION - (SPOT_TURN_ANGLE_OFFSET);
+    static double SERVO_FL_TURN_POSITION = NB_SERVO_FL_FORWARD_POSITION - (NB_SPOT_TURN_ANGLE_OFFSET);
+    static double SERVO_FR_TURN_POSITION = NB_SERVO_FR_FORWARD_POSITION + (NB_SPOT_TURN_ANGLE_OFFSET);
+    static double SERVO_BL_TURN_POSITION = NB_SERVO_BL_FORWARD_POSITION + (NB_SPOT_TURN_ANGLE_OFFSET);
+    static double SERVO_BR_TURN_POSITION = NB_SERVO_BR_FORWARD_POSITION - (NB_SPOT_TURN_ANGLE_OFFSET);
 
-    static double SERVO_FL_ORBIT_POSITION = SERVO_FL_FORWARD_POSITION + (THETA_FRONT / 180);
-    static double SERVO_FR_ORBIT_POSITION = SERVO_FR_FORWARD_POSITION - (THETA_FRONT / 180);
-    static double SERVO_BL_ORBIT_POSITION = SERVO_BL_FORWARD_POSITION + (THETA_BACK / 180);
-    static double SERVO_BR_ORBIT_POSITION = SERVO_BR_FORWARD_POSITION - (THETA_BACK / 180);
+    static double SERVO_FL_ORBIT_POSITION = NB_SERVO_FL_FORWARD_POSITION - (NB_THETA_FRONT / 180.0);
+    static double SERVO_FR_ORBIT_POSITION = NB_SERVO_FR_FORWARD_POSITION + (NB_THETA_FRONT / 180.0);
+    static double SERVO_BL_ORBIT_POSITION = NB_SERVO_BL_FORWARD_POSITION - (NB_THETA_BACK / 180.0);
+    static double SERVO_BR_ORBIT_POSITION = NB_SERVO_BR_FORWARD_POSITION + (NB_THETA_BACK / 180.0);
 
     ElapsedTime runtime;
     public double target_heading = 0.0; // [cart variable]
@@ -278,11 +265,11 @@ public class SwerveSystem {
             servoBackLeft = hwMap.servo.get("servoBackLeft");
             servoBackRight = hwMap.servo.get("servoBackRight");
 
-            motorFrontLeft.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-            motorFrontRight.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+            motorFrontLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+            motorFrontRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
             if (!use_front_drive_only) {
-                motorBackLeft.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-                motorBackRight.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+                motorBackLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+                motorBackRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
             }
             // Set all motors to zero power and set all servos to central position
             // May want to change servo #'s to the value where all wheels are pointing forward.
@@ -333,12 +320,12 @@ public class SwerveSystem {
     }
 
     public void initialize_newbot() {
-        SPOT_TURN_ANGLE_OFFSET = (Math.atan((0.5*NB_LENGTH_BETWEEN_WHEELS)/(0.5*NB_WIDTH_BETWEEN_WHEELS))) * (1/(Math.PI));
+        NB_SPOT_TURN_ANGLE_OFFSET = (Math.atan((0.5*NB_LENGTH_BETWEEN_WHEELS)/(0.5*NB_WIDTH_BETWEEN_WHEELS))) * (1/(Math.PI));
 
-        SERVO_FL_STRAFE_POSITION = NB_SERVO_FL_FORWARD_POSITION + NB_CRAB_DIFF_INC_FL - NB_LEFT_SV_DIFF;
+        SERVO_FL_STRAFE_POSITION = NB_SERVO_FL_FORWARD_POSITION - NB_CRAB_DIFF_DEC_FL - NB_LEFT_SV_DIFF;
         if (SERVO_FL_STRAFE_POSITION>1.0)
             SERVO_FL_STRAFE_POSITION = 1.0;
-        SERVO_FR_STRAFE_POSITION = NB_SERVO_FR_FORWARD_POSITION - NB_CRAB_DIFF_DEC_FR + NB_RIGHT_SV_DIFF;
+        SERVO_FR_STRAFE_POSITION = NB_SERVO_FR_FORWARD_POSITION + NB_CRAB_DIFF_INC_FR + NB_RIGHT_SV_DIFF;
         if (SERVO_FR_STRAFE_POSITION<0.0)
             SERVO_FR_STRAFE_POSITION = 0.0;
         SERVO_BL_STRAFE_POSITION = NB_SERVO_BL_FORWARD_POSITION + NB_CRAB_DIFF_INC_BL - NB_LEFT_SV_DIFF;
@@ -347,7 +334,7 @@ public class SwerveSystem {
         SERVO_BR_STRAFE_POSITION = NB_SERVO_BR_FORWARD_POSITION - NB_CRAB_DIFF_DEC_BR + NB_RIGHT_SV_DIFF;
         if (SERVO_BR_STRAFE_POSITION<0.0)
             SERVO_BR_STRAFE_POSITION = 0.0;
-        double NB_SERVO_UNIT_CONVERSION = Math.abs(SERVO_FL_STRAFE_POSITION - SERVO_FL_FORWARD_POSITION)/0.5;
+        double NB_SERVO_UNIT_CONVERSION = Math.abs(SERVO_FL_STRAFE_POSITION - NB_SERVO_FL_FORWARD_POSITION)/0.5;
 
         SERVO_FL_TURN_POSITION = NB_SERVO_FL_FORWARD_POSITION  - (NB_SPOT_TURN_ANGLE_OFFSET * NB_SERVO_UNIT_CONVERSION);
         SERVO_FR_TURN_POSITION = NB_SERVO_FR_FORWARD_POSITION  + (NB_SPOT_TURN_ANGLE_OFFSET * NB_SERVO_UNIT_CONVERSION);
@@ -474,8 +461,8 @@ public class SwerveSystem {
                 }
 
             } else if(cur_mode == CarMode.CRAB) {
-                motorFrontRight.setPower(lp);
-                motorFrontLeft.setPower(-lp);
+                motorFrontLeft.setPower(lp);
+                motorFrontRight.setPower(-lp);
                 if (!use_front_drive_only) {
                     motorBackLeft.setPower(-rp);
                     motorBackRight.setPower(rp);
@@ -1138,8 +1125,8 @@ public class SwerveSystem {
         double degree = joy_stick_x * 25.0 / 180.0; // maximum 25 degree each way
         if(Math.abs(degree)>0.01) {
 
-            servoPosFL = SERVO_FL_FORWARD_POSITION - degree;
-            servoPosFR = SERVO_FR_FORWARD_POSITION - degree;
+            servoPosFL = NB_SERVO_FL_FORWARD_POSITION - degree;
+            servoPosFR = NB_SERVO_FR_FORWARD_POSITION - degree;
             servoFrontLeft.setPosition(servoPosFL);
             servoFrontRight.setPosition(servoPosFR);
         }
@@ -1324,11 +1311,11 @@ public class SwerveSystem {
                     motorBackRight.setPower(motorPowerRight * drivePowerRatio);
                 }
             } else if(cur_mode == CarMode.CRAB) {
-                motorFrontLeft.setPower(-motorPowerRight * drivePowerRatio);
-                motorFrontRight.setPower(motorPowerRight * drivePowerRatio);
+                motorFrontLeft.setPower(motorPowerRight * drivePowerRatio);
+                motorFrontRight.setPower(-motorPowerRight * drivePowerRatio);
                 if (!use_front_drive_only) {
-                    motorBackLeft.setPower(motorPowerLeft * drivePowerRatio);
-                    motorBackRight.setPower(-motorPowerLeft * drivePowerRatio);
+                    motorBackLeft.setPower(-motorPowerLeft * drivePowerRatio);
+                    motorBackRight.setPower(+motorPowerLeft * drivePowerRatio);
                 }
             }
         }
