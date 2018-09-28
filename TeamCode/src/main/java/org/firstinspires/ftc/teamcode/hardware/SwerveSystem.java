@@ -26,7 +26,7 @@ public class SwerveSystem {
     // final static double SV_RELIC_GRABBER_INIT = 0.5039;
     public boolean use_verbose = false;
     public boolean use_swerve = false;   // use four motors and four servos for chassis
-    //public boolean use_newbot = false;   // use four motors and four servos for new chassis
+    public boolean use_2017 = false;   // use four motors and four servos for new chassis
     //public boolean use_newbot_v2 = true;
     public boolean use_front_drive_only = false;
     public boolean use_imu = true;
@@ -265,11 +265,20 @@ public class SwerveSystem {
             servoBackLeft = hwMap.servo.get("servoBackLeft");
             servoBackRight = hwMap.servo.get("servoBackRight");
 
-            motorFrontLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
-            motorFrontRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
-            if (!use_front_drive_only) {
-                motorBackLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
-                motorBackRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+            if (use_2017) {
+                motorFrontLeft.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+                motorFrontRight.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+                if (!use_front_drive_only) {
+                    motorBackLeft.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
+                    motorBackRight.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+                }
+            } else {
+                motorFrontLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+                motorFrontRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+                if (!use_front_drive_only) {
+                    motorBackLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
+                    motorBackRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
+                }
             }
             // Set all motors to zero power and set all servos to central position
             // May want to change servo #'s to the value where all wheels are pointing forward.

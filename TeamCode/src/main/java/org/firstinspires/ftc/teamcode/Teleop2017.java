@@ -10,8 +10,8 @@ import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.ORBIT
 import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.TURN;
 
 
-@TeleOp(name="TeleOp-V1", group="Rukus")
-public class TeleopV1 extends SwerveUtilLOP {
+@TeleOp(name="TeleOp-2017", group="Relic")
+public class Teleop2017 extends SwerveUtilLOP {
 
     /* Declare OpMode members. */
     //SwerveDriveHardware robot           = new SwerveDriveHardware();
@@ -23,8 +23,8 @@ public class TeleopV1 extends SwerveUtilLOP {
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
          */
-        enable_hardware_for_teleop();
-        //set_verbose();  // uncomment this line to debug
+        enable_hardware_for_teleop_2017();
+        // set_verbose();  // uncomment this line to debug
 
         init_and_test();
 

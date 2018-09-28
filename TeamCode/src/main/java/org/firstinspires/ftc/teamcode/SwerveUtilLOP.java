@@ -81,7 +81,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         }
         if (robot.relicReachSystem.use_relic_grabber) {
             robot.relicReachSystem.relic_grabber_open(false);
-            relic_arm_auto();
+            // relic_arm_auto();
         }
         if (robot.intake.use_intake) {
             robot.intake.intakeGateUp();
@@ -128,6 +128,15 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         robot.camera.disable();
         robot.jewel.disable();
         robot.relicReachSystem.disable();
+    }
+    public void enable_hardware_for_teleop_2017() {
+        robot.swerve.enable(false);
+        robot.swerve.use_2017 = true;
+        robot.dumper.enable(false);
+        robot.intake.enable(false);
+        robot.camera.disable();
+        robot.jewel.disable();
+        robot.relicReachSystem.enable(false);
     }
 
     /**

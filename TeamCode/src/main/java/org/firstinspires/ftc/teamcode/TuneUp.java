@@ -17,7 +17,7 @@ public class TuneUp extends SwerveUtilLOP {
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
          */
-        enable_hardware_for_teleop();
+        enable_hardware_for_teleop_2017();
         robot.servo_tune_up = true; // enable servo tune up
         robot.swerve.use_imu = true;
         robot.swerve.use_range_sensor = false;

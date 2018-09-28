@@ -81,12 +81,12 @@ public class MineralReachSystem {
     }
     void init(HardwareMap hwMap) {
         if (use_relic_grabber) {
-                    if (use_relic_elbow) {
-                        sv_relic_elbow = hwMap.servo.get("sv_relic_arm");
-                        sv_relic_elbow.setPosition(SV_RELIC_ELBOW_INIT);
-                    }
-                    sv_relic_wrist = hwMap.servo.get("sv_relic_wrist");
-                    sv_relic_wrist.setPosition(SV_RELIC_WRIST_INIT);
+            if (use_relic_elbow) {
+                sv_relic_elbow = hwMap.servo.get("sv_relic_arm");
+                sv_relic_elbow.setPosition(SV_RELIC_ELBOW_INIT);
+            }
+            sv_relic_wrist = hwMap.servo.get("sv_relic_wrist");
+            sv_relic_wrist.setPosition(SV_RELIC_WRIST_INIT);
             sv_relic_grabber = hwMap.servo.get("sv_relic_grabber");
             sv_relic_grabber.setPosition(SV_RELIC_GRABBER_INIT_NB);
         }
@@ -156,13 +156,13 @@ public class MineralReachSystem {
                 mt_relic_slider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             }
         }
-        if (power>0) taintedAccess.stop_chassis();
+        // if (power>0) taintedAccess.stop_chassis();
         mt_relic_slider.setPower(Math.abs(power));
     }
 
     public void relic_slider_out(double power) {
         if (Math.abs(power)>1) power=1;
-        if (power>0) taintedAccess.stop_chassis();
+        // if (power>0) taintedAccess.stop_chassis();
         mt_relic_slider.setPower(-1*Math.abs(power));
     }
 
@@ -266,8 +266,8 @@ public class MineralReachSystem {
 
     public void relic_arm_down()
     {
-        taintedAccess.stop_chassis();
-        taintedAccess.intakeGateInit();
+        //taintedAccess.stop_chassis();
+        //taintedAccess.intakeGateInit();
         double pos = sv_relic_wrist.getPosition();
         {
             if (Math.abs(pos - SV_RELIC_WRIST_DOWN_R) > 0.2) {
@@ -289,7 +289,7 @@ public class MineralReachSystem {
     }
 
     public void relic_arm_up() {
-        taintedAccess.stop_chassis();
+        // taintedAccess.stop_chassis();
         double pos = sv_relic_wrist.getPosition();
         {
             if (Math.abs(pos - SV_RELIC_WRIST_UP) > 0.15) {
@@ -308,7 +308,7 @@ public class MineralReachSystem {
     }
 
     public void relic_arm_middle() {
-        taintedAccess.stop_chassis();
+        // taintedAccess.stop_chassis();
         sv_relic_wrist.setPosition(SV_RELIC_WRIST_MIDDLE);
     }
 
