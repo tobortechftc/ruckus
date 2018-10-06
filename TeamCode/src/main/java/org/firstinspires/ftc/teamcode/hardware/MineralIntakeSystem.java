@@ -142,7 +142,7 @@ public class MineralIntakeSystem {
     public void intakeIn() {
         if (!use_intake)
             return;
-//        if (sv_dumper!=null && robot.sv_dumper.getPosition()<0.63) {
+//        if (sv_dumper!=null && robot.sv_dumper.getRawPosition()<0.63) {
 //            return;
 //        }
         mtIntakeLeft.setPower(intakeRatio);

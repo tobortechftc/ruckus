@@ -20,7 +20,7 @@ public class Teleop2018 extends SwerveUtilLOP implements YieldHandler {
 
     @Override
     public void runOpMode() throws InterruptedException{
-        int adj_count = 0; // count to smooth out car turn
+        int adj_count = 0; // count to smooth out car setPosition
 
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
@@ -186,7 +186,7 @@ public class Teleop2018 extends SwerveUtilLOP implements YieldHandler {
                     robot.swerve.initialize_newbot();
 
                 } // end isTesting
-                else { //If not allowed to test servo positions, triggers do teleop spot turn
+                else { //If not allowed to test servo positions, triggers do teleop spot setPosition
                     if (Math.abs(gamepad1.right_stick_x) > 0.1) {
                         //if (Math.abs(gamepad1.right_stick_y) > 0.2 &&
                         //        Math.abs(gamepad1.right_stick_y) > 0.2 &&
@@ -299,7 +299,7 @@ public class Teleop2018 extends SwerveUtilLOP implements YieldHandler {
 
                 if (robot.swerve.cur_mode== SwerveSystem.CarMode.CAR ||
                     robot.swerve.cur_mode== SwerveSystem.CarMode.STRAIGHT) {
-                    // use gamepad1.joy_stick_x to turn like Car
+                    // use gamepad1.joy_stick_x to setPosition like Car
                     if ((adj_count++)%20==0)
                         robot.swerve.car_servo_adj(gamepad1.left_stick_x);
                 }

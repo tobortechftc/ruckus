@@ -21,7 +21,7 @@ public class GreenManba {
     public MarkerSystem jewel;
     public CameraSystem camera;
 
-    // define all switches to turn on/off hardware each component
+    // define all switches to setPosition on/off hardware each component
     public boolean use_verbose = false;
     public boolean servo_tune_up = false;
 

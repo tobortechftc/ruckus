@@ -49,11 +49,11 @@ public class SwerveSystem {
     public int rightCnt = 0; // right motor target counter  [cart variable]
 
     final static int ONE_ROTATION = 538; // for new AndyMark-20 motor encoder one rotation
-    final static double RROBOT = 6.63;  // number of wheel turns to get chassis 360-degree turn
+    final static double RROBOT = 6.63;  // number of wheel turns to get chassis 360-degree setPosition
     final static double INCHES_PER_ROTATION = 12.69; // inches per chassis motor rotation based on 1:1 gear ratio
 
-    final static double IMU_ROTATION_RATIO_L = 0.8; // 0.84; // Ratio of IMU Sensor Left turn to prevent overshooting the turn.
-    final static double IMU_ROTATION_RATIO_R = 0.8; // 0.84; // Ratio of IMU Sensor Right turn to prevent overshooting the turn.
+    final static double IMU_ROTATION_RATIO_L = 0.8; // 0.84; // Ratio of IMU Sensor Left setPosition to prevent overshooting the setPosition.
+    final static double IMU_ROTATION_RATIO_R = 0.8; // 0.84; // Ratio of IMU Sensor Right setPosition to prevent overshooting the setPosition.
 
     final static double INIT_DRIVE_RATIO_FL = 0.998; //control veering by lowering left motor power
     final static double INIT_DRIVE_RATIO_FR = 0.978; //control veering by lowering right motor power

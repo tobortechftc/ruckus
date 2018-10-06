@@ -40,9 +40,9 @@ public class Chassis {
     int rightCount = 0;
 
     // rotate_left & rotate_right
-    final static double WHEEL_TURN_COMPLETE = 6.63;  // number of wheel turns to get chassis 360-degree turn
-    final static double IMU_ROTATION_RATIO_L = 0.80; // 0.84; // ratio of IMU Sensor Left turn to prevent overshooting the turn.
-    final static double IMU_ROTATION_RATIO_R = 0.80; // 0.84; // ratio of IMU Sensor Right turn to prevent overshooting the turn.
+    final static double WHEEL_TURN_COMPLETE = 6.63;  // number of wheel turns to get chassis 360-degree setPosition
+    final static double IMU_ROTATION_RATIO_L = 0.80; // 0.84; // ratio of IMU Sensor Left setPosition to prevent overshooting the setPosition.
+    final static double IMU_ROTATION_RATIO_R = 0.80; // 0.84; // ratio of IMU Sensor Right setPosition to prevent overshooting the setPosition.
 
 
     public void init(HardwareMap hwMap) {
