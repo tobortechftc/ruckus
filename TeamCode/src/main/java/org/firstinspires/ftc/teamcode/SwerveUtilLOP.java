@@ -304,7 +304,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         if (nearest_col)
             dist += 3;
         robot.swerve.StraightIn(direction*.3, dist); // Drive off the balance stone
-        if (direction==1 && !isSideBox) { // red front need to turn 180 degree
+        if (direction==1 && !isSideBox) { // red front need to setPosition 180 degree
             robot.swerve.TurnLeftD(0.4, 180);
             robot.swerve.alignUsingIMU(0.18, 178.0);
         } else {
@@ -316,7 +316,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         if (isSideBox) {
             if (isBlue) driveDistance = 6 + (18.5 * targetColumn); // 18cm between columns
             else driveDistance = 6 + (18.5 * (2 - targetColumn));
-            if (driveDistance<7) driveDistance=7; // ensure turn not hitting balance stone
+            if (driveDistance<7) driveDistance=7; // ensure setPosition not hitting balance stone
             robot.swerve.StraightCm(direction*power, driveDistance); // drive to cryptobox
 
             {

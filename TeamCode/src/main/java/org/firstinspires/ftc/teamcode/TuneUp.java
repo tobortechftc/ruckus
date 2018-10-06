@@ -112,7 +112,7 @@ public class TuneUp extends SwerveUtilLOP {
             if (robot.swerve.use_swerve) { // newbot related control
               /*  if (robot.use_newbot_v2) {
                     if (gamepad2.bumperleft) {
-                        robot.sv_intake_gate.setPosition(robot.sv_intake_gate.getPosition() + 0.01);
+                        robot.sv_intake_gate.setPosition(robot.sv_intake_gate.getRawPosition() + 0.01);
                     }
                 } */
                 if(robot.isTesting) { //Allow to test individual movement
