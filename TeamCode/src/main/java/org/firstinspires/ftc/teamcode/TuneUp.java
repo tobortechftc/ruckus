@@ -232,6 +232,8 @@ public class TuneUp extends SwerveUtilLOP {
                     }
                 } // end isTesting
             } // end use_swerve
+            /*
+            sv_bar_wheel does not exist, probably using old and new -ND
             if (robot.intake.sv_bar_wheel!=null) {
                 if (gamepad2.y) {
                     cs_val += 0.1;
@@ -242,6 +244,7 @@ public class TuneUp extends SwerveUtilLOP {
                 }
                 robot.intake.sv_bar_wheel.setPower(cs_val);
             }
+            */
 
             if (robot.servo_tune_up && !robot.isTesting) {
                 if (gamepad1.back && gamepad1.a) {

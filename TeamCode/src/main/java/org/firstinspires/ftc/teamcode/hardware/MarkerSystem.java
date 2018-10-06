@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
 
 /**
@@ -103,10 +104,6 @@ public class MarkerSystem {
                     // sv_jkicker.setPosition(SV_JKICKER_INIT);
 
         }
-        if (use_verbose) {
-            core.telemetry.addData("0: initialize arms CPU time =", "%3.2f sec", core.run_seconds());
-            core.telemetry.update();
-        }
     }
 
     public void stop () {
@@ -170,7 +167,7 @@ public class MarkerSystem {
         {
             if (sv_elbow!=null)
                 sv_elbow.setPosition(SV_ELBOW_UP);
-            core.sleep(200);
+            core.yield_for(.2);
             if (sv_shoulder!=null)
                 sv_shoulder.setPosition(SV_SHOULDER_INIT);
         }
@@ -192,7 +189,7 @@ public class MarkerSystem {
         if (sv_right_arm!=null) {
             sv_right_arm.setPosition(SV_RIGHT_ARM_UP_NB);
         }
-        core.sleep(200);
+        core.yield_for(.2);
 
     }
 
@@ -200,43 +197,43 @@ public class MarkerSystem {
         if (sv_right_arm!=null) {
             sv_right_arm.setPosition(SV_RIGHT_ARM_DOWN_NB);
         }
-        core.sleep(200);
+        core.yield_for(.2);
     }
 
     public void jkick_right() {
         if (sv_jkicker==null) return;
         sv_jkicker.setPosition(SV_JKICKER_RIGHT1);
-        core.sleep(100);
+        core.yield_for(.1);
         sv_jkicker.setPosition(SV_JKICKER_RIGHT2);
-        core.sleep(150);
+        core.yield_for(.15);
         sv_jkicker.setPosition(SV_JKICKER_RIGHT);
-        core.sleep(250);
+        core.yield_for(.25);
     }
 
     public void jkick_left() {
         if (sv_jkicker==null) return;
         sv_jkicker.setPosition(SV_JKICKER_LEFT1);
-        core.sleep(100);
+        core.yield_for(.1);
         sv_jkicker.setPosition(SV_JKICKER_LEFT2);
-        core.sleep(150);
+        core.yield_for(.15);
         sv_jkicker.setPosition(SV_JKICKER_LEFT);
-        core.sleep(250);
+        core.yield_for(.25);
     }
 
     void jkick_up() {
         if (sv_jkicker==null) return;
         sv_jkicker.setPosition(SV_JKICKER_UP);
-        core.sleep(300);
+        core.yield_for(.3);
     }
 
     public void arm_left() {
         if (sv_elbow!=null)
             sv_elbow.setPosition(SV_ELBOW_DOWN_HIT);
         sv_shoulder.setPosition(SV_SHOULDER_LEFT_1);
-        core.sleep(500);
+        core.yield_for(.5);
         if (sv_shoulder!=null)
             sv_shoulder.setPosition(SV_SHOULDER_LEFT_2);
-        core.sleep(500);
+        core.yield_for(.5);
         if (sv_shoulder!=null)
             sv_shoulder.setPosition(SV_SHOULDER_LEFT_3);
     }
@@ -246,12 +243,16 @@ public class MarkerSystem {
             sv_elbow.setPosition(SV_ELBOW_DOWN_HIT);
         if (sv_shoulder!=null)
             sv_shoulder.setPosition(SV_SHOULDER_RIGHT_1);
-        core.sleep(500);
+        core.yield_for(.5);
         if (sv_shoulder!=null)
             sv_shoulder.setPosition(SV_SHOULDER_RIGHT_2);
-        core.sleep(500);
+        core.yield_for(.5);
         if (sv_shoulder!=null)
             sv_shoulder.setPosition(SV_SHOULDER_RIGHT_3);
+    }
+
+    public void show_telemetry(Telemetry telemetry) {
+        telemetry.addData("marker servo =", sv_shoulder.getPosition());
     }
 
 }

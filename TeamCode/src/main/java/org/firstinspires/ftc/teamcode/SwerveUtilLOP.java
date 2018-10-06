@@ -62,7 +62,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             }
         };
         // ... and pass it along to the robot, as its "shall I continue operating" master control.
-        robot.init(hardwareMap, supplierForOpModeIsActive);
+        robot.init(hardwareMap);
 
         if (robot.dumper.use_dumper) {
             // check if lift encoder is working
@@ -72,7 +72,6 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
 
     public void start_init() throws InterruptedException {
         robot.runtimeAuto.reset();
-        robot.coreSystem.reset_run_period();
         //if (robot.use_dumper) {
         //    lift_to_target(robot.LIFT_INIT_COUNT);
         //}
@@ -106,10 +105,6 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         robot.use_verbose = true;
         robot.camera.use_verbose = true;
         robot.jewel.use_verbose = true;
-        robot.intake.use_verbose = true;
-        robot.dumper.use_verbose = true;
-        robot.relicReachSystem.use_verbose = true;
-        robot.swerve.use_verbose = true;
     }
 
     public void enable_hardware_for_auto() {
@@ -272,21 +267,19 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
 
     public void deliverGlyph() throws InterruptedException{
         if (!opModeIsActive()) return;
-        if (robot.swerve.use_verbose) {
-            robot.swerve.StraightIn(0.6, 2);
-            if (!opModeIsActive()) return;
-            robot.dumper.dumper_vertical();
-            // dumper_up();
-            if (!opModeIsActive()) return;
-            sleep(500);
-            if (!opModeIsActive()) return;
-            robot.swerve.driveTT(0.4, 0.4); // drive backward for .3 sec
-            sleep(250);
-            robot.swerve.driveTT(0,0);
-            if (!opModeIsActive()) return;
-            robot.swerve.StraightIn(0.8, 6);
-            robot.dumper.dumper_down(true);
-        }
+        robot.swerve.StraightIn(0.6, 2);
+        if (!opModeIsActive()) return;
+        robot.dumper.dumper_vertical();
+        // dumper_up();
+        if (!opModeIsActive()) return;
+        sleep(500);
+        if (!opModeIsActive()) return;
+        robot.swerve.driveTT(0.4, 0.4); // drive backward for .3 sec
+        sleep(250);
+        robot.swerve.driveTT(0, 0);
+        if (!opModeIsActive()) return;
+        robot.swerve.StraightIn(0.8, 6);
+        robot.dumper.dumper_down(true);
         if (robot.use_verbose) {
             telemetry.addData("0: End deliveryGlyph() CPU time =", "%3.2f sec", robot.runtimeAuto.seconds());
             telemetry.update();
@@ -501,10 +494,6 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             robot.swerve.stop_chassis();
         if (robot.jewel!=null)
             robot.jewel.stop();
-
-        if (robot.intake.sv_bar_wheel!=null) {
-            robot.intake.sv_bar_wheel.close();
-        }
         // stop all sensors
     }
 
@@ -791,7 +780,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
     void intakeGateMid() {
         if (!robot.intake.use_intake)
             return;
-        robot.intake.sv_intake_gate.setPosition(MineralIntakeSystem.SV_INTAKE_GATE_MID);
+//        robot.intake.sv_intake_gate.setPosition(MineralIntakeSystem.SV_INTAKE_GATE_MID);
     }
 
     public boolean autoIntake(boolean isSide, boolean isFirstGlyph, boolean isBlue) throws InterruptedException {

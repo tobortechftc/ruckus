@@ -5,25 +5,27 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 /**
  * Put brief class description here...
  */
 public class MineralIntakeSystem {
-    public boolean use_verbose = false;
     public boolean use_intake = false;
 
-    final static double SV_INTAKE_GATE_INIT = 0.844;
-    final static double SV_INTAKE_GATE_UP = 0.61;
-    public final static double SV_INTAKE_GATE_MID = 0.5;
-    final static double SV_INTAKE_GATE_DOWN = 0.217;
+    final static double svIntakeGate_INIT = 0.844;
+    final static double svIntakeGate_UP = 0.61;
+    public final static double svIntakeGate_MID = 0.5;
+    final static double svIntakeGate_DOWN = 0.217;
     final static double SV_DUMPER_GATE_INIT = 0.25;
     final static double SV_DUMPER_GATE_UP = 0.25;
     final static double SV_DUMPER_GATE_DOWN = 0.62;
 
-    public DcMotor mt_intake_left = null;
-    public DcMotor mt_intake_right = null;
+    public DcMotor mtIntakeLeft = null;
+    public DcMotor mtIntakeRight = null;
+    public Servo svIntakeGate = null;
+    public CRServo svBarWheel = null;
     public Servo sv_intake_gate = null;
-    public CRServo sv_bar_wheel = null;
 
     public double intakeRatio = 1.0;
 
@@ -53,22 +55,18 @@ public class MineralIntakeSystem {
 
     void init(HardwareMap hwMap) {
         if (use_intake) {
-            mt_intake_left = hwMap.dcMotor.get("mtIntakeLeft");
-            mt_intake_left.setDirection(DcMotor.Direction.REVERSE);
-            mt_intake_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            mt_intake_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            mtIntakeLeft = hwMap.dcMotor.get("mtIntakeLeft");
+            mtIntakeLeft.setDirection(DcMotor.Direction.REVERSE);
+            mtIntakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            mtIntakeLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            sv_intake_gate = hwMap.servo.get("sv_intake_gate");
-            sv_intake_gate.setPosition(SV_INTAKE_GATE_INIT);
+            svIntakeGate = hwMap.servo.get("svIntakeGate");
+            svIntakeGate.setPosition(svIntakeGate_INIT);
 
-            mt_intake_right = hwMap.dcMotor.get("mtIntakeRight");
+            mtIntakeRight = hwMap.dcMotor.get("mtIntakeRight");
             // mt_glyph_slider.setDirection(DcMotor.Direction.REVERSE);
-            mt_intake_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            mt_intake_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
-        if (use_verbose) {
-            core.telemetry.addData("0: initialize intake CPU time =", "%3.2f sec", core.run_seconds());
-            core.telemetry.update();
+            mtIntakeRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            mtIntakeRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
     public void correctGlyph(boolean leadClockwise) {
@@ -76,69 +74,69 @@ public class MineralIntakeSystem {
             return;
         if(leadClockwise) {
             intakeTurn(true);
-            core.sleep(150);
+            core.yield_for(.15);
             intakeTurn(false);
-            core.sleep(150);
+            core.yield_for(.15);
             intakeIn();
-            core.sleep(300);
+            core.yield_for(.3);
         }
         else{
             intakeTurn(false);
-            core.sleep(150);
+            core.yield_for(.15);
             intakeTurn(true);
-            core.sleep(150);
+            core.yield_for(.15);
             intakeIn();
-            core.sleep(300);
+            core.yield_for(.3);
         }
     }
     public void intakeGateInit() {
-        if (!use_intake||sv_intake_gate==null)
+        if (!use_intake||svIntakeGate==null)
             return;
-        sv_intake_gate.setPosition(SV_INTAKE_GATE_INIT);
+        svIntakeGate.setPosition(svIntakeGate_INIT);
     }
 
     public void intakeGateUp() {
-        if (!use_intake || sv_intake_gate==null)
+        if (!use_intake || svIntakeGate==null)
             return;
-        double pos = sv_intake_gate.getPosition();
-        if (Math.abs(pos-SV_INTAKE_GATE_DOWN)<0.1)
-            sv_intake_gate.setPosition(SV_INTAKE_GATE_MID);
-        else if (Math.abs(pos-SV_INTAKE_GATE_MID)<0.1)
-            sv_intake_gate.setPosition(SV_INTAKE_GATE_UP);
+        double pos = svIntakeGate.getPosition();
+        if (Math.abs(pos-svIntakeGate_DOWN)<0.1)
+            svIntakeGate.setPosition(svIntakeGate_MID);
+        else if (Math.abs(pos-svIntakeGate_MID)<0.1)
+            svIntakeGate.setPosition(svIntakeGate_UP);
         else
-            sv_intake_gate.setPosition(SV_INTAKE_GATE_INIT);
+            svIntakeGate.setPosition(svIntakeGate_INIT);
     }
 
     public void intakeGateDown() {
-        if (!use_intake || sv_intake_gate==null)
+        if (!use_intake || svIntakeGate==null)
             return;
         //if (swerve.use_newbot_v2 && robot.relicReachSystem.use_relic_grabber)
         //    robot.relicReachSystem.relic_arm_up();
-        double pos = sv_intake_gate.getPosition();
-        if (Math.abs(pos-SV_INTAKE_GATE_INIT)<0.1)
-            sv_intake_gate.setPosition(SV_INTAKE_GATE_UP);
-        else if (Math.abs(pos-SV_INTAKE_GATE_UP)<0.1)
-            sv_intake_gate.setPosition(SV_INTAKE_GATE_MID);
+        double pos = svIntakeGate.getPosition();
+        if (Math.abs(pos-svIntakeGate_INIT)<0.1)
+            svIntakeGate.setPosition(svIntakeGate_UP);
+        else if (Math.abs(pos-svIntakeGate_UP)<0.1)
+            svIntakeGate.setPosition(svIntakeGate_MID);
         else
-            sv_intake_gate.setPosition(SV_INTAKE_GATE_DOWN);
+            svIntakeGate.setPosition(svIntakeGate_DOWN);
     }
 
     public void intakeBarWheelIn() {
-        if (sv_bar_wheel==null)
+        if (svBarWheel==null)
             return;
-        sv_bar_wheel.setPower(0.8);
+        svBarWheel.setPower(0.8);
     }
 
     public void intakeBarWheelOut() {
-        if (sv_bar_wheel==null)
+        if (svBarWheel==null)
             return;
-        sv_bar_wheel.setPower(-0.8);
+        svBarWheel.setPower(-0.8);
     }
 
     public void intakeBarWheelStop() {
-        if (sv_bar_wheel==null)
+        if (svBarWheel==null)
             return;
-        sv_bar_wheel.setPower(0);
+        svBarWheel.setPower(0);
     }
 
     public void intakeIn() {
@@ -147,8 +145,8 @@ public class MineralIntakeSystem {
 //        if (sv_dumper!=null && robot.sv_dumper.getPosition()<0.63) {
 //            return;
 //        }
-        mt_intake_left.setPower(intakeRatio);
-        mt_intake_right.setPower(intakeRatio);
+        mtIntakeLeft.setPower(intakeRatio);
+        mtIntakeRight.setPower(intakeRatio);
         intakeBarWheelIn();
     }
 
@@ -156,27 +154,31 @@ public class MineralIntakeSystem {
         if (!use_intake)
             return;
         if (clockwise) {
-            mt_intake_left.setPower(-intakeRatio / 2.0);
-            mt_intake_right.setPower(intakeRatio);
+            mtIntakeLeft.setPower(-intakeRatio / 2.0);
+            mtIntakeRight.setPower(intakeRatio);
         } else {
-            mt_intake_left.setPower(intakeRatio);
-            mt_intake_right.setPower(-intakeRatio / 2);
+            mtIntakeLeft.setPower(intakeRatio);
+            mtIntakeRight.setPower(-intakeRatio / 2);
         }
     }
 
     public void intakeOut() {
         if (!use_intake)
             return;
-        mt_intake_left.setPower(-1.0*intakeRatio);
-        mt_intake_right.setPower(-1.0*intakeRatio);
+        mtIntakeLeft.setPower(-1.0*intakeRatio);
+        mtIntakeRight.setPower(-1.0*intakeRatio);
         intakeBarWheelOut();
     }
 
     public void intakeStop() {
         if (!use_intake)
             return;
-        mt_intake_left.setPower(0);
-        mt_intake_right.setPower(0);
+        mtIntakeLeft.setPower(0);
+        mtIntakeRight.setPower(0);
         intakeBarWheelStop();
+    }
+    public void show_telemetry(Telemetry telemetry) {
+        // filler , not needed
+        telemetry.addData("mtIntakeRight =", mtIntakeLeft.getPower());
     }
 }

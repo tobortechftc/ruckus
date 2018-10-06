@@ -10,6 +10,7 @@ import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
@@ -85,10 +86,6 @@ public class CameraSystem {
                 throw new IllegalStateException("use_camera cannot be flagged as true without use_Vuforia also being true!");
             }
         }
-        if (use_verbose) {
-            core.telemetry.addData("0: initialize Vuforia CPU time =", "%3.2f sec", core.run_seconds());
-            core.telemetry.update();
-        }
     }
 
     CameraSystem(VuforiaLocalizer vuforia){
@@ -126,8 +123,6 @@ public class CameraSystem {
                 /* Found an instance of the template. In the actual game, you will probably
                  * loop until this condition occurs, then move on to act accordingly depending
                  * on which VuMark was visible. */
-                core.telemetry.addData("VuMark", "%s visible", vuMark);
-                core.telemetry.update();
                 column = getColumnIndex(vuMark);
             }
         }
@@ -289,5 +284,9 @@ public class CameraSystem {
     public void stopCamera(){
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, false);
         this.vuforia.setFrameQueueCapacity(0);
+    }
+
+    public void show_telemetry(Telemetry telemetry) {
+        telemetry.addData("VuMark", "%s visible", RelicRecoveryVuMark.from(relicTemplate));
     }
 }

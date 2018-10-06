@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -24,7 +25,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
  */
 public class SwerveSystem {
     // final static double SV_RELIC_GRABBER_INIT = 0.5039;
-    public boolean use_verbose = false;
     public boolean use_swerve = false;   // use four motors and four servos for chassis
     public boolean use_2017 = false;   // use four motors and four servos for new chassis
     //public boolean use_newbot_v2 = true;
@@ -227,10 +227,6 @@ public class SwerveSystem {
             accel = imu.getAcceleration();
             imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
         }
-        if (use_verbose) {
-            core.telemetry.addData("0: initialize imu CPU time =", "%3.2f sec", core.run_seconds());
-            core.telemetry.update();
-        }
 
         if (use_proximity_sensor) {
             proxL = hwMap.get(DigitalChannel.class, "proxL");
@@ -246,10 +242,6 @@ public class SwerveSystem {
             // rangeSensorFrontRight = hwMap.get(ModernRoboticsI2cRangeSensor.class, "rsFrontRight");
             rangeSensorFrontLeft = hwMap.get(ModernRoboticsI2cRangeSensor.class, "rsFrontLeft");
             rangeSensorBack = hwMap.get(ModernRoboticsI2cRangeSensor.class, "rsBack");
-        }
-        if (use_verbose) {
-            core.telemetry.addData("0: initialize prox/ranger sensors CPU time =", "%3.2f sec", core.run_seconds());
-            core.telemetry.update();
         }
 
         if (use_swerve) {
@@ -306,10 +298,6 @@ public class SwerveSystem {
             }
             if (use_swerve) {
                 initialize_newbot();
-            }
-            if (use_verbose) {
-                core.telemetry.addData("0: initialize chassis CPU time =", "%3.2f sec", core.run_seconds());
-                core.telemetry.update();
             }
         }
     }
@@ -386,7 +374,7 @@ public class SwerveSystem {
         proxML.setState(true);
         proxFL.setMode(DigitalChannel.Mode.INPUT);
         proxML.setMode(DigitalChannel.Mode.INPUT);
-        core.sleep(200);
+        core.yield_for(.2);
     }
 
     public double getRange(RangeSensor direction){
@@ -399,18 +387,21 @@ public class SwerveSystem {
                 distance = 0;
             else while(distance > 365 && elapsedTime.seconds() < 0.3){
                 distance = rangeSensorFrontLeft.getDistance(DistanceUnit.CM);
+                core.yield();
             }
         } else if(direction == RangeSensor.FRONT_RIGHT){
             if (rangeSensorFrontRight==null)
                 distance = 0;
             else while(distance > 365 && elapsedTime.seconds() < 0.3){
                 distance = rangeSensorFrontRight.getDistance(DistanceUnit.CM);
+                core.yield();
             }
         } else if(direction == RangeSensor.BACK){
             if (rangeSensorBack==null)
                 distance = 0;
             else while(distance > 365 && elapsedTime.seconds() < 0.3){
                 distance = rangeSensorBack.getDistance(DistanceUnit.CM);
+                core.yield();
             }
         }
         else {
@@ -672,6 +663,7 @@ public class SwerveSystem {
                 driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                 while (motorFrontLeft.isBusy() && motorFrontRight.isBusy() && (runtime.seconds() < 1) && opModeIsActive()) {
                     driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
+                    core.yield();
                     // show_telemetry();
                 }
             }
@@ -705,12 +697,15 @@ public class SwerveSystem {
                     prev_time = cur_time;
                     prev_speed = cur_speed;
                 }
+                core.yield();
+                /*
                 if (use_verbose) {
                     core.telemetry.addData("4.Speed cur/prev/i=", "%.2f/%.2f/%1d", cur_speed, prev_speed, iter);
                     core.telemetry.addData("5.time cur/prev/^=", "%.4f/%.4f/%.4f", cur_time, prev_time, (cur_time-prev_time));
                     core.telemetry.addData("6.enco cur/prev/^=", "%2d/%2d/%2d", curPosFrontLeft, prev_lpos,(curPosFrontLeft-prev_lpos));
                     core.telemetry.update();
                 }
+                */
             }
 
             if (rightTC2 > 0 || leftTC2 > 0) {
@@ -725,8 +720,10 @@ public class SwerveSystem {
                 driveTTCoast(leftPowerSign * 0.2, rightPowerSign * 0.2);
                 while (!bump_detected && motorFrontLeft.isBusy() && motorFrontRight.isBusy() && (runtime.seconds() < 8) && opModeIsActive()) {
                     driveTTCoast(leftPowerSign * 0.2, rightPowerSign * 0.2);
+                    core.yield();
                 }
             }
+            /*
             if (use_verbose) {
                 //stop_chassis();
                 core.telemetry.addData("4.Speed cur/prev/i/bumped=", "%.2f/%.2f/%1d/%s",
@@ -737,6 +734,7 @@ public class SwerveSystem {
                 core.telemetry.update();
                 //while (!gamepad1.x&&!gamepad1.b) {;}
             }
+            */
         }
         else if((cur_mode == CarMode.CRAB) && !use_front_drive_only){
             if(strafeRight) {
@@ -750,6 +748,7 @@ public class SwerveSystem {
                     driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                     while (motorFrontRight.isBusy() && motorBackRight.isBusy() && (runtime.seconds() < 1) && opModeIsActive()) {
                         driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
+                        core.yield();
                         // show_telemetry();
                     }
                 }
@@ -765,6 +764,7 @@ public class SwerveSystem {
                 driveTTCoast(leftPower, rightPower);
                 while (motorFrontRight.isBusy() && motorBackRight.isBusy() && (runtime.seconds() < 7) && opModeIsActive()) {
                     driveTTCoast(leftPower, rightPower);
+                    core.yield();
                 }
 
                 if (rightTC2 > 0 || leftTC2 > 0) {
@@ -779,6 +779,7 @@ public class SwerveSystem {
                     driveTTCoast(leftPowerSign * 0.2, rightPowerSign * 0.2);
                     while (motorFrontRight.isBusy() && motorBackRight.isBusy() && (runtime.seconds() < 8) && opModeIsActive()) {
                         driveTTCoast(leftPowerSign * 0.2, rightPowerSign * 0.2);
+                        core.yield();
                     }
                 }
             }
@@ -793,6 +794,7 @@ public class SwerveSystem {
                     driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                     while (motorFrontLeft.isBusy() && motorBackLeft.isBusy() && (runtime.seconds() < 1) && opModeIsActive()) {
                         driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
+                        core.yield();
                         // show_telemetry();
                     }
                 }
@@ -808,6 +810,7 @@ public class SwerveSystem {
                 driveTTCoast(leftPower, rightPower);
                 while (motorFrontLeft.isBusy() && motorBackLeft.isBusy() && (runtime.seconds() < 7) && opModeIsActive()) {
                     driveTTCoast(leftPower, rightPower);
+                    core.yield();
                 }
 
                 if (rightTC2 > 0 || leftTC2 > 0) {
@@ -822,6 +825,7 @@ public class SwerveSystem {
                     driveTTCoast(leftPowerSign * 0.2, rightPowerSign * 0.2);
                     while (motorFrontLeft.isBusy() && motorBackLeft.isBusy() && (runtime.seconds() < 8) && opModeIsActive()) {
                         driveTTCoast(leftPowerSign * 0.2, rightPowerSign * 0.2);
+                        core.yield();
                     }
                 }
             }
@@ -888,7 +892,7 @@ public class SwerveSystem {
             if (msec < 100) msec = 100;
             if (msec > 6000) msec = 6000; // limit to 6 sec
             driveTT(power, power);
-            core.sleep(msec);
+            core.yield_for(msec / 1000);
             driveTT(0, 0);
         }
     }
@@ -916,7 +920,7 @@ public class SwerveSystem {
             if (msec < 100) msec = 100;
             if (msec > 6000) msec = 6000; // limit to 6 sec
             driveTT(power, power);
-            core.sleep(msec);
+            core.yield_for(msec / 1000);
             driveTT(0, 0);
 
         }
@@ -924,7 +928,7 @@ public class SwerveSystem {
 
     public void StraightTime(double power, double timeSec){
         driveTT(-power, -power);
-        core.sleep((long)(timeSec * 1000));
+        core.yield_for((long)(timeSec));
         driveTT(0,0);
     }
 
@@ -948,7 +952,7 @@ public class SwerveSystem {
 
         change_swerve_pos(CarMode.TURN);
 
-        core.sleep(100);
+        core.yield_for(.1);
 
         leftCnt += leftEncode;
         rightCnt += rightEncode;
@@ -972,6 +976,7 @@ public class SwerveSystem {
                     current_pos += 360;
                 }
                 driveTT(leftPower, rightPower);
+                core.yield();
             }
         } else {
             if (use_encoder) {
@@ -979,16 +984,16 @@ public class SwerveSystem {
             } else {
                 long degree_in_ms = 33 * (long) degree;
                 driveTT(leftPower, rightPower);
-                core.sleep(degree_in_ms);
+                core.yield_for(degree_in_ms / 1000);
                 driveTT(0, 0);
             }
         }
         driveTT(0, 0);
         if (!opModeIsActive()) return;
-        core.sleep(100);
+        core.yield_for(.1);
         change_swerve_pos(old_mode);
         //if (!fast_mode)
-        //    core.sleep(135);
+        //    core.yield_for(.135);
     }
 
     public void TurnLeftD(double power, double degree) throws InterruptedException {
@@ -1010,7 +1015,7 @@ public class SwerveSystem {
 
         change_swerve_pos(CarMode.TURN);
 
-        core.sleep(100);
+        core.yield_for(.1);
 
         leftCnt += leftEncode;
         rightCnt += rightEncode;
@@ -1033,6 +1038,7 @@ public class SwerveSystem {
                 if (heading_cross_zero && (current_pos >= 0)) {
                     current_pos -= 360;
                 }
+                core.yield();
                 driveTT(leftPower, rightPower);
             }
         } else {
@@ -1041,15 +1047,15 @@ public class SwerveSystem {
             } else {
                 long degree_in_ms = 33 * (long) degree;
                 driveTT(leftPower, rightPower);
-                core.sleep(degree_in_ms);
+                core.yield_for(degree_in_ms / 1000);
                 driveTT(0, 0);
             }
         }
         driveTT(0, 0);
-        core.sleep(100);
+        core.yield_for(.1);
         change_swerve_pos(old_mode);
         //if (!fast_mode)
-        //    core.sleep(135);
+        //    core.yield_for(.135);
     }
 
     // [Invoked from TaintedAccess]
@@ -1362,6 +1368,13 @@ public class SwerveSystem {
             thetaTwoCalc = (Math.atan((0.5 * NB_WIDTH_BETWEEN_WHEELS) / ((r_Value) + (0.5 * NB_LENGTH_BETWEEN_WHEELS))) / (Math.PI)) + 0.5; //Theta 2 (outside wheels)
         }
 
+    }
+
+    public void show_telmetry(Telemetry telmetry) {
+        telmetry.addData("motorFrontLeft power =", motorFrontLeft.getPower());
+        telmetry.addData("motorFrontLeft encoder =", motorFrontLeft.getCurrentPosition());
+        telmetry.addData("motorFrontRight power =", motorFrontRight.getPower());
+        telmetry.addData("motorFrontRight encoder =", motorFrontRight.getCurrentPosition());
     }
 
 }

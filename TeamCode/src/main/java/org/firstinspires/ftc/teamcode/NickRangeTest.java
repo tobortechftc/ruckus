@@ -12,12 +12,8 @@ public class NickRangeTest extends LinearOpMode implements YieldHandler {
 
     Robot robot;
 
-    double distance = 0;
-    double sum = 0;
-    int counter = 1;
-    double mean = 0;
-    double max = 0;
-    double min = 1000;
+    double currentDistance = 0;
+    double previousDistance = 0;
     int outliers = 0;
 
     @Override
@@ -30,21 +26,13 @@ public class NickRangeTest extends LinearOpMode implements YieldHandler {
         waitForStart();
 
         while(opModeIsActive()) {
-            distance = robot.chassis.rangeSensor.getDistance(DistanceUnit.CM);
-            sum += distance;
-            mean = sum / counter;
-            if (distance > mean + 10 || distance < mean - 10)
+            previousDistance = currentDistance;
+            currentDistance = robot.chassis.rangeSensor.getDistance(DistanceUnit.CM);
+
+            if (currentDistance > previousDistance + 10)
                 outliers++;
-            if (distance > max)
-                max = distance;
-            if (distance < min)
-                min = distance;
-            counter++;
+
             robot.core.yield();
-            //sleep(20);
-
-
-
         }
 
     }
@@ -52,11 +40,7 @@ public class NickRangeTest extends LinearOpMode implements YieldHandler {
     @Override
     public void on_yield() {
         robot.chassis.show_telemetry(telemetry);
-        telemetry.addData("mean:", mean);
-        telemetry.addData("counter:", counter);
         telemetry.addData("outliers:", outliers);
-        telemetry.addData("max:", max);
-        telemetry.addData("min:", min);
         telemetry.addData("time:", getRuntime());
         telemetry.update();
     }

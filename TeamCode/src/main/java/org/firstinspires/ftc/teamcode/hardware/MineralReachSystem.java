@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 /**
  * Put brief class description here...
  */
@@ -34,7 +36,6 @@ public class MineralReachSystem {
     final static double SV_RELIC_ELBOW_DOWN = 0.5;
     final static int RELIC_SLIDE_MAX = -8800;
 
-    public boolean use_verbose = false;
     public boolean use_relic_elbow = false;
     public boolean use_relic_grabber = true;
     public boolean use_relic_slider = true;
@@ -97,10 +98,6 @@ public class MineralReachSystem {
             mt_relic_slider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             mt_relic_slider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
-        if (use_verbose) {
-            core.telemetry.addData("0: initialize Relic system CPU time =", "%3.2f sec", core.run_seconds());
-            core.telemetry.update();
-        }
     }
 
     public void relic_grabber_lower() {
@@ -133,14 +130,14 @@ public class MineralReachSystem {
         double tar = SV_RELIC_GRABBER_OPEN_NB;
         if (pos < tar) {
             sv_relic_grabber.setPosition(pos+0.1);
-            core.sleep(.250);
+            core.yield_for(.250);
             sv_relic_grabber.setPosition(pos+0.2);
-            core.sleep(.250);
+            core.yield_for(.250);
         } else {
             sv_relic_grabber.setPosition(pos-0.1);
-            core.sleep(.250);
+            core.yield_for(.250);
             sv_relic_grabber.setPosition(pos-0.2);
-            core.sleep(.250);
+            core.yield_for(.250);
         }
         sv_relic_grabber.setPosition(tar);
     }
@@ -278,7 +275,7 @@ public class MineralReachSystem {
                         pos -= 0.1;
                     }
                     sv_relic_wrist.setPosition(pos);
-                    core.sleep(.050);
+                    core.yield_for(.050);
                     pos = sv_relic_wrist.getPosition();
                 }
                 sv_relic_wrist.setPosition(SV_RELIC_WRIST_DOWN_R);
@@ -299,7 +296,7 @@ public class MineralReachSystem {
                     pos = SV_RELIC_WRIST_UP + 0.2;
                 }
                 sv_relic_wrist.setPosition(pos);
-                core.sleep(.300);
+                core.yield_for(.300);
                 sv_relic_wrist.setPosition(SV_RELIC_WRIST_UP);
             } else {
                 sv_relic_wrist.setPosition(SV_RELIC_WRIST_UP);
@@ -312,4 +309,7 @@ public class MineralReachSystem {
         sv_relic_wrist.setPosition(SV_RELIC_WRIST_MIDDLE);
     }
 
+    public void show_telmetry(Telemetry telemetry) {
+        telemetry.addData("mineral reach pos =", sv_relic_grabber.getPosition());
+    }
 }

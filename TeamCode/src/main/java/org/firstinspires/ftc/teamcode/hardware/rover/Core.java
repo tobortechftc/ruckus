@@ -22,4 +22,13 @@ public class Core {
         yieldHandler.on_yield();
     }
 
+    public void yield_for(double seconds) {
+        long millisec = Math.round(seconds * 1000);
+        try {
+            Thread.sleep(millisec);
+        } catch (InterruptedException e) {
+            return;
+        }
+    }
+
 }

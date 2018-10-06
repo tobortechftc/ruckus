@@ -6,11 +6,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 /**
  * Put brief class description here...
  */
 public class MineralDumperSystem {
-    public boolean use_verbose = false;
+//    public boolean use_verbose = false;
     public boolean use_dumper = false;
     public boolean use_dumper_gate = true;
     boolean gg_slider_encoder_ok = false; // used by glyph lifter
@@ -87,10 +89,6 @@ public class MineralDumperSystem {
             mt_lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             mt_lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
-        if (use_verbose) {
-            core.telemetry.addData("0: initialize dumper CPU time =", "%3.2f sec", core.run_seconds());
-            core.telemetry.update();
-        }
     }
     public void dumper_vertical() {
         if (!use_dumper || sv_dumper==null)
@@ -126,7 +124,7 @@ public class MineralDumperSystem {
         double pos = sv_dumper.getPosition();
         if ((pos-0.1)>0) {
             sv_dumper.setPosition(pos - 0.1);
-            core.sleep(200);
+            core.yield_for(.2);
         }
         sv_dumper.setPosition(pos);
     }
@@ -173,11 +171,11 @@ public class MineralDumperSystem {
 
     public void lift_up_and_down(boolean force) {
         lift_up(force);
-        core.sleep(300);
+        core.yield_for(.3);
         lift_stop();
-        core.sleep(150);
+        core.yield_for(.15);
         lift_down(force);
-        core.sleep(150);
+        core.yield_for(.15);
         lift_stop();
     }
 
@@ -185,28 +183,29 @@ public class MineralDumperSystem {
         mt_lift.setPower(0.0);
     }
 
+    public void show_telemetry(Telemetry telemetry) {
+        // I don't know what dumper CPU time is -ND
+        //telemetry.addData("0: initialize dumper CPU time =?", "%3.2f sec", core.run_seconds());
+        telemetry.addData("8. gg-rot pwr/cur/tar = ", "%3.2f/%d/%d", mt_lift.getPower(), mt_lift.getCurrentPosition(), target_gg_slider_pos);
+    }
     public void slide_to_target(double power) {
         if (!gg_slider_encoder_ok)
             return;
 
         if (power<0) power=-1.0*power;
+
+        // Why?
         DcMotor mt = mt_lift;
 
         mt.setTargetPosition(target_gg_slider_pos);
         mt.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtime.reset();
         mt.setPower(Math.abs(power));
-        while (mt.isBusy() && (runtime.seconds() < 3) && core.opModeIsActive()) {
-            core.telemetry.addData("8. gg-rot pwr/cur/tar = ", "%3.2f/%d/%d",
-                    mt.getPower(), mt.getCurrentPosition(), target_gg_slider_pos);
-            core.telemetry.update();
-        }
+        while (mt.isBusy() && (runtime.seconds() < 3))
+            core.yield();
         mt.setPower(Math.abs(power / 2.0));
-        while (mt.isBusy() && (runtime.seconds() < 1) && core.opModeIsActive()) {
-            core.telemetry.addData("8. gg-rot pwr/cur/tar = ", "%3.2f/%d/%d",
-                    mt.getPower(), mt.getCurrentPosition(), target_gg_slider_pos);
-            core.telemetry.update();
-        }
+        while (mt.isBusy() && (runtime.seconds() < 1))
+            core.yield();
         mt.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         mt.setPower(0);
     }
