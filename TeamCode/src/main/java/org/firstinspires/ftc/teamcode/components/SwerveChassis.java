@@ -206,10 +206,12 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
     /**
      * Drive using currently specified power and heading values
-     * @param power - -1 to 1
-     * @param heading - -90 to 90; relative to current robot orientation
+     * @param power -1 to 1
+     * @param heading -90 to 90; relative to current robot orientation
+     * @param allWheels <code>true</code> to use all 4 wheels,
+     *                 <code>false</code> to use front wheels only
      */
-    public void driveAndSteer(double power, double heading) throws InterruptedException {
+    public void driveAndSteer(double power, double heading, boolean allWheels) throws InterruptedException {
         debug("driveSteer(pwr: %.3f, head: %.1f)", power, heading);
         if (power < -1 || power > 1) {
             throw new IllegalArgumentException("Power must be between -1 and 1");
@@ -224,7 +226,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         }
 
         double[] newServoPositions = new double[4];
-        if (power > 0) { // driving forward
+        if (allWheels) {
+            Arrays.fill(newServoPositions, heading);
+        } else if (power > 0) { // driving forward
             // front left and right
             newServoPositions[0] = newServoPositions[1] = heading / 2;
         } else if (power < 0) { // driving backward
