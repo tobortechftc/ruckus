@@ -364,8 +364,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             servo.configure(configuration.getHardwareMap(), "servo" + position);
             configuration.register(servo);
 
-            motor = configuration.getHardwareMap().get(DcMotor.class, "motor" + position);
-            motor.setDirection(direction);
+            // motor = configuration.getHardwareMap().get(DcMotor.class, "motor" + position);
+            motor = configuration.getHardwareMap().tryGet(DcMotor.class, "motor" + position);
+            if (motor!=null) motor.setDirection(direction);
         }
 
         void reset(boolean resetServo) {

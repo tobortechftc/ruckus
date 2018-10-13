@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.GreenManba;
@@ -11,7 +12,7 @@ import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CRAB;
 import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.ORBIT;
 import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.TURN;
 
-
+@Disabled
 @TeleOp(name="TeleOp-2018", group="Ruckus")
 public class Teleop2018 extends SwerveUtilLOP implements YieldHandler {
 
