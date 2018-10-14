@@ -27,6 +27,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.configure(configuration);
     }
 
+    public void AutoRoutineTest() throws InterruptedException {
+        chassis.driveAndSteerAuto(0.6,560*3,45);
+    }
+
     @Override
     public void reset() {
         chassis.reset();
