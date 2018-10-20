@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.components.Robot;
+import org.firstinspires.ftc.teamcode.hardware.CameraSystem;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.diagnostics.Adjuster;
@@ -54,7 +55,9 @@ public class MasonOpenCVTesting extends LinearOpMode {
         // run until driver presses STOP or runtime exceeds 30 seconds
         while (opModeIsActive() && getRuntime() < 30) {
             try {
-
+                SwerveUtilLOP.OpenCV openCV = new SwerveUtilLOP.OpenCV();
+                openCV.findGold();
+                openCV.findSilver();
             } catch (Exception E) {
                 telemetry.addData("Error", E.getMessage());
                 handleException(E);
