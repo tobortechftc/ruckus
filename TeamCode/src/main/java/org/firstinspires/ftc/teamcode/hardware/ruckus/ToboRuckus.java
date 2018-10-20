@@ -27,6 +27,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.configure(configuration);
     }
 
+    public void AutoRoutineTest() throws InterruptedException {
+        chassis.driveAndSteerAuto(0.6, 560*3, 45);
+    }
+
     @Override
     public void reset() {
         chassis.reset();
@@ -82,7 +86,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 double heading = 90 * currentX;
                 double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
                 debug("testSteering(): head: %+.1f, pwr: %+.2f", heading, power);
-                chassis.driveAndSteer(power, heading);
+                chassis.driveAndSteer(power, heading, false);
             }
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
 
@@ -100,7 +104,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     chassis.driveStraight(power, 90);
                 } else {
                     debug("testSteering(): head: %+.1f, pwr: %+.2f", heading, power);
-                    chassis.driveAndSteer(power, heading);
+                    chassis.driveAndSteer(power, heading, false);
                 }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
@@ -116,6 +120,67 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             }
         }, Events.Side.LEFT, Events.Side.RIGHT);
     }
+
+    @MenuEntry(label = "Sticks Only", group = "Chassis Test")
+    public void testSticks(EventManager em) {
+        telemetry.addLine().addData("(RS)", "4WD").setRetained(true)
+                .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
+        telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true);
+        chassis.setupTelemetry(telemetry);
+        em.updateTelemetry(telemetry, 100);
+
+        em.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
+                                   float currentY, float changeY) throws InterruptedException {
+                debug("sticksOnly(): right, L:(%.2f, %.2f = %.2f) R:(%.2f, %.2f = %.2f)",
+                        source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY),
+                        source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY),
+                        source.getStick(Events.Side.LEFT, Events.Axis.BOTH),
+                        currentX, currentY,
+                        source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)
+                );
+                if (source.getStick(Events.Side.LEFT, Events.Axis.BOTH) == 0) {
+                    double power = Math.max(Math.abs(currentX), Math.abs(currentY));
+                    double heading = toDegrees(currentX, currentY);
+                    // invert headings less than -90 / more than 90
+                    if (Math.abs(heading) > 90) {
+                        heading -= Math.signum(heading) * 180;
+                        power = -1 * power;
+                    }
+                    debug("sticksOnly(): straight, pwr: %.2f, head: %.2f", power, heading);
+                    chassis.driveAndSteer(power, heading, true);
+                } else {
+                    double heading = source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY) * 90;
+                    double power = currentY;
+                    debug("sticksOnly(): right / steer, pwr: %.2f, head: %.2f", power, heading);
+                    chassis.driveAndSteer(power, heading, false);
+                }
+            }
+        }, Events.Axis.BOTH, Events.Side.RIGHT);
+        em.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
+                                   float currentY, float changeY) throws InterruptedException {
+                debug("sticksOnly(): left, L:(%.2f, %.2f = %.2f) R:(%.2f, %.2f = %.2f)",
+                        currentX, currentY,
+                        source.getStick(Events.Side.LEFT, Events.Axis.BOTH),
+                        source.getStick(Events.Side.RIGHT, Events.Axis.X_ONLY),
+                        source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY),
+                        source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)
+                );
+                if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) == 0) {
+                    chassis.rotate(currentX);
+                } else {
+                    double heading = currentX * 90;
+                    double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
+                    debug("sticksOnly(): left / steer, pwr: %.2f, head: %.2f", power, heading);
+                    chassis.driveAndSteer(power, heading, false);
+                }
+            }
+        }, Events.Axis.X_ONLY, Events.Side.LEFT);
+    }
+
 
     @MenuEntry(label = "Rotate in Place", group = "Chassis Test")
     public void testRotate(EventManager em) {

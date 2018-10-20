@@ -328,7 +328,7 @@ public class Chassis {
         leftCnt = (int) (ONE_ROTATION * n_rotations);
         rightCnt = (int) (ONE_ROTATION * n_rotations);
         set_motor_power((float) power);
-        run_until_encoder(leftCnt, leftPower, rightCnt, rightPower);
+        run_until_encoder(leftCnt, power, rightCnt, power);
         if(cur_mode == CarMode.CRAB) {
             servoFrontLeft.setPosition(SERVO_FL_STRAFE_POSITION);
             servoFrontRight.setPosition(SERVO_FR_STRAFE_POSITION);
@@ -467,7 +467,7 @@ public class Chassis {
 
                     runtime.reset();
                     driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
-                    while (motorFrontRight.isBusy() && motorBackRight.isBusy() && (runtime.seconds() < 1) && opModeIsActive()) {
+                    while (motorFrontRight.isBusy() && motorBackRight.isBusy() && runtime.seconds() < 1) {
                         driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                         core.yield();
                         // show_telemetry();
@@ -513,7 +513,7 @@ public class Chassis {
 
                     runtime.reset();
                     driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
-                    while (motorFrontLeft.isBusy() && motorBackLeft.isBusy() && (runtime.seconds() < 1) && opModeIsActive()) {
+                    while (motorFrontLeft.isBusy() && motorBackLeft.isBusy() && runtime.seconds() < 1) {
                         driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                         core.yield();
                         // show_telemetry();
@@ -529,7 +529,7 @@ public class Chassis {
                 motorBackLeft.setTargetPosition(targetPosBackLeft);
 
                 driveTTCoast(leftPower, rightPower);
-                while (motorFrontLeft.isBusy() && motorBackLeft.isBusy() && (runtime.seconds() < 7) && opModeIsActive()) {
+                while (motorFrontLeft.isBusy() && motorBackLeft.isBusy() && runtime.seconds() < 7) {
                     driveTTCoast(leftPower, rightPower);
                     core.yield();
                 }

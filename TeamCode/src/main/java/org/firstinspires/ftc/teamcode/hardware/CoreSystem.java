@@ -18,16 +18,17 @@ public class CoreSystem {
         yieldHandler = y;
     }
 
-    public void yield(){
+    public void yield() {
+        if (yieldHandler == null) {
+            throw new RuntimeException("yieldHandler is null, call setYieldHandler in the beginning of teleop");
+        }
         yieldHandler.on_yield();
     }
 
     public void yield_for(double seconds) {
         long millisec = Math.round(seconds * 1000);
-        try {
-            Thread.sleep(millisec);
-        } catch (InterruptedException e) {
-            return;
-        }
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() - start < millisec)
+            yield();
     }
 }

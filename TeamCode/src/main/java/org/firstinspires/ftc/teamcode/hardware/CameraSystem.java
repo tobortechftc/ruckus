@@ -17,17 +17,39 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
 
+import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.annotation.TargetApi;
+import android.hardware.Camera;
+
 /**
  * Put brief class description here...
  */
-public class CameraSystem {
+public class CameraSystem extends OpenCVPipeline{
     public boolean use_verbose = false;
     public boolean use_Vuforia = true;
     public boolean use_camera = false;
+    public boolean use_OpenCV = true;
+
+    private boolean showContours = false;
+    private Mat hsv = new Mat();
+    private Mat thresholded = new Mat();
+    private List<MatOfPoint> contours = new ArrayList<>();
 
     //public SwerveUtilLOP.Camera icamera = null;
-    public SwerveUtilLOP.TeamColor leftJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
-    public SwerveUtilLOP.TeamColor rightJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
+    //public SwerveUtilLOP.TeamColor leftJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
+    //public SwerveUtilLOP.TeamColor rightJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
     public Bitmap bitmap = null;
     public boolean camReady = false;
 
@@ -55,9 +77,11 @@ public class CameraSystem {
         if (isAuto) {
             use_Vuforia = true;
             use_camera = true;
+            use_OpenCV = true;
         } else {
             use_Vuforia = false;
             use_camera = false;
+            use_OpenCV = false;
         }
     }
 
@@ -129,6 +153,10 @@ public class CameraSystem {
         return column;
     }
 
+    /**
+     * Opposite of stopCamera(), it sets the Vuforia frame queue capacity to one and sets the color format of the frames to allow it to be processed
+     * @author Mason Mann
+     */
     public void activate() {
         this.vuforia.setFrameQueueCapacity(1);
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
@@ -138,6 +166,12 @@ public class CameraSystem {
         return lastError;
     }
 
+    /**
+     * Takes in a Vuforia CloseableFrame and converts it to a Bitmap variable to be processed
+     * @author Mason Mann
+     * @param frame
+     * @return
+     */
     private Bitmap convertFrameToBitmap(VuforiaLocalizer.CloseableFrame frame) {
         long numImages = frame.getNumImages();
         Image image = null;
@@ -170,6 +204,7 @@ public class CameraSystem {
     }
 
     /**
+     * @author Mason Mann
      * @param xOffsetF
      * @param yOffsetF
      * @param widthF
@@ -205,6 +240,7 @@ public class CameraSystem {
     }
 
     /**
+     * @author Mason Mann
      * Takes a Bitmap as input and outputs an integer of the color constant of the "whitest" pixel
      * @param source
      * @return
@@ -240,6 +276,7 @@ public class CameraSystem {
     }
 
     /**
+     * @author Mason Mann
      * Takes returned integer from getWhitestPixel and a source bitmap then returns a white balanced bitmap
      * @param source
      * @param whitestPixel
@@ -281,10 +318,35 @@ public class CameraSystem {
             return source;
         }
     }
+
+    /**
+     * Opposite of activate(), sets frame queue capacity to zero and disables the frame format set by activate()
+     * @author Mason Mann
+     */
     public void stopCamera(){
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, false);
         this.vuforia.setFrameQueueCapacity(0);
     }
+
+    public Mat processFrame(Mat rgba, Mat grayscale){
+        Imgproc.cvtColor(rgba,hsv,Imgproc.COLOR_RGB2HSV,3);
+        Core.inRange(hsv, new Scalar(0,0,90), new Scalar(0,0,100), thresholded);
+        //TODO: Handle Gold, currently only handles silver
+
+        Imgproc.blur(thresholded, thresholded, new Size(3,3));
+        contours = new ArrayList<>();
+        Imgproc.findContours(thresholded, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        if (use_verbose){
+            Imgproc.drawContours(rgba, contours, -1, new Scalar(144, 255, 255), 2, 8);
+        }
+        return rgba;
+    }
+
+//    public List<int[]> findSilver(Mat src){
+//
+//        return null;
+//    }
 
     public void show_telemetry(Telemetry telemetry) {
         telemetry.addData("VuMark", "%s visible", RelicRecoveryVuMark.from(relicTemplate));
