@@ -242,6 +242,23 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         }
     }
 
+    public void driveAndSteerAuto(double power, double distance,double angle) throws InterruptedException {
+        int[] startingCount = new int[4];
+        for(int i=0;i<4;i++){
+            startingCount[i] = wheels[i].motor.getCurrentPosition();
+        }
+        driveAndSteer(power,angle,true);
+        while (true){
+            int maxTraveled=Integer.MIN_VALUE;
+            for(int i=0;i<4;i++){
+                maxTraveled = Math.max(maxTraveled,wheels[i].motor.getCurrentPosition()-startingCount[i]);
+            }
+            if (distance - maxTraveled < 10)
+                break;
+        }
+        driveAndSteer(0,0,true);
+    }
+
     /**
      * Rotate in place using currently specified power
      */

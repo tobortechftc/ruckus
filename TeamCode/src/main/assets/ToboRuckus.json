@@ -15,9 +15,9 @@
     "right": 0.825
   },
   "servoFrontRight": {
-    "center": 0.490,
-    "left": 0.157,
-    "right": 0.814
+    "center": 0.505,
+    "left": 0.172,
+    "right": 0.829
   },
   "chassis": {
     "track": 11.5,
