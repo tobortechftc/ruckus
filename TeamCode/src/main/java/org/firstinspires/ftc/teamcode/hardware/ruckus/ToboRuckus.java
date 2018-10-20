@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private Telemetry telemetry;
-    private SwerveChassis chassis;
+    public SwerveChassis chassis;
 
     @Override
     public String getName() {
@@ -28,7 +28,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     public void AutoRoutineTest() throws InterruptedException {
-        chassis.driveAndSteerAuto(0.6, 560*3, 45);
+        chassis.drive_and_steer_auto(0.6, 560*3, 45);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void testStraight(EventManager em) {
         telemetry.addLine().addData("(LS)", "Drive").setRetained(true)
                 .addData("Hold [LB]/[RB]", "45 degree").setRetained(true);
-        chassis.setupTelemetry(telemetry);
+        chassis.setup_telemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
         em.onStick(new Events.Listener() {
             @Override
@@ -60,11 +60,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
                 // adjust heading / power for driving backwards
                 if (heading > 90) {
-                    chassis.driveStraight(-1.0 * power, heading - 180);
+                    chassis.drive_straight(-1.0 * power, heading - 180);
                 } else if (heading < -90) {
-                    chassis.driveStraight(-1.0 * power, heading + 180);
+                    chassis.drive_straight(-1.0 * power, heading + 180);
                 } else {
-                    chassis.driveStraight(power, heading);
+                    chassis.drive_straight(power, heading);
                 }
             }
         }, Events.Axis.BOTH, Events.Side.LEFT);
@@ -76,7 +76,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 .addData("(RS)", "Power").setRetained(true);
         telemetry.addLine().addData("[LT] / [RT]", "Rotate").setRetained(true)
                 .addData("Hold [LB] / [RB]", "Crab").setRetained(true);
-        chassis.setupTelemetry(telemetry);
+        chassis.setup_telemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
 
         em.onStick(new Events.Listener() {
@@ -86,7 +86,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 double heading = 90 * currentX;
                 double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
                 debug("testSteering(): head: %+.1f, pwr: %+.2f", heading, power);
-                chassis.driveAndSteer(power, heading, false);
+                chassis.drive_and_steer(power, heading, false);
             }
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
 
@@ -98,13 +98,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 double power = currentY;
                 if (source.isPressed(Button.LEFT_BUMPER)) {
                     debug("testSteering(): head: -90, pwr: %+.2f", heading, power);
-                    chassis.driveStraight(power, -90);
+                    chassis.drive_straight(power, -90);
                 } else if (source.isPressed(Button.RIGHT_BUMPER)) {
                     debug("testSteering(): head: 90, pwr: %+.2f", heading, power);
-                    chassis.driveStraight(power, 90);
+                    chassis.drive_straight(power, 90);
                 } else {
                     debug("testSteering(): head: %+.1f, pwr: %+.2f", heading, power);
-                    chassis.driveAndSteer(power, heading, false);
+                    chassis.drive_and_steer(power, heading, false);
                 }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
@@ -126,7 +126,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         telemetry.addLine().addData("(RS)", "4WD").setRetained(true)
                 .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true);
-        chassis.setupTelemetry(telemetry);
+        chassis.setup_telemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
 
         em.onStick(new Events.Listener() {
@@ -149,12 +149,12 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         power = -1 * power;
                     }
                     debug("sticksOnly(): straight, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power, heading, true);
+                    chassis.drive_and_steer(power, heading, true);
                 } else {
                     double heading = source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY) * 90;
                     double power = currentY;
                     debug("sticksOnly(): right / steer, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power, heading, false);
+                    chassis.drive_and_steer(power, heading, false);
                 }
             }
         }, Events.Axis.BOTH, Events.Side.RIGHT);
@@ -175,7 +175,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     double heading = currentX * 90;
                     double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
                     debug("sticksOnly(): left / steer, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power, heading, false);
+                    chassis.drive_and_steer(power, heading, false);
                 }
             }
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
@@ -185,7 +185,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     @MenuEntry(label = "Rotate in Place", group = "Chassis Test")
     public void testRotate(EventManager em) {
         telemetry.addLine().addData(" < (LS) >", "Power").setRetained(true);
-        chassis.setupTelemetry(telemetry);
+        chassis.setup_telemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
         em.onStick(new Events.Listener() {
             @Override
