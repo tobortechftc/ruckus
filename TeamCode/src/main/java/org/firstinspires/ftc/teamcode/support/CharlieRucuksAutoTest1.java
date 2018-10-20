@@ -1,27 +1,19 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.support;
 
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.components.Robot;
-import org.firstinspires.ftc.teamcode.hardware.CameraSystem;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
-import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Adjuster;
-import org.firstinspires.ftc.teamcode.support.diagnostics.GamepadListener;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Menu;
-import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
-import org.firstinspires.ftc.teamcode.support.events.Button;
-import org.firstinspires.ftc.teamcode.support.events.EventManager;
-import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
-import java.lang.reflect.InvocationTargetException;
+/**
+ * Created by 28761 on 10/13/2018.
+ */
 
-@Autonomous(name = "Ruckus :: OpenCV Testing", group = "Ruckus")
-public class MasonOpenCVTesting extends LinearOpMode {
+@Autonomous(name = "Ruckus :: Autonomous test", group = "Ruckus")
+public class CharlieRucuksAutoTest1 extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -52,12 +44,12 @@ public class MasonOpenCVTesting extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
+        robot.AutoRoutineTest();
         // run until driver presses STOP or runtime exceeds 30 seconds
         while (opModeIsActive() && getRuntime() < 30) {
             try {
-                SwerveUtilLOP.OpenCV openCV = new SwerveUtilLOP.OpenCV();
-                openCV.findGold();
-                openCV.findSilver();
+                // TODO: invoke something like robot.autonomousProgram()
+//                robot.AutoRoutineTest();
             } catch (Exception E) {
                 telemetry.addData("Error", E.getMessage());
                 handleException(E);
@@ -69,7 +61,7 @@ public class MasonOpenCVTesting extends LinearOpMode {
     protected void handleException(Throwable T) {
         log.error(T.getMessage(), T);
         int linesToShow = 5;
-        for(StackTraceElement line : T.getStackTrace()) {
+        for (StackTraceElement line : T.getStackTrace()) {
             telemetry.log().add("%s.%s():%d", line.getClassName(), line.getMethodName(), line.getLineNumber());
             if (--linesToShow == 0) break;
         }

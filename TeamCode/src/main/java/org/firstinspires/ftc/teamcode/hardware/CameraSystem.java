@@ -11,45 +11,24 @@ import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
 
-import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.imgproc.Moments;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import android.annotation.TargetApi;
-import android.hardware.Camera;
-
 /**
  * Put brief class description here...
  */
-public class CameraSystem extends OpenCVPipeline{
+public class CameraSystem{
     public boolean use_verbose = false;
     public boolean use_Vuforia = true;
     public boolean use_camera = false;
     public boolean use_OpenCV = true;
 
-    private boolean showContours = false;
-    private Mat hsv = new Mat();
-    private Mat thresholded = new Mat();
-    private List<MatOfPoint> contours = new ArrayList<>();
-
-    //public SwerveUtilLOP.Camera icamera = null;
-    //public SwerveUtilLOP.TeamColor leftJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
-    //public SwerveUtilLOP.TeamColor rightJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
+    public SwerveUtilLOP.TeamColor leftJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
+    public SwerveUtilLOP.TeamColor rightJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
     public Bitmap bitmap = null;
     public boolean camReady = false;
 
@@ -327,26 +306,6 @@ public class CameraSystem extends OpenCVPipeline{
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, false);
         this.vuforia.setFrameQueueCapacity(0);
     }
-
-    public Mat processFrame(Mat rgba, Mat grayscale){
-        Imgproc.cvtColor(rgba,hsv,Imgproc.COLOR_RGB2HSV,3);
-        Core.inRange(hsv, new Scalar(0,0,90), new Scalar(0,0,100), thresholded);
-        //TODO: Handle Gold, currently only handles silver
-
-        Imgproc.blur(thresholded, thresholded, new Size(3,3));
-        contours = new ArrayList<>();
-        Imgproc.findContours(thresholded, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        if (use_verbose){
-            Imgproc.drawContours(rgba, contours, -1, new Scalar(144, 255, 255), 2, 8);
-        }
-        return rgba;
-    }
-
-//    public List<int[]> findSilver(Mat src){
-//
-//        return null;
-//    }
 
     public void show_telemetry(Telemetry telemetry) {
         telemetry.addData("VuMark", "%s visible", RelicRecoveryVuMark.from(relicTemplate));

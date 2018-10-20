@@ -2,16 +2,28 @@ package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Point;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.firstinspires.ftc.robotcore.external.Supplier;
 import org.firstinspires.ftc.teamcode.hardware.MineralDumperSystem;
 import org.firstinspires.ftc.teamcode.hardware.MineralIntakeSystem;
 import org.firstinspires.ftc.teamcode.hardware.GreenManba;
 import org.firstinspires.ftc.teamcode.hardware.SwerveSystem;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CAR;
 import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CRAB;
@@ -20,8 +32,8 @@ import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CRAB;
 public abstract class SwerveUtilLOP extends LinearOpMode {
 
     /* Declare OpMode members. */
-      // public SwerveDriveHardware robot           = new SwerveDriveHardware();
-      public GreenManba robot = new GreenManba();
+    // public SwerveDriveHardware robot           = new SwerveDriveHardware();
+    public GreenManba robot = new GreenManba();
 
     /**
      * Is used for checking or determining a color based on an alliance
@@ -860,6 +872,56 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             got_two = !robot.swerve.proxML.getState() && !robot.swerve.proxFL.getState();
         }
         return got_two;
+    }
+
+    public static class OpenCV extends OpenCVPipeline{
+        private boolean showContours = false;
+        private Mat silverHSV = new Mat();
+        private Mat silverThresholded = new Mat();
+        private Mat goldHSV = new Mat();
+        private Mat goldThresholded = new Mat();
+        private List<MatOfPoint> silverContours = new ArrayList<>();
+        private List<MatOfPoint> goldContours = new ArrayList<>();
+
+        @Override
+        public Mat processFrame(Mat rgba, Mat grayscale){
+            Imgproc.cvtColor(rgba, silverHSV,Imgproc.COLOR_RGB2HSV,3);
+            Imgproc.cvtColor(rgba, goldHSV, Imgproc.COLOR_RGB2HSV, 3);
+            Core.inRange(silverHSV, new Scalar(0,0,90), new Scalar(0,0,100), silverThresholded);
+            Core.inRange(goldHSV, new Scalar (27,223,69.8), new Scalar(51,160,100), goldThresholded);
+
+            Imgproc.blur(silverThresholded, silverThresholded, new Size(3,3));
+
+            Imgproc.blur(goldThresholded, goldThresholded, new Size(3,3));
+            silverContours = new ArrayList<>();
+            goldContours = new ArrayList<>();
+            Imgproc.findContours(silverThresholded, silverContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(goldThresholded, goldContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            if (showContours){
+                Imgproc.drawContours(rgba, silverContours, -1, new Scalar(144, 255, 255), 2, 8);
+                Imgproc.drawContours(rgba, goldContours, -1, new Scalar(255, 144, 255), 2, 8);
+            }
+            return rgba;
+        }
+        public Point[] findSilver(){
+            List<Moments> mu = new ArrayList<>(silverContours.size());
+            Point[] coordCenter = new Point[mu.size()];
+            for (int i = 0; i < silverContours.size(); i++) {
+                mu.add(Imgproc.moments(silverContours.get(i)));
+                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
+            }
+            return coordCenter;
+        }
+        public Point[] findGold(){
+            List<Moments> mu = new ArrayList<>(goldContours.size());
+            Point[] coordCenter = new Point[mu.size()];
+            for (int i = 0; i < goldContours.size(); i++) {
+                mu.add(Imgproc.moments(goldContours.get(i)));
+                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
+            }
+            return coordCenter;
+        }
     }
 
 }
