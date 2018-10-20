@@ -1,20 +1,22 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.hardware.rover.Robot;
+import org.firstinspires.ftc.teamcode.hardware.minibot.Robot;
 import org.firstinspires.ftc.teamcode.support.YieldHandler;
 
-@Autonomous(name = "NickRangeTest", group = "test")
+@TeleOp(name = "NickRangeTest", group = "test")
 public class NickRangeTest extends LinearOpMode implements YieldHandler {
 
     Robot robot;
 
     double currentDistance = 0;
-    double previousDistance = 0;
-    int outliers = 0;
+    double power = 0;
+    boolean isMoving = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -25,23 +27,40 @@ public class NickRangeTest extends LinearOpMode implements YieldHandler {
 
         waitForStart();
 
-        while(opModeIsActive()) {
-            previousDistance = currentDistance;
+        while (opModeIsActive()) {
             currentDistance = robot.chassis.rangeSensor.getDistance(DistanceUnit.CM);
+            if (isMoving)
+                Log.v("range", String.format("%.2f", currentDistance));
 
-            if (currentDistance > previousDistance + 10)
-                outliers++;
+            if (gamepad1.a) {
+                setSpeed(0);
+                isMoving = false;
+            }
+
+            if (gamepad1.dpad_up) {
+                setSpeed(power);
+                isMoving = true;
+            }
+            if (gamepad1.dpad_down) {
+                setSpeed(-power);
+                isMoving = true;
+            }
+
+            if (gamepad1.dpad_right)
+                power += .1;
+            if (gamepad1.dpad_left)
+                power -= .1;
 
             robot.core.yield();
         }
 
     }
 
+    void setSpeed(double x) {
+        robot.chassis.motorLeft.setPower(x);
+        robot.chassis.motorRight.setPower(x);
+    }
     @Override
     public void on_yield() {
-        robot.chassis.show_telemetry(telemetry);
-        telemetry.addData("outliers:", outliers);
-        telemetry.addData("time:", getRuntime());
-        telemetry.update();
     }
 }
