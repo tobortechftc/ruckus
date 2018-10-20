@@ -18,5 +18,7 @@ public class Robot {
 
     public void init(HardwareMap hwMap) {
         chassis.init(hwMap);
+        kicker.init(hwMap);
+        pusher.init(hwMap);
     }
 }

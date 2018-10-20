@@ -61,5 +61,4 @@ public class CharlieAutoPrototypeV4 extends LinearOpMode implements YieldHandler
         }
         telemetry.update();
     }
-
 }

@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.hardware.minibot;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -11,16 +10,12 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Chassis {
 
-    public DcMotor motorRight;
-    public DcMotor motorLeft;
-
-    public DistanceSensor rangeSensor;
-
+    DcMotor motorRight;
+    DcMotor motorLeft;
     final Core core;
 
     public Chassis(Core c) {
@@ -54,9 +49,6 @@ public class Chassis {
         motorLeft = hwMap.dcMotor.get("left_drive"); // should be motorLeft, not left_drive
         motorRight = hwMap.dcMotor.get("right_drive");
 
-        rangeSensor = hwMap.get(DistanceSensor.class, "rangeSensor");
-
-
         // initializes IMU
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -82,7 +74,6 @@ public class Chassis {
      * @param telemetry this.telemetry
      */
     public void show_diagnostic(Telemetry telemetry) {
-        telemetry.addData("range", rangeSensor.getDistance(DistanceUnit.CM));
         telemetry.addData("motorLeft:", motorLeft.getPower());
         telemetry.addData("motorRight:", motorRight.getPower());
     }
