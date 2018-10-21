@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private Telemetry telemetry;
     public SwerveChassis chassis;
+    public Hanging hanging;
 
     @Override
     public String getName() {
@@ -25,6 +26,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
         chassis.configure(configuration);
+        hanging = new Hanging().configureLogging("Hanging", logLevel);
+        hanging.configure(configuration);
     }
 
     public void AutoRoutineTest() throws InterruptedException {
