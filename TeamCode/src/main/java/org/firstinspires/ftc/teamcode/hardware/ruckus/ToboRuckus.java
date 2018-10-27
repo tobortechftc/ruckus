@@ -12,9 +12,9 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private Telemetry telemetry;
-    private SwerveChassis chassis;
-    private MineralIntake mineralIntake;
-    private Hanging hanging;
+    public SwerveChassis chassis;
+    public MineralIntake mineralIntake;
+    public Hanging hanging;
 
     @Override
     public String getName() {
