@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private Telemetry telemetry;
-    private SwerveChassis chassis;
+    public SwerveChassis chassis;
 
     @Override
     public String getName() {
@@ -28,7 +28,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     public void AutoRoutineTest() throws InterruptedException {
-        chassis.driveAndSteerAuto(0.6, 560*3, 45);
+//        chassis.driveAndSteerAuto(0.6, 560*3, 45);
     }
 
     @Override
