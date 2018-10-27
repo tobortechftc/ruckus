@@ -126,13 +126,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @MenuEntry(label = "Sticks Only", group = "Chassis Test")
-    public void testSticks(EventManager em) {
+    public void testSticks(EventManager em, EventManager em2) {
         telemetry.addLine().addData("(RS)", "4WD").setRetained(true)
                 .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true);
         chassis.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
-
+        em2.updateTelemetry(telemetry, 100);
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -183,6 +183,51 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
+
+        // Eevnts for gamepad2
+        em2.onTrigger(new Events.Listener() {
+            @Override
+            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
+                // do not rotate if the robot is currently moving
+                if (side==Events.Side.LEFT) { // lift down
+                    if (current>0.2) {
+                        // mineralDelivery.liftDown();
+                    } else {
+                        // mineralDelivery.liftStop();
+                    }
+                }
+                if (side==Events.Side.RIGHT) { // latch down
+                    if (current>0.2) {
+                        hanging.latchDown();
+                    } else {
+                        hanging.latchStop();
+                    }
+                }
+            }
+        }, Events.Side.LEFT, Events.Side.RIGHT);
+        em2.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+                if (button==Button.LEFT_BUMPER) { // lift up
+                    // mineralDelivery.liftUp();
+                } else if (button==Button.RIGHT_BUMPER) { // latch up
+                    hanging.latchUp();
+                } else if (button==Button.B) {
+                    hanging.hookAuto();
+                }
+            }
+        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER,Button.B);
+
+        em2.onButtonUp(new Events.Listener() {
+            @Override
+            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+                if (button==Button.LEFT_BUMPER) { // lift stop
+                    // mineralDelivery.liftStop();
+                } else if (button==Button.RIGHT_BUMPER) { // latch stop
+                    hanging.latchStop();
+                }
+            }
+        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER,Button.B);
     }
 
 

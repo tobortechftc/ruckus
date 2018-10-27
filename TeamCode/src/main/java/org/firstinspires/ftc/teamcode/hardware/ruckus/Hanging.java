@@ -29,10 +29,10 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private Servo hook;
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
-    private double hook_init = 0;
-    private double hook_up = hook_init;
-    private double hook_down = 0.5;
+    private double hook_up = 0.5;
+    private double hook_down = 0.9;
     private double latch_power = .5;
+    private boolean hookIsOepned = false;
 
     @Override
     public String getUniqueName() {
@@ -47,7 +47,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
     public void reset() {
         latch.setPower(0);
-        hook.setPosition(hook_init);
+        hookClose();
     }
 
     public void configure(Configuration configuration) {
@@ -56,26 +56,35 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setPower(0);
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         hook = configuration.getHardwareMap().servo.get("sv_hook");
-        hook.setPosition(hook_init);
+        hookClose();
 
 
         // register chassis as configurable component
         configuration.register(this);
     }
 
-    public void hook_up(){
+    public void hookClose(){
         hook.setPosition(hook_up);
+        hookIsOepned=false;
     }
-    public void hook_down(){
+    public void hookOpen(){
         hook.setPosition(hook_down);
+        hookIsOepned=true;
     }
-    public void latch_up(){
+    public void hookAuto() {
+        if (hookIsOepned) {
+            hookClose();
+        } else {
+            hookOpen();
+        }
+    }
+    public void latchUp(){
         latch.setPower(latch_power);
     }
-    public void latch_down(){
+    public void latchDown(){
         latch.setPower(-1 * latch_power);
     }
-    public void latch_stop(){
+    public void latchStop(){
         latch.setPower(0);
     }
     /**
