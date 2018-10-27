@@ -51,7 +51,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private double servoCorrection;   // latest correction applied to leading wheels' servos to correct heading deviation
 
 
-    @Adjustable(min = 8.0, max=18.0, step = 0.02)
+    @Adjustable(min = 8.0, max = 18.0, step = 0.02)
     public double getTrack() {
         return track;
     }
@@ -59,7 +59,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         this.track = track;
     }
 
-    @Adjustable(min = 8.0, max=18.0, step = 0.02)
+    @Adjustable(min = 8.0, max = 18.0, step = 0.02)
     public double getWheelBase() {
         return wheelBase;
     }
@@ -67,7 +67,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         this.wheelBase = wheelBase;
     }
 
-    @Adjustable(min = 1.0, max=5.0, step = 0.02)
+    @Adjustable(min = 1.0, max = 5.0, step = 0.02)
     public double getWheelRadius() {
         return wheelRadius;
     }
@@ -75,7 +75,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         this.wheelRadius = wheelRadius;
     }
 
-    @Adjustable(min = 0.0, max=0.4, step = 0.01)
+    @Adjustable(min = 0.0, max = 0.4, step = 0.01)
     public double getMinPower() {
         return minPower;
     }
@@ -83,7 +83,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         this.minPower = minPower;
     }
 
-    @Adjustable(min = 0.2, max=1.0, step = 0.01)
+    @Adjustable(min = 0.2, max = 1.0, step = 0.01)
     public double getMaxPower() {
         return maxPower;
     }
@@ -127,8 +127,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
      * @param power - -1 to 1
      * @param heading - -90 to 90; relative to current robot orientation
      */
-    public void drive_straight(double power, double heading) throws InterruptedException {
-        debug("drive_straight(pwr: %.3f, head: %.1f)", power, heading);
+    public void driveStraight(double power, double heading) throws InterruptedException {
+        debug("driveStraight(pwr: %.3f, head: %.1f)", power, heading);
         if (power < -1 || power > 1) {
             throw new IllegalArgumentException("Power must be between -1 and 1");
         }
@@ -159,7 +159,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 wheel.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             double[] newServoPositions = new double[4];
             Arrays.fill(newServoPositions, heading);
-            change_servo_positions(newServoPositions);
+            changeServoPositions(newServoPositions);
 
             orientationSensor.enableCorrections(true);
             targetHeading = orientationSensor.getHeading();
@@ -167,7 +167,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             // check and correct heading as needed
             double sensorHeading = orientationSensor.getHeading();
             headingDeviation = targetHeading - sensorHeading;
-            debug("drive_straight(): target=%+.2f, sensor=%+.2f, adjustment=%+.2f)", targetHeading, sensorHeading, headingDeviation);
+            debug("driveStraight(): target=%+.2f, sensor=%+.2f, adjustment=%+.2f)", targetHeading, sensorHeading, headingDeviation);
             if (Math.abs(headingDeviation) > 0.5) {
                 servoCorrection = headingDeviation / 2;
                 if (power > 0) {
@@ -189,7 +189,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             }
         }
         for (WheelAssembly wheel : wheels)
-            wheel.motor.setPower(scale_power(power));
+            wheel.motor.setPower(scalePower(power));
     }
 
     /**
@@ -199,7 +199,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
      * @param allWheels <code>true</code> to use all 4 wheels,
      *                 <code>false</code> to use front wheels only
      */
-    public void drive_and_steer(double power, double heading, boolean allWheels) throws InterruptedException {
+    public void driveAndSteer(double power, double heading, boolean allWheels) throws InterruptedException {
         debug("driveSteer(pwr: %.3f, head: %.1f)", power, heading);
         if (power < -1 || power > 1) {
             throw new IllegalArgumentException("Power must be between -1 and 1");
@@ -225,25 +225,25 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             // back left and right
             newServoPositions[2] = newServoPositions[3] = heading / 2;
         }
-        change_servo_positions(newServoPositions);
+        changeServoPositions(newServoPositions);
 
         for (WheelAssembly wheel : wheels)
-            wheel.motor.setPower(scale_power(power));
+            wheel.motor.setPower(scalePower(power));
     }
 
-    public void drive_and_steer_auto(double power, double distance,double angle) throws InterruptedException {
+    public void driveAndSteerAuto(double power, double distance, double angle) throws InterruptedException {
         int[] startingCount = new int[4];
         for (int i=0; i<4; i++)
             startingCount[i] = wheels[i].motor.getCurrentPosition();
-        drive_and_steer(power,angle,true);
+        driveAndSteer(power,angle,true);
         while (true) {
             int maxTraveled=Integer.MIN_VALUE;
             for (int i=0; i<4; i++)
-                maxTraveled = Math.max(maxTraveled,wheels[i].motor.getCurrentPosition()-startingCount[i]);
+                maxTraveled = Math.max(maxTraveled,wheels[i].motor.getCurrentPosition() - startingCount[i]);
             if (distance - maxTraveled < 10)
                 break;
         }
-        drive_and_steer(0,0,true);
+        driveAndSteer(0,0,true);
     }
 
     /**
@@ -273,19 +273,19 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             newServoPositions[0] = newServoPositions[3] = angle;
             // front right and back left
             newServoPositions[1] = newServoPositions[2] = -1 * angle;
-            change_servo_positions(newServoPositions);
+            changeServoPositions(newServoPositions);
         }
 
-        frontLeft.motor.setPower(scale_power(power));
-        frontRight.motor.setPower(-1 * scale_power(power));
-        backLeft.motor.setPower(scale_power(power));
-        backRight.motor.setPower(-1 * scale_power(power));
+        frontLeft.motor.setPower(scalePower(power));
+        frontRight.motor.setPower(-1 * scalePower(power));
+        backLeft.motor.setPower(scalePower(power));
+        backRight.motor.setPower(-1 * scalePower(power));
     }
 
     /**
      * Scales power according to <code>minPower</code> and <code>maxPower</code> settings
      */
-    private double scale_power(double power) {
+    private double scalePower(double power) {
         return Math.signum(power) * minPower + power * (maxPower - minPower);
     }
 
@@ -294,7 +294,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
      * @param newPositions new servo positions matching wheel assembly order:
      *                     front left, front right, back left, back right
      */
-    private void change_servo_positions(double[] newPositions) throws InterruptedException {
+    private void changeServoPositions(double[] newPositions) throws InterruptedException {
         double maxServoAdjustment = 0;
         for (int index = 0; index < newPositions.length; index++) {
             double servoAdjustment = Math.abs(newPositions[index] - wheels[index].servo.getPosition());
@@ -310,7 +310,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
      *  drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
      *  and servo position for each wheel
      */
-    public void setup_telemetry(Telemetry telemetry) {
+    public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
         line.addData("Pwr", "%.2f", new Func<Double>() {
             @Override
@@ -334,7 +334,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 return String.format("%+.1f", servoCorrection);
             }
         });
-        line = telemetry.addLine( "Srv: ");
+        line = telemetry.addLine("Srv: ");
         for (WheelAssembly wheel : wheels) {
             final AdjustableServo servo = wheel.servo;
             line.addData(wheel.position, "%+.1f", new Func<Double>() {
