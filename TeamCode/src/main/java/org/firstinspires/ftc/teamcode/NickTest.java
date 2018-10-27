@@ -2,39 +2,32 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Adjuster;
-import org.firstinspires.ftc.teamcode.support.diagnostics.GamepadListener;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Menu;
-import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
-import org.firstinspires.ftc.teamcode.support.events.Button;
-import org.firstinspires.ftc.teamcode.support.events.EventManager;
-import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
-import java.lang.reflect.InvocationTargetException;
+/**
+ * Created by 28761 on 10/13/2018.
+ */
 
-@TeleOp(name="Ruckus-TeleOp", group="Ruckus")
-public class RuckusTeleOp extends LinearOpMode {
+@Autonomous(name = "NickAutonomousTest", group = "Ruckus")
+public class NickTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
 
-    private EventManager eventManager1;
-    private EventManager eventManager2;
+    int targetMineral = 1; // 0=left, 1=center, 2=right. default to center since it is fastest
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Initializing Robot", "Please Wait ...");
         telemetry.update();
 
-        ToboRuckus robot = new ToboRuckus();
+        ToboRuckus robot = new ToboRuckus().configureLogging("ToboRuckus", LOG_LEVEL);
         configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
 
         try {
@@ -42,11 +35,6 @@ public class RuckusTeleOp extends LinearOpMode {
             robot.configure(configuration, telemetry);
             configuration.apply();
             robot.reset();
-
-            eventManager1 = new EventManager(gamepad1, true);
-            eventManager2 = new EventManager(gamepad2, true);
-
-            robot.testSticks(eventManager1, eventManager2); // define events for the chassis drive
 
             telemetry.addData("Robot is ready", "Press Play");
             telemetry.update();
@@ -57,14 +45,29 @@ public class RuckusTeleOp extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+        resetStartTime();
 
-        // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
+        robot.AutoRoutineTest();
+
+        if (opModeIsActive()) {
             try {
-                eventManager1.processEvents();
-                eventManager2.processEvents();
+                robot.chassis.driveAndSteerAuto(.2, 4, 0);
+                if (targetMineral == 0) {
+                    robot.chassis.driveAndSteerAuto(.2, 22.3, -49);
+                    robot.chassis.driveAndSteerAuto(.2, -16.6, -68);
+                }
+                else if (targetMineral == 1) {
+                    robot.chassis.driveAndSteerAuto(.2, 22.3, 0);
+                    robot.chassis.driveAndSteerAuto(.2, -16.6, 0);
+                }
+                else {
+                    robot.chassis.driveAndSteerAuto(.2, 22.3, 49);
+                    robot.chassis.driveAndSteerAuto(.2, -16.6, 68);
+                }
+
+
             } catch (Exception E) {
-                telemetry.addData("Error in event handler", E.getMessage());
+                telemetry.addData("Error", E.getMessage());
                 handleException(E);
                 Thread.sleep(5000);
             }
@@ -74,7 +77,7 @@ public class RuckusTeleOp extends LinearOpMode {
     protected void handleException(Throwable T) {
         log.error(T.getMessage(), T);
         int linesToShow = 5;
-        for(StackTraceElement line : T.getStackTrace()) {
+        for (StackTraceElement line : T.getStackTrace()) {
             telemetry.log().add("%s.%s():%d", line.getClassName(), line.getMethodName(), line.getLineNumber());
             if (--linesToShow == 0) break;
         }

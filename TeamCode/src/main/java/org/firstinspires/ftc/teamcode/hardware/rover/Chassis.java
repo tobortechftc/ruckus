@@ -17,8 +17,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-import org.firstinspires.ftc.teamcode.hardware.SwerveSystem;
-import org.firstinspires.ftc.teamcode.hardware.rover.Core;
 
 // TODO: Remove all of the NB_ prefixes from the variables
 
@@ -148,7 +146,7 @@ public class Chassis {
         motorBackRight.setDirection(DcMotor.Direction.REVERSE);
 
         // Set all motors to zero power and set all servos to central position
-        set_chassis_forward_position();
+        setChassisForwardPosition();
         motorFrontLeft.setPower(0);
         motorFrontRight.setPower(0);
         motorBackLeft.setPower(0);
@@ -167,7 +165,7 @@ public class Chassis {
         motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-    public double imu_heading() {
+    public double imuHeading() {
         if (!use_imu2)
             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         else
@@ -176,7 +174,7 @@ public class Chassis {
         return angles.firstAngle;
     }
 
-    void set_chassis_forward_position() {
+    void setChassisForwardPosition() {
             servoFrontLeft.setPosition(NB_SERVO_FL_FORWARD_POSITION);
             servoFrontRight.setPosition(NB_SERVO_FR_FORWARD_POSITION);
             servoBackLeft.setPosition(NB_SERVO_BL_FORWARD_POSITION);
@@ -186,7 +184,7 @@ public class Chassis {
 
     // Rename to drive_power
     public void driveTT(double lp, double rp) {
-        double cur_heading = imu_heading();
+        double cur_heading = imuHeading();
         double heading_off_by = ((cur_heading - target_heading) / 360);
         if (cur_mode == CarMode.CAR) {
             if (rp > 0 && lp > 0) { // Forwards
@@ -232,7 +230,7 @@ public class Chassis {
     
     // Rename to drive_distance
     public void StraightCm(double power, double cm) throws InterruptedException {
-        target_heading = imu_heading();
+        target_heading = imuHeading();
         double WHEEL_DIAMETER = 102.18; // In millimeters
         double WHEEL_RADIUS = WHEEL_DIAMETER / 2; // Still in millimeters
         double CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI; // Also is mm per rotation
@@ -263,7 +261,7 @@ public class Chassis {
             motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         }
 
-        double cur_heading = imu_heading();
+        double cur_heading = imuHeading();
         double heading_off_by = ((cur_heading - target_heading) / 360);
         if (cur_mode == CarMode.CAR) {
             if (rp > 0 && lp > 0) { //When going forward
@@ -319,7 +317,7 @@ public class Chassis {
     }
 
     void StraightR(double power, double n_rotations) throws InterruptedException {
-        reset_chassis();
+        resetChassis();
         // set_drive_modes(DcMotorController.RunMode.RUN_USING_ENCODERS);
         int leftEncode = motorFrontLeft.getCurrentPosition();
         int rightEncode = motorFrontRight.getCurrentPosition();
@@ -327,22 +325,22 @@ public class Chassis {
         //motorFR.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         leftCnt = (int) (ONE_ROTATION * n_rotations);
         rightCnt = (int) (ONE_ROTATION * n_rotations);
-        set_motor_power((float) power);
-        run_until_encoder(leftCnt, power, rightCnt, power);
+        setMotorPower((float) power);
+        runUntilEncoder(leftCnt, power, rightCnt, power);
         if(cur_mode == CarMode.CRAB) {
             servoFrontLeft.setPosition(SERVO_FL_STRAFE_POSITION);
             servoFrontRight.setPosition(SERVO_FR_STRAFE_POSITION);
             servoBackLeft.setPosition(SERVO_BL_STRAFE_POSITION);
             servoBackRight.setPosition(SERVO_BR_STRAFE_POSITION);
         } else {
-            set_chassis_forward_position();
+            setChassisForwardPosition();
         }
 
         //if (!fast_mode)
         //    sleep(135);
     }
 
-    public void run_until_encoder(int leftCnt, double leftPower, int rightCnt, double rightPower) throws InterruptedException {
+    public void runUntilEncoder(int leftCnt, double leftPower, int rightCnt, double rightPower) throws InterruptedException {
         runtime.reset();
         int leftTC1 = leftCnt;
         int rightTC1 = rightCnt;
@@ -398,7 +396,7 @@ public class Chassis {
                 while (motorFrontLeft.isBusy() && motorFrontRight.isBusy() && runtime.seconds() < 1) {
                     driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                     core.yield();
-                    // show_telemetry();
+                    // showTelemetry();
                 }
             }
             curPosFrontLeft = motorFrontLeft.getCurrentPosition();
@@ -470,7 +468,7 @@ public class Chassis {
                     while (motorFrontRight.isBusy() && motorBackRight.isBusy() && runtime.seconds() < 1) {
                         driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                         core.yield();
-                        // show_telemetry();
+                        // showTelemetry();
                     }
                 }
                 curPosFrontRight = motorFrontRight.getCurrentPosition();
@@ -516,7 +514,7 @@ public class Chassis {
                     while (motorFrontLeft.isBusy() && motorBackLeft.isBusy() && runtime.seconds() < 1) {
                         driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                         core.yield();
-                        // show_telemetry();
+                        // showTelemetry();
                     }
                 }
                 curPosFrontLeft = motorFrontLeft.getCurrentPosition();
@@ -561,12 +559,12 @@ public class Chassis {
         motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        set_motor_power(0);
+        setMotorPower(0);
         runtime.reset();
     }
     
     // Rename to reset_encoders
-    void reset_chassis()  {
+    void resetChassis()  {
         motorFrontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFrontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motorBackLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -579,15 +577,15 @@ public class Chassis {
             motorBackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    public void set_motor_power(double power) {
+    public void setMotorPower(double power) {
         motorFrontRight.setPower(power);
         motorFrontLeft.setPower(power);
         motorBackLeft.setPower(power);
         motorBackRight.setPower(power);
     }
 
-    public void show_telemetry(Telemetry telemetry) {
+    public void showTelemetry(Telemetry telemetry) {
         telemetry.addData("range", rangeSensor.getDistance(DistanceUnit.CM));
-        telemetry.addData("IMU", imu_heading());
+        telemetry.addData("IMU", imuHeading());
     }
 }
