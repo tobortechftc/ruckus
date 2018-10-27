@@ -804,7 +804,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             robot.swerve.stop_chassis();
             return false;
         }
-//        double cur_heading = imu_heading();
+//        double cur_heading = imuHeading();
 //        if (isBlue) { // drive to right
 //            driveTT(-0.2,-0.1);
 //        } else {

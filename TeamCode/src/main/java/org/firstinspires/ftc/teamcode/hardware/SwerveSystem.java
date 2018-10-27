@@ -664,7 +664,7 @@ public class SwerveSystem {
                 while (motorFrontLeft.isBusy() && motorFrontRight.isBusy() && (runtime.seconds() < 1) && opModeIsActive()) {
                     driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                     core.yield();
-                    // show_telemetry();
+                    // showTelemetry();
                 }
             }
             curPosFrontLeft = motorFrontLeft.getCurrentPosition();
@@ -749,7 +749,7 @@ public class SwerveSystem {
                     while (motorFrontRight.isBusy() && motorBackRight.isBusy() && (runtime.seconds() < 1) && opModeIsActive()) {
                         driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                         core.yield();
-                        // show_telemetry();
+                        // showTelemetry();
                     }
                 }
                 curPosFrontRight = motorFrontRight.getCurrentPosition();
@@ -795,7 +795,7 @@ public class SwerveSystem {
                     while (motorFrontLeft.isBusy() && motorBackLeft.isBusy() && (runtime.seconds() < 1) && opModeIsActive()) {
                         driveTTCoast(leftPowerSign * 0.3, rightPowerSign * 0.3);
                         core.yield();
-                        // show_telemetry();
+                        // showTelemetry();
                     }
                 }
                 curPosFrontLeft = motorFrontLeft.getCurrentPosition();
