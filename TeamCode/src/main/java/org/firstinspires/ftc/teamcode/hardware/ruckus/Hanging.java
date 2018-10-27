@@ -32,7 +32,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private double hook_up = 0.5;
     private double hook_down = 0.9;
     private double latch_power = .5;
-    private boolean hookIsOepned = false;
+    private boolean hookIsOpened = false;
 
     @Override
     public String getUniqueName() {
@@ -65,14 +65,14 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
     public void hookClose(){
         hook.setPosition(hook_up);
-        hookIsOepned=false;
+        hookIsOpened=false;
     }
     public void hookOpen(){
         hook.setPosition(hook_down);
-        hookIsOepned=true;
+        hookIsOpened=true;
     }
     public void hookAuto() {
-        if (hookIsOepned) {
+        if (hookIsOpened) {
             hookClose();
         } else {
             hookOpen();
@@ -104,3 +104,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     }
 
 }
+
+
+
