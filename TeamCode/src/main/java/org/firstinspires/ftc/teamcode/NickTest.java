@@ -20,7 +20,7 @@ public class NickTest extends LinearOpMode {
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
 
-    int targetMineral = 1; // 0=left, 1=center, 2=right. default to center as it is fastest
+    int targetMineral = 0; // 0=left, 1=center, 2=right. default to center as it is fastest
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -52,29 +52,32 @@ public class NickTest extends LinearOpMode {
         if (opModeIsActive()) {
             try {
                 // Forward a bit
-                robot.chassis.driveStraightAuto(.2, 4, 0);
+                robot.chassis.driveStraightAuto(.2, 15, 0);
                 sleep(500);
 
                 // Knock off mineral and go back
                 if (targetMineral == 0) {
-                    robot.chassis.driveStraightAuto(.2, 22.3, -49);
+                    robot.chassis.driveStraightAuto(.2, 56.6, -49);
                     sleep(300);
-                    robot.chassis.driveStraightAuto(.2, -16.6, -68);
+                    robot.chassis.driveStraightAuto(.2, -37, -55);
                 }
                 else if (targetMineral == 1) {
-                    robot.chassis.driveStraightAuto(.2, 22.3, 0);;
+                    robot.chassis.driveStraightAuto(.2, 40.6, 0);
                     sleep(300);
-                    robot.chassis.driveStraightAuto(.2, -16.6, 0);
+                    robot.chassis.driveStraightAuto(.2, -40.6, 0);
                 }
                 else {
-                    robot.chassis.driveStraightAuto(.2, 22.3, 49);;
+                    robot.chassis.driveStraightAuto(.2, 56.6, 49);
                     sleep(300);
-                    robot.chassis.driveStraightAuto(.2, -16.6, 68);
+                    robot.chassis.driveStraightAuto(.2, -42.2, 55);
                 }
                 sleep(300);
-                robot.chassis.driveStraightAuto(.2, 36, 45);
+                robot.chassis.driveStraightAuto(.2, 100, -90);
                 sleep(300);
-                robot.chassis.rotateTo(.2, -135, telemetry);
+                robot.chassis.rotateTo(.4, -135, telemetry);
+                robot.chassis.driveStraightAuto(.2,8,90);
+                sleep(300);
+                robot.chassis.driveStraightAuto(.2, 100, 0);
 
             } catch (Exception e) {
                 telemetry.addData("Error", e.getMessage());
