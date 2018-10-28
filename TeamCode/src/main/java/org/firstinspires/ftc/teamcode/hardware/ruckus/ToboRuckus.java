@@ -28,7 +28,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
         chassis.configure(configuration);
-        intake = new MineralIntake().configureLogging("intake", logLevel);
+        intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
         hanging = new Hanging().configureLogging("Hanging", logLevel);
         hanging.configure(configuration);
@@ -43,6 +43,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     @Override
     public void reset() {
         chassis.reset();
+        intake.reset();
     }
 
     @MenuEntry(label = "Drive Straight", group = "Chassis Test")
@@ -137,7 +138,6 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true);
         chassis.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
-        em2.updateTelemetry(telemetry, 100);
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -351,18 +351,19 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     /**
      * Returns power adjustment based on left bumper / left trigger state
-     * Left bumper down = slow mode (50% power)
-     * Left trigger down = turbo mode (100% + 50% of trigger strength) power
+     * Normal mode = 60% power
+     * Left bumper down = slow mode (30% power)
+     * Left trigger down = turbo mode (up to 100%) power
      */
     private double powerAdjustment(EventManager source) {
-        double adjustment = 1.0;
+        double adjustment = 0.6;
         if (source.isPressed(Button.RIGHT_BUMPER)) {
-            // slow mode uses 50% of power
-            adjustment = 0.5;
+            // slow mode uses 30% of power
+            adjustment = 0.3;
         } else if (source.getTrigger(Events.Side.RIGHT) > 0.2) {
             // 0.2 is the dead zone threshold
             // turbo mode uses (100% + 1/2 trigger value) of power
-            adjustment = 1 + 0.5 * source.getTrigger(Events.Side.RIGHT);
+            adjustment = 0.6 + 0.4 * source.getTrigger(Events.Side.RIGHT);
         }
         return adjustment;
     }
