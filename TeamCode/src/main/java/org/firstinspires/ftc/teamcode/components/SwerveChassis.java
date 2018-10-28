@@ -345,9 +345,13 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         } else if (power > 0) { // driving forward
             // front left and right
             newServoPositions[0] = newServoPositions[1] = heading / 2;
+            // back left and right
+            newServoPositions[2] = newServoPositions[3] = -1 * heading / 2;
         } else if (power < 0) { // driving backward
             // back left and right
             newServoPositions[2] = newServoPositions[3] = heading / 2;
+            // front left and right
+            newServoPositions[0] = newServoPositions[1] = -1 * heading / 2;
         }
         changeServoPositions(newServoPositions);
 
@@ -552,7 +556,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         void reset(boolean resetServo) {
             motor.setPower(0.0d);
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             if (resetServo) servo.reset();
         }
     }
