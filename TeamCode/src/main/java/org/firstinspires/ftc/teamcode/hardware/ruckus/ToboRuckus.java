@@ -14,6 +14,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private Telemetry telemetry;
     public SwerveChassis chassis;
     public MineralIntake intake;
+    public MineralDelivery mineralDelivery;
+    public Hanging hanging;
 
     @Override
     public String getName() {
@@ -28,6 +30,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.configure(configuration);
         intake = new MineralIntake().configureLogging("intake", logLevel);
         intake.configure(configuration);
+        hanging = new Hanging().configureLogging("Hanging", logLevel);
+        hanging.configure(configuration);
+        mineralDelivery = new MineralDelivery().configureLogging("Delivery", logLevel);
+        mineralDelivery.configure(configuration);
     }
 
     public void AutoRoutineTest() throws InterruptedException {
@@ -125,13 +131,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @MenuEntry(label = "Sticks Only", group = "Chassis Test")
-    public void testSticks(EventManager em) {
+    public void testSticks(EventManager em, EventManager em2) {
         telemetry.addLine().addData("(RS)", "4WD").setRetained(true)
                 .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true);
         chassis.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
-
+        em2.updateTelemetry(telemetry, 100);
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -143,7 +149,6 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         currentX, currentY,
                         source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)
                 );
-
                 if (source.getStick(Events.Side.LEFT, Events.Axis.BOTH) == 0) {
                     double power = Math.max(Math.abs(currentX), Math.abs(currentY));
                     double heading = toDegrees(currentX, currentY);
@@ -252,6 +257,71 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         });
+
+        // Eevnts for gamepad2
+        em2.onTrigger(new Events.Listener() {
+            @Override
+            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
+                // do not rotate if the robot is currently moving
+                if (side==Events.Side.LEFT) { // lift down
+                    if (current>0.2) {
+                        //mineralDelivery.liftDown();
+                    } else {
+                        //mineralDelivery.liftStop();
+                    }
+                }
+                if (side==Events.Side.RIGHT) { // latch down
+                    if (current>0.2) {
+                        hanging.latchDown();
+                    } else {
+                        hanging.latchStop();
+                    }
+                }
+            }
+        }, Events.Side.LEFT, Events.Side.RIGHT);
+        em2.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+                if (button==Button.LEFT_BUMPER) { // lift up
+                    //mineralDelivery.liftUp();
+                } else if (button==Button.RIGHT_BUMPER) { // latch up
+                    hanging.latchUp();
+                } else if (button==Button.B) {
+                    hanging.hookAuto();
+                } else if (button==Button.X){
+                    mineralDelivery.gateAuto();
+                } else if (button==Button.Y) {
+                    mineralDelivery.armUp();
+                } else if (button==Button.A){
+                    mineralDelivery.armDown();
+                }
+            }
+        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER,Button.B, Button.X, Button.Y, Button.A);
+
+        em2.onButtonUp(new Events.Listener() {
+            @Override
+            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+                if (button==Button.LEFT_BUMPER) { // lift stop
+                    //mineralDelivery.liftStop();
+                } else if (button==Button.RIGHT_BUMPER) { // latch stop
+                    hanging.latchStop();
+                }
+            }
+        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER);
+
+        em2.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
+                                   float currentY, float changeY) throws InterruptedException {
+                if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) > 0.2) {
+                    mineralDelivery.liftUp();
+                } else if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) < -0.2) {
+                    mineralDelivery.liftDown();
+                } else {
+                    mineralDelivery.liftStop();
+                }
+            }
+        }, Events.Axis.Y_ONLY, Events.Side.LEFT);
     }
 
 
