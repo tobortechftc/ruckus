@@ -26,20 +26,20 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private boolean adjustmentMode = false;
 
     // adjustable servo positions in order of BoxPosition constants
-    private double[] boxPositions = { 120, 20, 0, 240 };
+    private double[] boxPositions = { 0, 100, 120, -100 };
 
     // sweeper intake / push out power values
     private double sweeperInPower = 0.2;
     private double sweeperOutPower = 0.3;
-    private int sweeperHalfRotation = 320; // TBD
+    private int sweeperHalfRotation = 250; // TBD
 
     // slider encoder positions
     private int sliderContracted = 0; // contracted
-    private int sliderExtended = 700; // fully extended
+    private int sliderExtended = 70; // fully extended
     // minimally extended position that allows for box to be rotated to one of the collection positions
-    private int sliderSafe = 350;
-    private int sliderDump = 300; // allows box to rest on back bracket and dump
-    private double sliderPower = 0.5; // TBD
+    private int sliderSafe = 35;
+    private int sliderDump = 30; // allows box to rest on back bracket and dump
+    private double sliderPower = 0.1; // TBD
 
     @Override
     public String getUniqueName() {
@@ -48,19 +48,25 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     @Override
     public void setAdjustmentMode(boolean on) {
+        if (this.adjustmentMode == on) return;
         this.adjustmentMode = on;
+        if (on) {
+            debug("Adjustment: ON, box: %.1f, sweeper: %s / %d, slider: %s", boxServo.getPosition(),
+                    sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
+                    sliderMotor.getMode(), sliderMotor.getCurrentPosition()
+            );
+        } else {
+            resetMotor(this.sliderMotor);
+            resetMotor(this.sweeperMotor);
+            this.boxServo.setPosition(boxPositions[BoxPosition.INITIAL.ordinal()]);
+            debug("Adjustment: OFF, box: %.1f, sweeper: %s / %d, slider: %s", boxServo.getPosition(),
+                    sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
+                    sliderMotor.getMode(), sliderMotor.getCurrentPosition()
+            );
+        }
     }
 
-    @Adjustable(min = 0, max = 250, step = 1)
-    public double getBoxInitial() {
-        return this.boxPositions[BoxPosition.INITIAL.ordinal()];
-    }
-    public void setBoxInitial(double position) {
-        this.boxPositions[BoxPosition.INITIAL.ordinal()] = position;
-        if (adjustmentMode) this.boxServo.setPosition(position);
-    }
-
-    @Adjustable(min = 0, max = 250, step = 1)
+    @Adjustable(min = 90, max = 125, step = 1)
     public double getBoxGoldCollection() {
         return this.boxPositions[BoxPosition.GOLD_COLLECTION.ordinal()];
     }
@@ -69,7 +75,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         if (adjustmentMode) this.boxServo.setPosition(position);
     }
 
-    @Adjustable(min = 0, max = 250, step = 1)
+    @Adjustable(min = 90, max = 125, step = 1)
     public double getBoxSilverCollection() {
         return this.boxPositions[BoxPosition.SILVER_COLLECTION.ordinal()];
     }
@@ -78,7 +84,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         if (adjustmentMode) this.boxServo.setPosition(position);
     }
 
-    @Adjustable(min = 0, max = 250, step = 1)
+    @Adjustable(min = -125, max = -75, step = 1)
     public double getBoxDump() {
         return this.boxPositions[BoxPosition.DUMP.ordinal()];
     }
@@ -113,25 +119,17 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
     }
 
-    @Adjustable(min = 1, max = 1000, step = 1)
+    @Adjustable(min = 1, max = 1000, step = 5)
     public int getSweeperHalfRotation() {
         return sweeperHalfRotation;
     }
     public void setSweeperHalfRotation(int position) {
         this.sweeperHalfRotation = position;
         if (adjustmentMode) {
-            this.sweeperMotor.setPower(0);
-            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            debug("Sweeper Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sweeperMotor.getCurrentPosition(), position, sweeperMotor.getPower(), sweeperInPower);
             this.sweeperMotor.setTargetPosition(sweeperHalfRotation);
             this.sweeperMotor.setPower(sweeperInPower);
-            // wait for sweeper to rotate
-            // it's ok to "busy wait" here since we're in adjustment mode
-            try {
-                while (this.sweeperMotor.isBusy()) {
-                    Thread.sleep(100);
-                }
-            } catch (InterruptedException ignored) {
-            }
+            debug("Sweeper Adjustment Running: ON, position: %d / %d, power: %.3f, mode: %s", sweeperMotor.getCurrentPosition(), sweeperMotor.getTargetPosition(), sweeperMotor.getPower(), sweeperMotor.getMode());
         }
     }
 
@@ -142,8 +140,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     public void setSliderExtended(int sliderExtended) {
         this.sliderExtended = sliderExtended;
         if (adjustmentMode) {
-            this.sliderMotor.setPower(0);
-            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            debug("Slider Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sliderMotor.getCurrentPosition(), sliderExtended, sliderMotor.getPower(), sliderPower);
             this.sliderMotor.setTargetPosition(this.sliderExtended);
             this.sliderMotor.setPower(this.sliderPower);
         }
@@ -156,10 +153,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     public void setSliderSafe(int sliderSafe) {
         this.sliderSafe = sliderSafe;
         if (adjustmentMode) {
-            this.sliderMotor.setPower(0);
-            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            debug("Slider Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sliderMotor.getCurrentPosition(), sliderSafe, sliderMotor.getPower(), sliderPower);
             this.sliderMotor.setTargetPosition(sliderSafe);
             this.sliderMotor.setPower(this.sliderPower);
+            debug("Slider Adjustment Running: ON, position: %d / %d, power: %.3f, mode: %s", sliderMotor.getCurrentPosition(), sliderMotor.getTargetPosition(), sliderMotor.getPower(), sliderMotor.getMode());
         }
     }
 
@@ -170,8 +167,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     public void setSliderDump(int sliderDump) {
         this.sliderDump = sliderDump;
         if (adjustmentMode) {
-            this.sliderMotor.setPower(0);
-            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            debug("Slider Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sliderMotor.getCurrentPosition(), sliderDump, sliderMotor.getPower(), sliderPower);
             this.sliderMotor.setTargetPosition(sliderDump);
             this.sliderMotor.setPower(this.sliderPower);
         }
@@ -186,7 +182,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     }
 
     public void configure(Configuration configuration) {
-        boxServo = new AdjustableServo(0, 250).configureLogging(
+        boxServo = new AdjustableServo(-125, 125).configureLogging(
                 logTag + ":servo" , logLevel
         );
         boxServo.configure(configuration.getHardwareMap(), "sv_sw_box");
@@ -205,6 +201,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         boxServo.setPosition(this.boxPositions[BoxPosition.INITIAL.ordinal()]);
         resetMotor(sweeperMotor);
         resetMotor(sliderMotor);
+        debug("Reset mineral intake, box: %.1f, sweeper: %s / %d, slider: %s / %d", boxServo.getPosition(),
+                sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
+                sliderMotor.getMode(), sliderMotor.getCurrentPosition()
+        );
     }
 
     /**
@@ -301,10 +301,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     }
 
     private void resetMotor(DcMotor motor) {
-        motor.setPower(0.0d);
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setPower(0d);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
-
-
 }

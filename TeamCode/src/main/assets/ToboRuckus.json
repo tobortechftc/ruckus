@@ -25,5 +25,15 @@
     "wheelRadius": 2.0,
     "maxPower": 0.6,
     "minPower": 0.12
+  },
+  "sv_sw_box": {
+    "center": 0.5,
+    "left": 0.026,
+    "right": 0.949
+  },
+  "intake": {
+    "boxDump": -106.0,
+    "boxGoldCollection": 104.0,
+    "boxSilverCollection": 117.0
   }
 }
