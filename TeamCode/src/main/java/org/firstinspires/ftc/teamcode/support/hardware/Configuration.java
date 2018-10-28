@@ -160,7 +160,7 @@ public class Configuration extends Logger<Configuration> {
 
             for(String name : getAdjustableProperties(deviceEntry.getValue()).keySet()) {
                 try {
-                    double value = (Double) Reflection.get(deviceEntry.getValue(), name);
+                    double value = ((Number) Reflection.get(deviceEntry.getValue(), name)).doubleValue();
                     if (deviceAdjustments == null) deviceAdjustments = new JsonObject();
                     deviceAdjustments.addProperty(name, value);
                 } catch (Exception E) {

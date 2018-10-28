@@ -119,6 +119,7 @@ public class Adjuster extends Logger<Adjuster> {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY)!=0) return;
+                if (selectedDevice!=null) selectedDevice.setAdjustmentMode(false);
                 if (cfg.storе()) {
                     updateTelemetry("Saved configuration");
                 } else {
@@ -130,6 +131,7 @@ public class Adjuster extends Logger<Adjuster> {
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
+                if (selectedDevice!=null) selectedDevice.setAdjustmentMode(false);
                 if (cfg.apply()) {
                     updateTelemetry("Reverted configuration");
                 } else {
@@ -141,12 +143,7 @@ public class Adjuster extends Logger<Adjuster> {
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX, float currentY, float changeY) {
-                if (selectedSetting==null) return;
-                if (currentY == 0) {
-                    selectedDevice.setAdjustmentMode(false);
-                    return;
-                }
-
+                if (selectedSetting==null || currentY==0) return;
                 double step = selectedSetting.getValue().step();
                 if (source.isPressed(Button.LEFT_BUMPER)) step *= 2;
                 if (source.isPressed(Button.RIGHT_BUMPER)) step *= 5;

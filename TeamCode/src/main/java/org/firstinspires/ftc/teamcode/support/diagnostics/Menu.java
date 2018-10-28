@@ -78,7 +78,7 @@ public class Menu {
         public void invoke(EventManager gamepad1, EventManager gamepad2) throws InvocationTargetException, IllegalAccessException {
             Object[] args = new Object[method.getParameterTypes().length];
             if (args.length>0) args[0] = gamepad1;
-            if (args.length==2) args[1] = gamepad1;
+            if (args.length==2) args[1] = gamepad2;
             method.setAccessible(true);
             method.invoke(target, args);
         }

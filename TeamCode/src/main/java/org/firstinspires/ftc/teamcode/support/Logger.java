@@ -45,7 +45,7 @@ public class Logger<T> {
      * @param args arguments to pass to <code>String.format()</code>
      */
     public void verbose(String format, Object ... args) {
-        if (logLevel > Log.VERBOSE) return;
+        if (logLevel > Log.VERBOSE || format==null) return;
         Log.v(logTag, String.format(format, args));
     }
 
@@ -56,7 +56,7 @@ public class Logger<T> {
      * @param args arguments to pass to <code>String.format()</code>
      */
     public void debug(String format, Object ... args) {
-        if (logLevel > Log.DEBUG) return;
+        if (logLevel > Log.DEBUG || format==null) return;
         Log.d(logTag, String.format(format, args));
     }
 
@@ -67,7 +67,7 @@ public class Logger<T> {
      * @param args arguments to pass to <code>String.format()</code>
      */
     public void info(String format, Object ... args) {
-        if (logLevel > Log.INFO) return;
+        if (logLevel > Log.INFO || format==null) return;
         Log.i(logTag, String.format(format, args));
     }
 
@@ -81,8 +81,8 @@ public class Logger<T> {
         if (logLevel > Log.WARN) return;
         Object lastArgument = args.length > 0 ? args[args.length - 1] : null;
         if (lastArgument instanceof Throwable) {
-            Log.w(logTag, String.format(format, args), (Throwable) lastArgument);
-        } else {
+            Log.w(logTag, format==null ? "" : String.format(format, args), (Throwable) lastArgument);
+        } else if (format!=null) {
             Log.w(logTag, String.format(format, args));
         }
     }
@@ -97,8 +97,8 @@ public class Logger<T> {
         if (logLevel > Log.ERROR) return;
         Object lastArgument = args.length > 0 ? args[args.length - 1] : null;
         if (lastArgument instanceof Throwable) {
-            Log.e(logTag, String.format(format, args), (Throwable) lastArgument);
-        } else {
+            Log.e(logTag, format==null ? "" : String.format(format, args), (Throwable) lastArgument);
+        } else if (format!=null) {
             Log.e(logTag, String.format(format, args));
         }
     }
