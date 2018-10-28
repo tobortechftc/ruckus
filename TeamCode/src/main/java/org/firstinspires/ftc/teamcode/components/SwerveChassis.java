@@ -356,22 +356,22 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         }
     }
 
-    public void driveAndSteerAuto(double power, double distance, double angle, Telemetry tl) throws InterruptedException {
+    public void driveAndSteerAuto(double power, double distance, double angle) throws InterruptedException {
         int[] startingCount = new int[4];
         for (int i = 0; i < 4; i++) {
             startingCount[i] = wheels[i].motor.getCurrentPosition();
             wheels[i].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-        tl.addLine(String.format("DriveAndSteer/pwr: %.3f, currentHeading: %.1f)", power, orientationSensor.getHeading()));
-        tl.update();
+        //tl.addLine(String.format("DriveAndSteer/pwr: %.3f, currentHeading: %.1f)", power, orientationSensor.getHeading()));
+        //tl.update();
         long startTime = System.currentTimeMillis();
         driveAndSteer(power, angle, true);
         while (true) {
 //            debug("DriveAndSteer/pwr: %.3f, currentHeading: %.1f)", power, orientationSensor.getHeading());
             if (System.currentTimeMillis() - startTime > 7000)
                 throw new RuntimeException("Time Out");
-            tl.addLine(String.format("DriveAndSteer/pwr: %.3f, currentHeading: %.1f)", power, orientationSensor.getHeading()));
-            tl.update();
+            //tl.addLine(String.format("DriveAndSteer/pwr: %.3f, currentHeading: %.1f)", power, orientationSensor.getHeading()));
+            //tl.update();
             int maxTraveled = Integer.MIN_VALUE;
             for (int i = 0; i < 4; i++) {
                 maxTraveled = Math.max(maxTraveled, wheels[i].motor.getCurrentPosition() - startingCount[i]);
