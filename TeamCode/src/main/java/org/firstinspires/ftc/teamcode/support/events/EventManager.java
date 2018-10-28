@@ -187,7 +187,7 @@ public class EventManager extends Logger<EventManager> {
     public void updateTelemetry(final Telemetry telemetry, int interval) {
         this.onLoop(new Events.Listener() {
             @Override
-            public void idle() { telemetry.update(); }
+            public void idle(EventManager source) { telemetry.update(); }
         }.setInterval(interval));
     }
 
@@ -334,7 +334,7 @@ public class EventManager extends Logger<EventManager> {
         for (Events.Listener listener : loopListeners) {
             long now = System.currentTimeMillis();
             if (listener.lastTimeInvoked + listener.interval > now) continue;
-            listener.idle();
+            listener.idle(this);
             listener.lastTimeInvoked = now;
         }
 

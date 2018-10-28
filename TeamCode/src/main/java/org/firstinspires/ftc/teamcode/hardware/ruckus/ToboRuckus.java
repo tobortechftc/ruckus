@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private Telemetry telemetry;
     public SwerveChassis chassis;
-    public MineralIntake mineralIntake;
+    public MineralIntake intake;
 
     @Override
     public String getName() {
@@ -26,6 +26,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
         chassis.configure(configuration);
+        intake = new MineralIntake().configureLogging("intake", logLevel);
+        intake.configure(configuration);
     }
 
     public void AutoRoutineTest() throws InterruptedException {
@@ -141,6 +143,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         currentX, currentY,
                         source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)
                 );
+
                 if (source.getStick(Events.Side.LEFT, Events.Axis.BOTH) == 0) {
                     double power = Math.max(Math.abs(currentX), Math.abs(currentY));
                     double heading = toDegrees(currentX, currentY);
@@ -150,12 +153,12 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         power = -1 * power;
                     }
                     debug("sticksOnly(): straight, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power, heading, true);
+                    chassis.driveAndSteer(power * powerAdjustment(source), heading, true);
                 } else {
                     double heading = source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY) * 90;
                     double power = currentY;
                     debug("sticksOnly(): right / steer, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power, heading, false);
+                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
                 }
             }
         }, Events.Axis.BOTH, Events.Side.RIGHT);
@@ -171,15 +174,84 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)
                 );
                 if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) == 0) {
-                    chassis.rotate(currentX);
+                    chassis.rotate(currentX * powerAdjustment(source));
                 } else {
                     double heading = currentX * 90;
                     double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
                     debug("sticksOnly(): left / steer, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power, heading, false);
+                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
                 }
             }
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
+        em.onTrigger(new Events.Listener() {
+            @Override
+            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
+                // 0.2 is a dead zone threshold for the trigger
+                if (current > 0.2) intake.rotateSweeper(false);
+            }
+        }, Events.Side.LEFT);
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+                if (button==Button.DPAD_LEFT) {
+                    if (intake.getSliderTarget()==0 || intake.getSliderTarget()==intake.getSliderDump()) {
+                        // slider is currently contracted or is in dump position or is moving there
+                        intake.moveSlider(intake.getSliderSafe());
+                    }
+                } else {
+                    if (intake.getSliderTarget()==intake.getSliderSafe()) {
+                        intake.moveSlider(intake.getSliderDump());
+                    } else if (intake.getSliderTarget()==intake.getSliderDump()) {
+                        intake.moveSlider(0);
+                    }
+                }
+            }
+        }, Button.DPAD_RIGHT, Button.DPAD_LEFT);
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+                if (button==Button.DPAD_UP) {
+                    if (intake.getBoxPosition()==MineralIntake.BoxPosition.GOLD_COLLECTION
+                            || intake.getBoxPosition()==MineralIntake.BoxPosition.SILVER_COLLECTION
+                    ) {
+                        intake.rotateBox(MineralIntake.BoxPosition.INITIAL);
+                    } else if (intake.getBoxPosition()==MineralIntake.BoxPosition.INITIAL) {
+                        intake.rotateBox(MineralIntake.BoxPosition.DUMP);
+                    }
+                } else {
+                    if (intake.getBoxPosition()==MineralIntake.BoxPosition.GOLD_COLLECTION) {
+                        intake.rotateBox(MineralIntake.BoxPosition.SILVER_COLLECTION);
+                    } else if (intake.getBoxPosition()==MineralIntake.BoxPosition.SILVER_COLLECTION) {
+                        intake.rotateBox(MineralIntake.BoxPosition.GOLD_COLLECTION);
+                    } else if (intake.getBoxPosition()==MineralIntake.BoxPosition.INITIAL) {
+                        intake.rotateBox(MineralIntake.BoxPosition.GOLD_COLLECTION);
+                    } else if (intake.getBoxPosition()==MineralIntake.BoxPosition.DUMP) {
+                        intake.rotateBox(MineralIntake.BoxPosition.INITIAL);
+                    }
+                }
+            }
+        }, Button.DPAD_UP, Button.DPAD_DOWN);
+        em.onLoop(new Events.Listener() {
+            @Override
+            public void idle(EventManager source) throws InterruptedException {
+                if (source.isPressed(Button.LEFT_BUMPER)) {
+                    intake.rotateSweeper(true);
+                }
+                if (source.isPressed(Button.DPAD_LEFT)
+                        && (intake.getSliderCurrent() >= intake.getSliderSafe())
+                ) {
+                    intake.moveSlider(Math.min(
+                            intake.getSliderCurrent() + 100, intake.getSliderExtended()
+                    ));
+                } else if (source.isPressed(Button.DPAD_RIGHT)
+                        && (intake.getSliderCurrent() >= intake.getSliderSafe())
+                ) {
+                    intake.moveSlider(Math.max(
+                            intake.getSliderCurrent() - 100, intake.getSliderSafe()
+                    ));
+                }
+            }
+        });
     }
 
 
@@ -205,5 +277,23 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private double toDegrees(double x, double y) {
         if (x == 0) return y>=0 ? 0 : 180;
         return Math.atan2(x, y) / Math.PI * 180;
+    }
+
+    /**
+     * Returns power adjustment based on left bumper / left trigger state
+     * Left bumper down = slow mode (50% power)
+     * Left trigger down = turbo mode (100% + 50% of trigger strength) power
+     */
+    private double powerAdjustment(EventManager source) {
+        double adjustment = 1.0;
+        if (source.isPressed(Button.RIGHT_BUMPER)) {
+            // slow mode uses 50% of power
+            adjustment = 0.5;
+        } else if (source.getTrigger(Events.Side.RIGHT) > 0.2) {
+            // 0.2 is the dead zone threshold
+            // turbo mode uses (100% + 1/2 trigger value) of power
+            adjustment = 1 + 0.5 * source.getTrigger(Events.Side.RIGHT);
+        }
+        return adjustment;
     }
 }

@@ -169,7 +169,7 @@ public class Adjuster extends Logger<Adjuster> {
 
     public double getProperty(Configurable device, String name) {
         try {
-            return (Double) Reflection.get(device, name);
+            return ((Number) Reflection.get(device, name)).doubleValue();
         } catch (Exception E) {
             error("Unable to get %s: %s", name, E.getMessage(), E);
         }

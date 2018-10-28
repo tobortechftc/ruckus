@@ -286,7 +286,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
      * Scales power according to <code>minPower</code> and <code>maxPower</code> settings
      */
     private double scalePower(double power) {
-        return Math.signum(power) * minPower + power * (maxPower - minPower);
+        double adjustedPower = Math.signum(power) * minPower + power * (maxPower - minPower);
+        return Math.abs(adjustedPower) > 1.0 ? Math.signum(adjustedPower) : adjustedPower;
     }
 
     /**

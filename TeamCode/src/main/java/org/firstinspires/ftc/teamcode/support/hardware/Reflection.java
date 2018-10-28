@@ -36,9 +36,13 @@ public class Reflection {
     public static void set(Object instance, String property, @NonNull Object value)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
     {
-        Class<?> valueClass = value.getClass();
-        if (valueClass.equals(Double.class)) valueClass = Double.TYPE;
-        Method method = instance.getClass().getMethod("set" + capitalize(property), valueClass);
+        Method method = instance.getClass().getMethod("get" + capitalize(property));
+        Class<?> valueClass = method.getReturnType();
+        // convert double to int if needed
+        if (valueClass.equals(Integer.TYPE)) {
+            value = new Integer(((Number) value).intValue());
+        }
+        method = instance.getClass().getMethod("set" + capitalize(property), valueClass);
         method.setAccessible(true);
         method.invoke(instance, value);
     }
