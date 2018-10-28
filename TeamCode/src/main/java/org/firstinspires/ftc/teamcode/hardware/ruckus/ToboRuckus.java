@@ -14,6 +14,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private Telemetry telemetry;
     public SwerveChassis chassis;
     public MineralIntake mineralIntake;
+    public MineralDelivery mineralDelivery;
     public Hanging hanging;
 
     @Override
@@ -29,6 +30,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.configure(configuration);
         hanging = new Hanging().configureLogging("Hanging", logLevel);
         hanging.configure(configuration);
+        mineralDelivery = new MineralDelivery().configureLogging("Delivery", logLevel);
+        mineralDelivery.configure(configuration);
     }
 
     public void AutoRoutineTest() throws InterruptedException {
@@ -191,9 +194,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 // do not rotate if the robot is currently moving
                 if (side==Events.Side.LEFT) { // lift down
                     if (current>0.2) {
-                        // mineralDelivery.liftDown();
+                        //mineralDelivery.liftDown();
                     } else {
-                        // mineralDelivery.liftStop();
+                        //mineralDelivery.liftStop();
                     }
                 }
                 if (side==Events.Side.RIGHT) { // latch down
@@ -209,25 +212,45 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 if (button==Button.LEFT_BUMPER) { // lift up
-                    // mineralDelivery.liftUp();
+                    //mineralDelivery.liftUp();
                 } else if (button==Button.RIGHT_BUMPER) { // latch up
                     hanging.latchUp();
                 } else if (button==Button.B) {
                     hanging.hookAuto();
+                } else if (button==Button.X){
+                    mineralDelivery.gateAuto();
+                } else if (button==Button.Y) {
+                    mineralDelivery.armUp();
+                } else if (button==Button.A){
+                    mineralDelivery.armDown();
                 }
             }
-        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER,Button.B);
+        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER,Button.B, Button.X, Button.Y, Button.A);
 
         em2.onButtonUp(new Events.Listener() {
             @Override
             public void buttonUp(EventManager source, Button button) throws InterruptedException {
                 if (button==Button.LEFT_BUMPER) { // lift stop
-                    // mineralDelivery.liftStop();
+                    //mineralDelivery.liftStop();
                 } else if (button==Button.RIGHT_BUMPER) { // latch stop
                     hanging.latchStop();
                 }
             }
-        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER,Button.B);
+        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER);
+
+        em2.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
+                                   float currentY, float changeY) throws InterruptedException {
+                if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) > 0.2) {
+                    mineralDelivery.liftUp();
+                } else if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) < -0.2) {
+                    mineralDelivery.liftDown();
+                } else {
+                    mineralDelivery.liftStop();
+                }
+            }
+        }, Events.Axis.Y_ONLY, Events.Side.LEFT);
     }
 
 
