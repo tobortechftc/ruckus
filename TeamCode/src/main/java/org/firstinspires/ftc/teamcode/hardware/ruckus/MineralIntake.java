@@ -3,8 +3,11 @@ package org.firstinspires.ftc.teamcode.hardware.ruckus;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.components.AdjustableServo;
 import org.firstinspires.ftc.teamcode.components.Operation;
+import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
@@ -31,14 +34,14 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // sweeper intake / push out power values
     private double sweeperInPower = 0.2;
     private double sweeperOutPower = 0.3;
-    private int sweeperHalfRotation = 250; // TBD
+    private int sweeperHalfRotation = 180; // TBD
 
     // slider encoder positions
     private int sliderContracted = 0; // contracted
-    private int sliderExtended = 70; // fully extended
+    private int sliderExtended = 1400; // fully extended
     // minimally extended position that allows for box to be rotated to one of the collection positions
-    private int sliderSafe = 35;
-    private int sliderDump = 30; // allows box to rest on back bracket and dump
+    private int sliderSafe = 700;
+    private int sliderDump = 600; // allows box to rest on back bracket and dump
     private double sliderPower = 0.1; // TBD
 
     @Override
@@ -128,6 +131,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         if (adjustmentMode) {
             debug("Sweeper Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sweeperMotor.getCurrentPosition(), position, sweeperMotor.getPower(), sweeperInPower);
             this.sweeperMotor.setTargetPosition(sweeperHalfRotation);
+            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sweeperMotor.setPower(sweeperInPower);
             debug("Sweeper Adjustment Running: ON, position: %d / %d, power: %.3f, mode: %s", sweeperMotor.getCurrentPosition(), sweeperMotor.getTargetPosition(), sweeperMotor.getPower(), sweeperMotor.getMode());
         }
@@ -155,6 +159,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         if (adjustmentMode) {
             debug("Slider Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sliderMotor.getCurrentPosition(), sliderSafe, sliderMotor.getPower(), sliderPower);
             this.sliderMotor.setTargetPosition(sliderSafe);
+            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setPower(this.sliderPower);
             debug("Slider Adjustment Running: ON, position: %d / %d, power: %.3f, mode: %s", sliderMotor.getCurrentPosition(), sliderMotor.getTargetPosition(), sliderMotor.getPower(), sliderMotor.getMode());
         }
@@ -192,7 +197,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         sweeperMotor.setDirection(DcMotor.Direction.FORWARD);
 
         sliderMotor = configuration.getHardwareMap().tryGet(DcMotor.class, "sw_slider");
-        sliderMotor.setDirection(DcMotor.Direction.REVERSE);
+        sliderMotor.setDirection(DcMotor.Direction.FORWARD);
 
         configuration.register(this);
     }
@@ -290,6 +295,32 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         return this.sliderMotor.getTargetPosition();
     }
 
+    /**
+     * Set up telemetry lines for intake metrics
+     * Shows encoder values for slider / sweeper and box position
+     */
+    public void setupTelemetry(Telemetry telemetry) {
+        Telemetry.Line line = telemetry.addLine();
+        line.addData("Slide", "%d", new Func<Integer>() {
+            @Override
+            public Integer value() {
+                return sliderMotor.getCurrentPosition();
+            }
+        });
+        line.addData("Sweep", "%d", new Func<Integer>() {
+            @Override
+            public Integer value() {
+                return sweeperMotor.getCurrentPosition();
+            }
+        });
+        line.addData("Box", "%.1f", new Func<Double>() {
+            @Override
+            public Double value() {
+                return boxServo.getPosition();
+            }
+        });
+    }
+
     private boolean arePositionsCompatible(double boxPosition, int sliderPosition) {
         boolean collectionMode = boxPosition==getBoxGoldCollection()
                 || boxPosition==getBoxSilverCollection();
@@ -304,6 +335,6 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         motor.setPower(0d);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }

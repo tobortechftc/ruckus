@@ -137,6 +137,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true);
         chassis.setupTelemetry(telemetry);
+        intake.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
         em.onStick(new Events.Listener() {
             @Override
