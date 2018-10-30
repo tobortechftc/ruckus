@@ -46,7 +46,7 @@ public class RuckusTeleOp extends LinearOpMode {
             eventManager1 = new EventManager(gamepad1, true);
             eventManager2 = new EventManager(gamepad2, true);
 
-//            robot.testSticks(eventManager1, eventManager2); // define events for the chassis drive
+            robot.testSticks(eventManager1, eventManager2); // define events for the chassis drive
 
             telemetry.addData("Robot is ready", "Press Play");
             telemetry.update();

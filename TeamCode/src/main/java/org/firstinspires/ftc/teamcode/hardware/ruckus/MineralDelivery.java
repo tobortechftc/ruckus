@@ -22,10 +22,10 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private DcMotor lift;
     private Servo dumperArm;
     private Servo dumperGate;
-    private double gateClosePos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
-    private double gateOpenPos = .11200;    // maximum power that should be applied to the wheel motors
-    private double armDownPos = 0;
-    private double armUpPos = 0.1;
+    private double gateClosePos = 0.01;
+    private double gateOpenPos = .8;
+    private double armDownPos = 0.01;
+    private double armUpPos = 0.95;
     private double liftPower = .5;
     private boolean gateIsOpened = false;
 
@@ -52,12 +52,11 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         dumperGate = configuration.getHardwareMap().servo.get("sv_hp_gate");
+        gateOpen();
         dumperArm = configuration.getHardwareMap().servo.get("sv_hp_dump");
-        gateClose();
+        armDown();
 
-
-
-        // register chassis as configurable component
+        // register delivery as configurable component
         configuration.register(this);
     }
 
@@ -100,13 +99,13 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
         if (lift!=null)
-           line.addData("Latch", "pw=%.2f enc=%d", lift.getPower(), lift.getCurrentPosition());
+           line.addData("Lift", "pw=%.2f enc=%d", lift.getPower(), lift.getCurrentPosition());
 
         if(dumperGate!=null){
-            line.addData("Hook", "pos=%.2f", dumperGate.getPosition());
+            line.addData("Gate", "pos=%.2f", dumperGate.getPosition());
         }
         if(dumperArm!=null){
-            line.addData("Hook", "pos=%.2f", dumperArm.getPosition());
+            line.addData("Arm", "pos=%.2f", dumperArm.getPosition());
         }
     }
 

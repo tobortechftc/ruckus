@@ -34,8 +34,9 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private double hook_down = 0.05;
     private double latch_power = .5;
     private boolean hookIsOpened = false;
-    private final double MARKER_UP = 0.05;
-    private final double MARKER_DOWN = 0.5;
+    private final double MARKER_UP = 0.4;
+    private final double MARKER_DOWN = 0.9;
+    private boolean markerIsDown = false;
 
     @Override
     public String getUniqueName() {
@@ -65,7 +66,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         marker = configuration.getHardwareMap().servo.get("sv_marker");
         markerUp();
 
-        // register chassis as configurable component
+        // register hanging as configurable component
         configuration.register(this);
     }
 
@@ -86,16 +87,18 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     }
     public void markerUp(){
         marker.setPosition(MARKER_UP);
+        markerIsDown = false;
     }
     public void markerDown(){
         marker.setPosition(MARKER_DOWN);
+        markerIsDown = true;
     }
     public void markerAuto(){
-        if (Math.abs(marker.getPosition()-MARKER_UP)<0.05) {
-            markerDown();
+        if (markerIsDown) {
+            markerUp();
         }
         else {
-            markerUp();
+            markerDown();
         }
     }
     public void latchUp(){
@@ -120,6 +123,10 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
         if(hook!=null){
             line.addData("Hook", "pos=%.2f", hook.getPosition());
+        }
+
+        if(marker!=null){
+            line.addData("Marker", "pos=%.2f", marker.getPosition());
         }
     }
 

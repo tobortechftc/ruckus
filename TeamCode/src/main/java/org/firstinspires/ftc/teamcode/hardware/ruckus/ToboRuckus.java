@@ -141,6 +141,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         hanging.setupTelemetry(telemetry);
         mineralDelivery.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
+        em2.updateTelemetry(telemetry, 100);
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -289,20 +290,23 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     //mineralDelivery.liftUp();
                 } else if (button==Button.RIGHT_BUMPER) { // latch up
                     hanging.latchUp();
-                } else if (button==Button.B) {
+                }
+                if (button==Button.B) {
                     if (source.isPressed(Button.BACK)) {
-                        hanging.markerUp();
+                        hanging.markerAuto();
                     }
                     else if (source.isPressed(Button.START)==false) {
                         hanging.hookAuto();
                     }
-                } else if (button==Button.X){
+                }
+                if (button==Button.X){
                     if (source.isPressed(Button.BACK)) {
                         hanging.markerDown();
                     } else {
                         mineralDelivery.gateAuto();
                     }
-                } else if (button==Button.Y) {
+                }
+                if (button==Button.Y) {
                     mineralDelivery.armUp();
                 } else if (button==Button.A){
                     mineralDelivery.armDown();
