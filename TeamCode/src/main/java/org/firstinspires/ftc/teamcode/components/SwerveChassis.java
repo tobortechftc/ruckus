@@ -145,11 +145,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         configuration.register(this);
     }
 
-    public double distanceToLeft(){
+    public double distanceToLeft() {
         return leftRangeSensor.getDistance(DistanceUnit.CM);
     }
 
-    public double distanceToFront(){
+    public double distanceToFront() {
         return frontRangeSensor.getDistance(DistanceUnit.CM);
     }
 
@@ -231,7 +231,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     double TICKS_PER_CM = 16.04;
 
     //using the indicated absolute power to drive a certain distance at a certain heading
-    public void driveStraightAuto(double power, double cm, double heading) throws InterruptedException {
+    public void driveStraightAuto(double power, double cm, double heading, int timeout) throws InterruptedException {
         debug("driveStraight(pwr: %.3f, head: %.1f)", power, heading);
         if (power < 0 || power > 1) {
             throw new IllegalArgumentException("Power must be between 0 and 1");
@@ -252,9 +252,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             return;
         }
 
-        if (distance<0){
-            power=-power;
-            distance=-distance;
+        if (distance < 0) {
+            power = -power;
+            distance = -distance;
         }
 
         //motor settings
@@ -275,8 +275,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         orientationSensor.enableCorrections(true);
         targetHeading = orientationSensor.getHeading();
 
-        //start powering
+        //start powering wheels
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(power);
+
+        //record time
+        long iniTime = System.currentTimeMillis();
 
         //waiting loop
         while (true) {
@@ -310,6 +313,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 maxTraveled = Math.abs(Math.max(maxTraveled, wheels[i].motor.getCurrentPosition() - startingCount[i]));
             }
             if (distance - maxTraveled < 10)
+                break;
+            //determine if time limit is reached
+            if (System.currentTimeMillis() - iniTime > timeout)
                 break;
         }
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(0);
@@ -360,6 +366,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         }
     }
 
+    @Deprecated
     public void driveAndSteerAuto(double power, double distance, double angle) throws InterruptedException {
         int[] startingCount = new int[4];
         for (int i = 0; i < 4; i++) {
@@ -439,19 +446,47 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     public void rotateTo(double power, double finalHeading, Telemetry tl) throws InterruptedException {
         double iniHeading = orientationSensor.getHeading();
         double deltaD = finalHeading - iniHeading;
+        if (Math.abs(deltaD) < 1.0)
+            return;
         for (WheelAssembly wheel : wheels)
             wheel.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        tl.addLine(String.format("rotateTo/pwr: %.3f, currentHeading: %.1f)", power, orientationSensor.getHeading()));
-        tl.update();
-        rotate(Math.signum(deltaD) * power);
+
+//        rotate(Math.signum(deltaD) * power);
+        //***** routine to start the wheels ******//
+        driveMode = DriveMode.ROTATE;
+        for (WheelAssembly wheel : wheels) {
+            wheel.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+        // angle between Y axis and line from the center of chassis,
+        //  which is assumed to be at (0, 0) to the center of the front right wheel
+        double angle = Math.atan2(track, wheelBase) / Math.PI * 180;
+        double[] newServoPositions = new double[4];
+        // front left and back right
+        newServoPositions[0] = newServoPositions[3] = angle;
+        // front right and back left
+        newServoPositions[1] = newServoPositions[2] = -1 * angle;
+        changeServoPositions(newServoPositions);
+        //start motors
+        frontLeft.motor.setPower(Math.signum(deltaD) * power);
+        frontRight.motor.setPower(-1 * Math.signum(deltaD) * power);
+        backLeft.motor.setPower(Math.signum(deltaD) * power);
+        backRight.motor.setPower(-1 * Math.signum(deltaD) * power);
+        //***** End routine to start the wheels ******//
         while (true) {
             tl.addLine(String.format("rotateTo/pwr: %.3f, currentHeading: %.1f)", power, orientationSensor.getHeading()));
             tl.update();
+            //if within acceptable range, terminate
             if (Math.abs(finalHeading - orientationSensor.getHeading()) < 0.5)
+                break;
+            //if overshoot, terminate
+            if (deltaD > 0 && orientationSensor.getHeading() - finalHeading > 0)
+                break;
+            if (deltaD < 0 && orientationSensor.getHeading() - finalHeading < 0)
                 break;
         }
         for (WheelAssembly wheel : wheels)
             wheel.motor.setPower(0);
+        driveMode = DriveMode.STOP;
     }
 
     /**

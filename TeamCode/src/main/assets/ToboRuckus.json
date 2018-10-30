@@ -23,7 +23,7 @@
     "track": 13.0,
     "wheelBase": 11.5,
     "wheelRadius": 2.0,
-    "maxPower": 0.6,
+    "maxPower": 0.5,
     "minPower": 0.12
   },
   "sv_sw_box": {

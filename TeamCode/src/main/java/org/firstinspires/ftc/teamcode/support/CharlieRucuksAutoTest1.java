@@ -46,32 +46,54 @@ public class CharlieRucuksAutoTest1 extends LinearOpMode {
 
 
         //at this place, use open cv to determine the mineral configuration
-        int mode = +1;
+        int mode = 0;
         if (mode == 0) {
-            robot.chassis.driveStraightAuto(0.35, 43, 0);
+            robot.chassis.driveStraightAuto(0.35, 43, 0,Integer.MAX_VALUE);
         } else if (mode == 1) {
-            robot.chassis.driveStraightAuto(0.35, 58, 46);
+            robot.chassis.driveStraightAuto(0.35, 58, 46,Integer.MAX_VALUE);
         } else {
-            robot.chassis.driveStraightAuto(0.35, 58, -46);
+            robot.chassis.driveStraightAuto(0.35, 58, -46,Integer.MAX_VALUE);
         }
 
         sleep(500);
-        robot.chassis.driveStraightAuto(0.35, 40, 0);
+        robot.chassis.driveStraightAuto(0.35, 40, 0,Integer.MAX_VALUE);
 
         sleep(1000);
-        robot.chassis.rotateTo(0.5, 45,telemetry);
+        robot.chassis.rotateTo(0.18, 45,telemetry);
+
+        //from here, three different routine will converge into the depot
+//        telemetry.addLine(String.format("detected distance to left: %.3f",robot.chassis.distanceToLeft()));
+//        telemetry.update();
         sleep(500);
-        robot.chassis.driveStraightAuto(0.4, robot.chassis.distanceToLeft() - 10.0,-90);
+        robot.chassis.driveStraightAuto(0.30, robot.chassis.distanceToLeft() - 10.0,-90,Integer.MAX_VALUE);
+//        telemetry.addLine(String.format("adjusted distance to left: %.3f",robot.chassis.distanceToLeft()));
+//        telemetry.update();
         sleep(500);
-        robot.chassis.driveStraightAuto(0.4, robot.chassis.distanceToFront() - 30.0,0);
+
+
+        robot.chassis.rotateTo(0.18, 45,telemetry);
+
+        telemetry.addLine(String.format("detected distance to front: %.3f",robot.chassis.distanceToFront()));
+        telemetry.update();
+        sleep(500);
+        robot.chassis.driveStraightAuto(0.30, robot.chassis.distanceToFront() - 30.0,0,Integer.MAX_VALUE);
+        telemetry.addLine(String.format("adjusted distance to front: %.3f",robot.chassis.distanceToFront()));
+        telemetry.update();
+        sleep(500);
 
         //dump the marker here
+        robot.hanging.markerDown();
+        sleep(500);
 
-        sleep(100);
-//        robot.chassis.rotateTo(0.5, 46,telemetry);
+        robot.chassis.rotateTo(0.18, 46,telemetry);
 
-        sleep(3000);
-        robot.chassis.driveStraightAuto(0.90, 240,0);
+        sleep(500);
+        robot.chassis.driveStraightAuto(0.40, -180,0,Integer.MAX_VALUE);
+        sleep(200);
+        robot.chassis.driveStraightAuto(0.20, 5,90,Integer.MAX_VALUE);
+
+//        robot.chassis.rotateTo(0.18, 60,telemetry);
+        robot.chassis.driveStraightAuto(0.70, -40,0,2000);
 
 //        robot.chassis.driveAndSteerAuto(0.7, 1500, 45, telemetry);
 ////        robot.chassis.rotateDegree(0.4,45);
