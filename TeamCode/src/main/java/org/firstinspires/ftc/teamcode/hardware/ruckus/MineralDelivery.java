@@ -47,9 +47,10 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     public void configure(Configuration configuration) {
         // set up motors / sensors as wheel assemblies
-        lift = configuration.getHardwareMap().dcMotor.get("lift");
+        lift = configuration.getHardwareMap().dcMotor.get("lift_slider");
         lift.setPower(0);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         dumperGate = configuration.getHardwareMap().servo.get("sv_hp_gate");
         dumperArm = configuration.getHardwareMap().servo.get("sv_hp_dump");
         gateClose();
@@ -96,10 +97,10 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
      *  drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
      *  and servo position for each wheel
      */
-    public void setup_telemetry(Telemetry telemetry) {
+    public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
         if (lift!=null)
-           line.addData("Latch", "pw=%.2f pos=%.2f", lift.getPower(), lift.getCurrentPosition());
+           line.addData("Latch", "pw=%.2f enc=%d", lift.getPower(), lift.getCurrentPosition());
 
         if(dumperGate!=null){
             line.addData("Hook", "pos=%.2f", dumperGate.getPosition());

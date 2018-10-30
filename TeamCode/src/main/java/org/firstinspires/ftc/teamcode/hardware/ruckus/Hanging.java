@@ -27,12 +27,15 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
     private DcMotor latch;
     private Servo hook;
+    private Servo marker;
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
-    private double hook_up = 0.5;
-    private double hook_down = 0.9;
+    private double hook_up = 0.55;
+    private double hook_down = 0.05;
     private double latch_power = .5;
     private boolean hookIsOpened = false;
+    private final double MARKER_UP = 0.05;
+    private final double MARKER_DOWN = 0.5;
 
     @Override
     public String getUniqueName() {
@@ -48,6 +51,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     public void reset() {
         latch.setPower(0);
         hookClose();
+        markerUp();
     }
 
     public void configure(Configuration configuration) {
@@ -55,9 +59,11 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch = configuration.getHardwareMap().dcMotor.get("latch");
         latch.setPower(0);
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        latch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         hook = configuration.getHardwareMap().servo.get("sv_hook");
         hookClose();
-
+        marker = configuration.getHardwareMap().servo.get("sv_marker");
+        markerUp();
 
         // register chassis as configurable component
         configuration.register(this);
@@ -78,6 +84,20 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             hookOpen();
         }
     }
+    public void markerUp(){
+        marker.setPosition(MARKER_UP);
+    }
+    public void markerDown(){
+        marker.setPosition(MARKER_DOWN);
+    }
+    public void markerAuto(){
+        if (Math.abs(marker.getPosition()-MARKER_UP)<0.05) {
+            markerDown();
+        }
+        else {
+            markerUp();
+        }
+    }
     public void latchUp(){
         latch.setPower(latch_power);
     }
@@ -93,10 +113,10 @@ public class Hanging extends Logger<Hanging> implements Configurable {
      *  drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
      *  and servo position for each wheel
      */
-    public void setup_telemetry(Telemetry telemetry) {
+    public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
         if (latch!=null)
-           line.addData("Latch", "pw=%.2f pos=%.2f", latch.getPower(), latch.getCurrentPosition());
+           line.addData("Latch", "pw=%.2f enc=%d", latch.getPower(), latch.getCurrentPosition());
 
         if(hook!=null){
             line.addData("Hook", "pos=%.2f", hook.getPosition());
