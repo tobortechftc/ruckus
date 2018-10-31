@@ -141,7 +141,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         hanging.setupTelemetry(telemetry);
         mineralDelivery.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
-        em2.updateTelemetry(telemetry, 100);
+        // em2.updateTelemetry(telemetry, 100);
+        if (!hanging.latchIsBusy()) {
+            hanging.resetLatch();
+        }
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -276,7 +279,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
                 if (side==Events.Side.RIGHT) { // latch down
                     if (current>0.2) {
-                        hanging.latchDown();
+                        if (source.isPressed(Button.START))
+                            hanging.latchDownInches(2);
+                        else
+                            hanging.latchDown(source.isPressed(Button.BACK));
                     } else {
                         hanging.latchStop();
                     }
@@ -289,7 +295,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (button==Button.LEFT_BUMPER) { // lift up
                     //mineralDelivery.liftUp();
                 } else if (button==Button.RIGHT_BUMPER) { // latch up
-                    hanging.latchUp();
+                    if (source.isPressed(Button.START))
+                        hanging.latchUpInches(2);
+                    else
+                        hanging.latchUp();
                 }
                 if (button==Button.B) {
                     if (source.isPressed(Button.BACK)) {
@@ -332,12 +341,25 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) > 0.2) {
                     mineralDelivery.liftUp();
                 } else if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) < -0.2) {
-                    mineralDelivery.liftDown();
+                    mineralDelivery.liftDown(source.isPressed(Button.BACK));
                 } else {
                     mineralDelivery.liftStop();
                 }
             }
         }, Events.Axis.Y_ONLY, Events.Side.LEFT);
+        em2.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
+                                   float currentY, float changeY) throws InterruptedException {
+                if (source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY) > 0.2) {
+                    mineralDelivery.armUpInc();
+                } else if (source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY) < -0.2) {
+                    mineralDelivery.armDownInc();
+                } else {
+                    mineralDelivery.armStop();
+                }
+            }
+        }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
     }
 
 

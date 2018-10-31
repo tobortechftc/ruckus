@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Func;
@@ -32,10 +33,12 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
     private double hook_up = 0.55;
     private double hook_down = 0.05;
-    private double latch_power = .5;
+    private double latch_power = -.5;
     private boolean hookIsOpened = false;
     private final double MARKER_UP = 0.4;
     private final double MARKER_DOWN = 0.9;
+    private final int MAX_LATCH_POS = 8900;
+    private final int LATCH_COUNT_PER_INCH = 1305;
     private boolean markerIsDown = false;
 
     @Override
@@ -59,8 +62,10 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         // set up motors / sensors as wheel assemblies
         latch = configuration.getHardwareMap().dcMotor.get("latch");
         latch.setPower(0);
-        latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        latch.setDirection(DcMotorSimple.Direction.REVERSE);
         latch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         hook = configuration.getHardwareMap().servo.get("sv_hook");
         hookClose();
         marker = configuration.getHardwareMap().servo.get("sv_marker");
@@ -102,12 +107,53 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         }
     }
     public void latchUp(){
-        latch.setPower(latch_power);
+        latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        int cur_pos = latch.getCurrentPosition();
+        if (cur_pos>MAX_LATCH_POS) {
+            latch.setPower(0);
+        } else {
+            latch.setPower(latch_power);
+        }
     }
-    public void latchDown(){
-        latch.setPower(-1 * latch_power);
+    public void latchDown(boolean force){
+        latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        int cur_pos = latch.getCurrentPosition();
+        if (cur_pos<=0 && force==false) {
+            latch.setPower(0);
+        } else {
+            latch.setPower(-latch_power);
+        }
     }
     public void latchStop(){
+        if (!latch.isBusy())
+            latch.setPower(0);
+    }
+    public void latchUpInches(double inches) {
+        int cur_pos = latch.getCurrentPosition();
+        int tar_pos = cur_pos + (int)(inches*LATCH_COUNT_PER_INCH);
+        if (tar_pos>MAX_LATCH_POS)
+            tar_pos = MAX_LATCH_POS;
+        latch.setTargetPosition(tar_pos);
+        latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        latch.setPower(Math.abs(latch_power));
+    }
+
+    public void latchDownInches(double inches) {
+        int cur_pos = latch.getCurrentPosition();
+        int tar_pos = cur_pos - (int)(inches*LATCH_COUNT_PER_INCH);
+        if (tar_pos<=0)
+            tar_pos = 0;
+        latch.setTargetPosition(tar_pos);
+        latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        latch.setPower(Math.abs(latch_power));
+    }
+
+    public boolean latchIsBusy() {
+        return latch.isBusy();
+    }
+
+    public void resetLatch() {
+        latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         latch.setPower(0);
     }
     /**
@@ -119,14 +165,26 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
         if (latch!=null)
-           line.addData("Latch", "pw=%.2f enc=%d", latch.getPower(), latch.getCurrentPosition());
+           line.addData("Latch", "enc=%d", new Func<Integer>() {
+               @Override
+               public Integer value() {
+                   return latch.getCurrentPosition();
+               }});
 
         if(hook!=null){
-            line.addData("Hook", "pos=%.2f", hook.getPosition());
+            line.addData("Hook", "pos=%.2f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return hook.getPosition();
+                }});
         }
 
         if(marker!=null){
-            line.addData("Marker", "pos=%.2f", marker.getPosition());
+            line.addData("Marker", "pos=%.2f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return marker.getPosition();
+                }});
         }
     }
 
