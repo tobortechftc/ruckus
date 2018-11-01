@@ -21,20 +21,33 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  */
 public class MineralIntake extends Logger<MineralIntake> implements Configurable {
 
-    public enum BoxPosition { INITIAL, GOLD_COLLECTION, SILVER_COLLECTION, DUMP };
+    public enum BoxPosition {
+        INITIAL(0),
+        GOLD_COLLECTION(100),
+        SILVER_COLLECTION(120),
+        DUMP(-100);
+
+        double value;
+        BoxPosition(double value) {
+            this.value = value;
+        }
+    };
 
     private DcMotor sweeperMotor;
     private DcMotor sliderMotor;
     private AdjustableServo boxServo;
     private boolean adjustmentMode = false;
 
-    // adjustable servo positions in order of BoxPosition constants
-    private double[] boxPositions = { 0, 100, 120, -100 };
-
     // sweeper intake / push out power values
     private double sweeperInPower = 0.2;
     private double sweeperOutPower = 0.3;
-    private int sweeperHalfRotation = 180; // TBD
+    // encoder value for sweeper rotating half circle
+    private int sweeperHalfRotation = 240;
+    // maximum encoder value for sweeper motor
+    private int sweeperMaxPosition = 10000;
+
+    private int sweeperLastPosition = 0;
+    private int sweeperOverflowCount = 0;
 
     // slider encoder positions
     private int sliderContracted = 0; // contracted
@@ -42,7 +55,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // minimally extended position that allows for box to be rotated to one of the collection positions
     private int sliderSafe = 700;
     private int sliderDump = 600; // allows box to rest on back bracket and dump
-    private double sliderPower = 0.1; // TBD
+    private double sliderPower = 0.2; // TBD
 
     @Override
     public String getUniqueName() {
@@ -61,7 +74,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         } else {
             resetMotor(this.sliderMotor);
             resetMotor(this.sweeperMotor);
-            this.boxServo.setPosition(boxPositions[BoxPosition.INITIAL.ordinal()]);
+            this.boxServo.setPosition(BoxPosition.INITIAL.value);
             debug("Adjustment: OFF, box: %.1f, sweeper: %s / %d, slider: %s", boxServo.getPosition(),
                     sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
                     sliderMotor.getMode(), sliderMotor.getCurrentPosition()
@@ -71,28 +84,28 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     @Adjustable(min = 90, max = 125, step = 1)
     public double getBoxGoldCollection() {
-        return this.boxPositions[BoxPosition.GOLD_COLLECTION.ordinal()];
+        return BoxPosition.GOLD_COLLECTION.value;
     }
     public void setBoxGoldCollection(double position) {
-        this.boxPositions[BoxPosition.GOLD_COLLECTION.ordinal()] = position;
+        BoxPosition.GOLD_COLLECTION.value = position;
         if (adjustmentMode) this.boxServo.setPosition(position);
     }
 
     @Adjustable(min = 90, max = 125, step = 1)
     public double getBoxSilverCollection() {
-        return this.boxPositions[BoxPosition.SILVER_COLLECTION.ordinal()];
+        return BoxPosition.SILVER_COLLECTION.value;
     }
     public void setBoxSilverCollection(double position) {
-        this.boxPositions[BoxPosition.SILVER_COLLECTION.ordinal()] = position;
+        BoxPosition.SILVER_COLLECTION.value = position;
         if (adjustmentMode) this.boxServo.setPosition(position);
     }
 
     @Adjustable(min = -125, max = -75, step = 1)
     public double getBoxDump() {
-        return this.boxPositions[BoxPosition.DUMP.ordinal()];
+        return BoxPosition.DUMP.value;
     }
     public void setBoxDump(double position) {
-        this.boxPositions[BoxPosition.DUMP.ordinal()] = position;
+        BoxPosition.DUMP.value = position;
         if (adjustmentMode) this.boxServo.setPosition(position);
     }
 
@@ -122,7 +135,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
     }
 
-    @Adjustable(min = 1, max = 1000, step = 5)
+    @Adjustable(min = 0, max = 1000, step = 5)
     public int getSweeperHalfRotation() {
         return sweeperHalfRotation;
     }
@@ -135,6 +148,18 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             this.sweeperMotor.setPower(sweeperInPower);
             debug("Sweeper Adjustment Running: ON, position: %d / %d, power: %.3f, mode: %s", sweeperMotor.getCurrentPosition(), sweeperMotor.getTargetPosition(), sweeperMotor.getPower(), sweeperMotor.getMode());
         }
+    }
+
+    @Adjustable(min = 0, max = 20000, step = 5)
+    public int getSweeperMaxPosition() {
+        return sweeperMaxPosition;
+    }
+    public void setSweeperMaxPosition(int position) {
+        this.sweeperMaxPosition = position;
+    }
+
+    public int getSliderContracted() {
+        return sliderContracted;
     }
 
     @Adjustable(min = 0.0, max = 8000.0, step = 1.0)
@@ -203,9 +228,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     }
 
     public void reset() {
-        boxServo.setPosition(this.boxPositions[BoxPosition.INITIAL.ordinal()]);
+        boxServo.setPosition(BoxPosition.INITIAL.value);
         resetMotor(sweeperMotor);
         resetMotor(sliderMotor);
+        this.sweeperOverflowCount = 0;
         debug("Reset mineral intake, box: %.1f, sweeper: %s / %d, slider: %s / %d", boxServo.getPosition(),
                 sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
                 sliderMotor.getMode(), sliderMotor.getCurrentPosition()
@@ -218,10 +244,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
      * @return operation showing whether rotation is complete
      */
     public Operation rotateBox(BoxPosition position) {
-        double targetPosition = this.boxPositions[position.ordinal()];
-        double adjustment = Math.abs(boxServo.getPosition() - targetPosition);
-        if (arePositionsCompatible(targetPosition, this.sliderMotor.getCurrentPosition())) {
-            boxServo.setPosition(targetPosition);
+        double adjustment = Math.abs(boxServo.getPosition() - position.value);
+        if (arePositionsCompatible(position.value, this.sliderMotor.getCurrentPosition())) {
+            boxServo.setPosition(position.value);
         } else {
             adjustment = 0;
         }
@@ -236,29 +261,62 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     public BoxPosition getBoxPosition() {
         for (BoxPosition position : BoxPosition.values()) {
-            if (boxServo.getPosition()==boxPositions[position.ordinal()]) {
+            if (Math.abs(boxServo.getPosition() - position.value) < 0.1) {
                 return position;
             }
         }
         return BoxPosition.INITIAL;
     }
 
+    public enum SweeperMode { INTAKE, PUSH_OUT, VERTICAL_STOP, HORIZONTAL_STOP };
     /**
-     * Rotates the sweeper half a circle for either intake or pushing out
-     * @param intake <code>true</code> for intake, <code>false</code> for pushing out
-     * @return operation showing whether rotation is complete
+     * Rotates or parks the sweeper according to the mode specified
+     * @param mode direction to rotate or position to park the sweeper in
      */
-    public Operation rotateSweeper(boolean intake) {
-        this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        this.sweeperMotor.setTargetPosition(this.sweeperMotor.getTargetPosition()
-                + (intake ? 1 : -1) * sweeperHalfRotation);
-        this.sweeperMotor.setPower(intake ? sweeperInPower : (-1 * sweeperOutPower));
-        return new Operation() {
-            @Override
-            public boolean isFinished() {
-                return sweeperMotor.isBusy();
+    public void rotateSweeper(SweeperMode mode) {
+        double power = mode==SweeperMode.INTAKE ? sweeperInPower : (-1 * sweeperOutPower);
+        if ((mode==SweeperMode.INTAKE) || (mode==SweeperMode.PUSH_OUT)) {
+            int currentPosition = this.sweeperMotor.getCurrentPosition();
+            // determine if sweeper position has just crossed the maximum value
+            int difference = currentPosition - this.sweeperLastPosition;
+            if (difference * power < 0) {
+                this.sweeperOverflowCount += difference < 0 ? 1 : -1;
+                debug("rotateSweeper() overflow count: %d, last: %d, current: %d, power: %.2f",
+                        this.sweeperOverflowCount, this.sweeperLastPosition,
+                        currentPosition, power
+                );
             }
-        };
+            this.sweeperLastPosition = currentPosition;
+            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            this.sweeperMotor.setPower(power);
+        } else {
+            this.sweeperMotor.setPower(0);
+            // find closest position evenly divisible by half rotation
+            int offset = (this.sweeperOverflowCount * this.sweeperMaxPosition) % this.sweeperHalfRotation;
+            int targetPosition = Math.round(1.0f * (this.sweeperMotor.getCurrentPosition() + offset) / this.sweeperHalfRotation) * this.sweeperHalfRotation;
+            if (mode==SweeperMode.HORIZONTAL_STOP) {
+                // adjust target position by quarter rotation
+                if (targetPosition > 0) {
+                    targetPosition += this.sweeperHalfRotation / 2;
+                } else {
+                    targetPosition -= this.sweeperHalfRotation / 2;
+                }
+            }
+            // make sure target position does not exceed overflow point
+            if (targetPosition > this.sweeperMaxPosition) {
+                targetPosition -= this.sweeperHalfRotation;
+            } else if (targetPosition < -1 * this.sweeperMaxPosition) {
+                targetPosition += this.sweeperHalfRotation;
+            }
+            debug("rotateSweeper() park: %d, overflow: %d, offset: %d, max: %d",
+                    targetPosition, this.sweeperOverflowCount,
+                    offset, this.sweeperMaxPosition
+            );
+            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            this.sweeperMotor.setTargetPosition(targetPosition);
+            this.sweeperLastPosition = targetPosition;
+            this.sweeperMotor.setPower(power);
+        }
     }
 
     /**
@@ -285,6 +343,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                 return sliderMotor.isBusy();
             }
         };
+    }
+
+    public void stopSlider() {
+        this.sliderMotor.setPower(0);
     }
 
     public int getSliderCurrent() {

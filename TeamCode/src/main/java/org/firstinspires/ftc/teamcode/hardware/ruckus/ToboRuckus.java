@@ -135,13 +135,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void testSticks(EventManager em, EventManager em2) {
         telemetry.addLine().addData("(RS)", "4WD").setRetained(true)
                 .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
-        telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true);
+        telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true)
+                .addData("[LB]/[LT]", "Slow / Fast").setRetained(true);
         chassis.setupTelemetry(telemetry);
         intake.setupTelemetry(telemetry);
         hanging.setupTelemetry(telemetry);
         mineralDelivery.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
-        // em2.updateTelemetry(telemetry, 100);
         if (!hanging.latchIsBusy()) {
             hanging.resetLatch();
         }
@@ -149,15 +149,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
-                debug("sticksOnly(): right, L:(%.2f, %.2f = %.2f) R:(%.2f, %.2f = %.2f)",
-                        source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY),
-                        source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY),
-                        source.getStick(Events.Side.LEFT, Events.Axis.BOTH),
-                        currentX, currentY,
-                        source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)
-                );
                 if (source.getStick(Events.Side.LEFT, Events.Axis.BOTH) == 0) {
-                    double power = Math.max(Math.abs(currentX), Math.abs(currentY));
+                    // right stick with idle left stick operates robot in "crab" mode
+                    double power = source.getStick(Events.Side.RIGHT, Events.Axis.BOTH);
                     double heading = toDegrees(currentX, currentY);
                     // invert headings less than -90 / more than 90
                     if (Math.abs(heading) > 90) {
@@ -167,6 +161,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     debug("sticksOnly(): straight, pwr: %.2f, head: %.2f", power, heading);
                     chassis.driveAndSteer(power * powerAdjustment(source), heading, true);
                 } else {
+                    // right stick with left stick operates robot in "car" mode
                     double heading = source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY) * 90;
                     double power = currentY;
                     debug("sticksOnly(): right / steer, pwr: %.2f, head: %.2f", power, heading);
@@ -178,16 +173,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
-                debug("sticksOnly(): left, L:(%.2f, %.2f = %.2f) R:(%.2f, %.2f = %.2f)",
-                        currentX, currentY,
-                        source.getStick(Events.Side.LEFT, Events.Axis.BOTH),
-                        source.getStick(Events.Side.RIGHT, Events.Axis.X_ONLY),
-                        source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY),
-                        source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)
-                );
                 if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) == 0) {
+                    // left stick with idle right stick rotates robot in place
                     chassis.rotate(currentX * powerAdjustment(source));
                 } else {
+                    // right stick with left stick operates robot in "car" mode
                     double heading = currentX * 90;
                     double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
                     debug("sticksOnly(): left / steer, pwr: %.2f, head: %.2f", power, heading);
@@ -199,26 +189,56 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
                 // 0.2 is a dead zone threshold for the trigger
-                if (current > 0.2) intake.rotateSweeper(false);
+                if (current > 0.2) {
+                    intake.rotateSweeper( MineralIntake.SweeperMode.PUSH_OUT);
+                } else if (current == 0) {
+                    intake.rotateSweeper( MineralIntake.SweeperMode.HORIZONTAL_STOP);
+                }
             }
         }, Events.Side.LEFT);
+        em.onButtonUp(new Events.Listener() {
+            @Override
+            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+                intake.rotateSweeper( MineralIntake.SweeperMode.VERTICAL_STOP);
+            }
+        }, Button.LEFT_BUMPER);
+        // onLoop() instead of onButtonDown() because we need function to execute constantly
+        //  in order to monitor current sweeper position and possible overflows
+        em.onLoop(new Events.Listener() {
+            @Override
+            public void idle(EventManager source) throws InterruptedException {
+                if (source.isPressed(Button.LEFT_BUMPER)) {
+                    intake.rotateSweeper( MineralIntake.SweeperMode.INTAKE);
+                }
+            }
+        });
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
-                if (button==Button.DPAD_LEFT) {
-                    if (intake.getSliderTarget()==0 || intake.getSliderTarget()==intake.getSliderDump()) {
+                if (button==Button.DPAD_RIGHT) {
+                    if (intake.getSliderTarget()==intake.getSliderContracted() || intake.getSliderTarget()==intake.getSliderDump()) {
                         // slider is currently contracted or is in dump position or is moving there
                         intake.moveSlider(intake.getSliderSafe());
+                    } else if (intake.getSliderCurrent() >= intake.getSliderSafe()) {
+                        intake.moveSlider(intake.getSliderExtended());
                     }
                 } else {
                     if (intake.getSliderTarget()==intake.getSliderSafe()) {
                         intake.moveSlider(intake.getSliderDump());
                     } else if (intake.getSliderTarget()==intake.getSliderDump()) {
-                        intake.moveSlider(0);
+                        intake.moveSlider(intake.getSliderContracted());
+                    } else if (intake.getSliderCurrent() >= intake.getSliderSafe()) {
+                        intake.moveSlider(intake.getSliderSafe());
                     }
                 }
             }
-        }, Button.DPAD_RIGHT, Button.DPAD_LEFT);
+        }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
+        em.onButtonUp(new Events.Listener() {
+            @Override
+            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+                if (intake.getSliderCurrent() >= intake.getSliderSafe()) intake.stopSlider();
+            }
+        }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
@@ -243,29 +263,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Button.DPAD_UP, Button.DPAD_DOWN);
-        em.onLoop(new Events.Listener() {
-            @Override
-            public void idle(EventManager source) throws InterruptedException {
-                if (source.isPressed(Button.LEFT_BUMPER)) {
-                    intake.rotateSweeper(true);
-                }
-                if (source.isPressed(Button.DPAD_LEFT)
-                        && (intake.getSliderCurrent() >= intake.getSliderSafe())
-                ) {
-                    intake.moveSlider(Math.min(
-                            intake.getSliderCurrent() + 100, intake.getSliderExtended()
-                    ));
-                } else if (source.isPressed(Button.DPAD_RIGHT)
-                        && (intake.getSliderCurrent() >= intake.getSliderSafe())
-                ) {
-                    intake.moveSlider(Math.max(
-                            intake.getSliderCurrent() - 100, intake.getSliderSafe()
-                    ));
-                }
-            }
-        });
 
-        // Eevnts for gamepad2
+        // Events for gamepad2
         em2.onTrigger(new Events.Listener() {
             @Override
             public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
