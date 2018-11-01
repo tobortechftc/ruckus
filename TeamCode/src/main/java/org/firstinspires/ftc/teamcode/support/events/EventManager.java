@@ -233,7 +233,7 @@ public class EventManager extends Logger<EventManager> {
             case BOTH:
                 float x = analogValues[move.ordinal()];
                 float y = analogValues[move.ordinal() + 1];
-                float distance = (float) Math.sqrt(x*x + y*y);
+                float distance = (float) Math.sqrt((x*x + y*y) / 2);
                 return y==0 ? (Math.signum(x) * distance) : (Math.signum(y) * distance);
         }
         throw new UnsupportedOperationException("Unknown axis value: " + axis); // unreachable
