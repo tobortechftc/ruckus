@@ -345,22 +345,24 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 wheel.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
 
-        double[] newServoPositions = new double[4];
-        if (allWheels) {
-            Arrays.fill(newServoPositions, heading);
-        } else if (power > 0) { // driving forward
-            // front left and right
-            newServoPositions[0] = newServoPositions[1] = heading / 2;
-            // back left and right
-            newServoPositions[2] = newServoPositions[3] = -1 * heading / 2;
-        } else if (power < 0) { // driving backward
-            // back left and right
-            newServoPositions[2] = newServoPositions[3] = heading / 2;
-            // front left and right
-            newServoPositions[0] = newServoPositions[1] = -1 * heading / 2;
+        if (Math.abs(power) > 0) {
+            // only adjust servo positions if power is applied
+            double[] newServoPositions = new double[4];
+            if (allWheels) {
+                Arrays.fill(newServoPositions, heading);
+            } else if (power > 0) { // driving forward
+                // front left and right
+                newServoPositions[0] = newServoPositions[1] = heading / 2;
+                // back left and right
+                newServoPositions[2] = newServoPositions[3] = -1 * heading / 2;
+            } else if (power < 0) { // driving backward
+                // back left and right
+                newServoPositions[2] = newServoPositions[3] = heading / 2;
+                // front left and right
+                newServoPositions[0] = newServoPositions[1] = -1 * heading / 2;
+            }
+            changeServoPositions(newServoPositions);
         }
-        changeServoPositions(newServoPositions);
-
         for (WheelAssembly wheel : wheels) {
             wheel.motor.setPower(scalePower(power));
         }
