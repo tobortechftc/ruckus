@@ -109,16 +109,16 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void armDownInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armDownPos;
-        if (cur_pos>armDownPos+0.05) {
-            tar_pos = cur_pos - 0.05;
+        if (cur_pos>armDownPos+0.02) {
+            tar_pos = cur_pos - 0.02;
         }
         dumperArm.setPosition(tar_pos);
     }
     public void armUpInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armUpPos;
-        if (cur_pos<armUpPos-0.05) {
-            tar_pos = cur_pos + 0.05;
+        if (cur_pos<armUpPos-0.02) {
+            tar_pos = cur_pos + 0.02;
         }
         dumperArm.setPosition(tar_pos);
     }

@@ -39,8 +39,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private boolean adjustmentMode = false;
 
     // sweeper intake / push out power values
-    private double sweeperInPower = 0.2;
-    private double sweeperOutPower = 0.3;
+    private double sweeperInPower = 0.7;
+    private double sweeperOutPower = 0.7;
     // encoder value for sweeper rotating half circle
     private int sweeperHalfRotation = 240;
     // maximum encoder value for sweeper motor
@@ -131,7 +131,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         if (adjustmentMode) {
             this.sweeperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             this.sweeperMotor.setTargetPosition(0);
-            this.sweeperMotor.setPower(power);
+            this.sweeperMotor.setPower(-1 * power);
         }
     }
 

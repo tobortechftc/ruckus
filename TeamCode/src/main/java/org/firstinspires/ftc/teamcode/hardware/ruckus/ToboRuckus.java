@@ -151,7 +151,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                                    float currentY, float changeY) throws InterruptedException {
                 if (source.getStick(Events.Side.LEFT, Events.Axis.BOTH) == 0) {
                     // right stick with idle left stick operates robot in "crab" mode
-                    double power = source.getStick(Events.Side.RIGHT, Events.Axis.BOTH);
+                    double power = Math.abs(source.getStick(Events.Side.RIGHT, Events.Axis.BOTH));
                     double heading = toDegrees(currentX, currentY);
                     // invert headings less than -90 / more than 90
                     if (Math.abs(heading) > 90) {

@@ -23,7 +23,7 @@
     "track": 13.0,
     "wheelBase": 11.5,
     "wheelRadius": 2.0,
-    "maxPower": 0.5,
+    "maxPower": 0.6,
     "minPower": 0.12
   },
   "sv_sw_box": {
@@ -34,6 +34,8 @@
   "intake": {
     "boxDump": -106.0,
     "boxGoldCollection": 104.0,
-    "boxSilverCollection": 117.0
+    "boxSilverCollection": 117.0,
+    "sweeperInPower": 0.7,
+    "sweeperOutPower": 0.7
   }
 }
