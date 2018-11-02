@@ -46,93 +46,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         intake.reset();
     }
 
-    @MenuEntry(label = "Drive Straight", group = "Chassis Test")
-    public void testStraight(EventManager em) {
-        telemetry.addLine().addData("(LS)", "Drive").setRetained(true)
-                .addData("Hold [LB]/[RB]", "45 degree").setRetained(true);
-        chassis.setupTelemetry(telemetry);
-        em.updateTelemetry(telemetry, 100);
-        em.onStick(new Events.Listener() {
-            @Override
-            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX, float currentY, float changeY) throws InterruptedException {
-                double power = Math.max(Math.abs(currentX), Math.abs(currentY));
-                double heading = toDegrees(currentX, currentY);
-                debug("testStraight(): x: %+.2f, y: %+.2f, pow: %+.3f, head: %+.1f",
-                        currentX, currentY, power, heading);
-
-                if (source.isPressed(Button.LEFT_BUMPER) || source.isPressed(Button.RIGHT_BUMPER)) {
-                    // constrain to 45 degree diagonals
-                    heading = Math.signum(heading) * (Math.abs(heading) < 90 ? 45 : 135);
-                } else {
-                    // constrain to 90 degrees
-                    heading = Math.round(heading / 90) * 90;
-                }
-
-                // adjust heading / power for driving backwards
-                if (heading > 90) {
-                    chassis.driveStraight(-1.0 * power, heading - 180);
-                } else if (heading < -90) {
-                    chassis.driveStraight(-1.0 * power, heading + 180);
-                } else {
-                    chassis.driveStraight(power, heading);
-                }
-            }
-        }, Events.Axis.BOTH, Events.Side.LEFT);
-    }
-
-    @MenuEntry(label = "Drive & Steer", group = "Chassis Test")
-    public void testSteering(EventManager em) {
-        telemetry.addLine().addData(" < (LS) >", "Steer").setRetained(true)
-                .addData("(RS)", "Power").setRetained(true);
-        telemetry.addLine().addData("[LT] / [RT]", "Rotate").setRetained(true)
-                .addData("Hold [LB] / [RB]", "Crab").setRetained(true);
-        chassis.setupTelemetry(telemetry);
-        em.updateTelemetry(telemetry, 100);
-
-        em.onStick(new Events.Listener() {
-            @Override
-            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
-                                   float currentY, float changeY) throws InterruptedException {
-                double heading = 90 * currentX;
-                double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
-                debug("testSteering(): head: %+.1f, pwr: %+.2f", heading, power);
-                chassis.driveAndSteer(power, heading, false);
-            }
-        }, Events.Axis.X_ONLY, Events.Side.LEFT);
-
-        em.onStick(new Events.Listener() {
-            @Override
-            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
-                                   float currentY, float changeY) throws InterruptedException {
-                double heading = 90 * source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY);
-                double power = currentY;
-                if (source.isPressed(Button.LEFT_BUMPER)) {
-                    debug("testSteering(): head: -90, pwr: %+.2f", heading, power);
-                    chassis.driveStraight(power, -90);
-                } else if (source.isPressed(Button.RIGHT_BUMPER)) {
-                    debug("testSteering(): head: 90, pwr: %+.2f", heading, power);
-                    chassis.driveStraight(power, 90);
-                } else {
-                    debug("testSteering(): head: %+.1f, pwr: %+.2f", heading, power);
-                    chassis.driveAndSteer(power, heading, false);
-                }
-            }
-        }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
-
-        em.onTrigger(new Events.Listener() {
-            @Override
-            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
-                // do not rotate if the robot is currently moving
-                if (source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY)!=0
-                        || source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY)!=0) return;
-                double power = current * (side == Events.Side.LEFT ? -1 : 1);
-                chassis.rotate(power);
-            }
-        }, Events.Side.LEFT, Events.Side.RIGHT);
-    }
-
-    @MenuEntry(label = "Sticks Only", group = "Chassis Test")
-    public void testSticks(EventManager em, EventManager em2) {
+    @MenuEntry(label = "TeleOp", group = "Competition")
+    public void mainTeleOp(EventManager em, EventManager em2) {
         telemetry.addLine().addData("(RS)", "4WD").setRetained(true)
                 .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true)
@@ -196,22 +111,19 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Events.Side.LEFT);
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+                intake.rotateSweeper( MineralIntake.SweeperMode.INTAKE);
+            }
+        }, Button.LEFT_BUMPER);
         em.onButtonUp(new Events.Listener() {
             @Override
             public void buttonUp(EventManager source, Button button) throws InterruptedException {
                 intake.rotateSweeper( MineralIntake.SweeperMode.VERTICAL_STOP);
             }
         }, Button.LEFT_BUMPER);
-        // onLoop() instead of onButtonDown() because we need function to execute constantly
-        //  in order to monitor current sweeper position and possible overflows
-        em.onLoop(new Events.Listener() {
-            @Override
-            public void idle(EventManager source) throws InterruptedException {
-                if (source.isPressed(Button.LEFT_BUMPER)) {
-                    intake.rotateSweeper( MineralIntake.SweeperMode.INTAKE);
-                }
-            }
-        });
+
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
@@ -361,8 +273,41 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
     }
 
+    @MenuEntry(label = "Drive Straight", group = "Test Chassis")
+    public void testStraight(EventManager em) {
+        telemetry.addLine().addData("(LS)", "Drive").setRetained(true)
+                .addData("Hold [LB]/[RB]", "45 degree").setRetained(true);
+        chassis.setupTelemetry(telemetry);
+        em.updateTelemetry(telemetry, 100);
+        em.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX, float currentY, float changeY) throws InterruptedException {
+                double power = Math.max(Math.abs(currentX), Math.abs(currentY));
+                double heading = toDegrees(currentX, currentY);
+                debug("testStraight(): x: %+.2f, y: %+.2f, pow: %+.3f, head: %+.1f",
+                        currentX, currentY, power, heading);
 
-    @MenuEntry(label = "Rotate in Place", group = "Chassis Test")
+                if (source.isPressed(Button.LEFT_BUMPER) || source.isPressed(Button.RIGHT_BUMPER)) {
+                    // constrain to 45 degree diagonals
+                    heading = Math.signum(heading) * (Math.abs(heading) < 90 ? 45 : 135);
+                } else {
+                    // constrain to 90 degrees
+                    heading = Math.round(heading / 90) * 90;
+                }
+
+                // adjust heading / power for driving backwards
+                if (heading > 90) {
+                    chassis.driveStraight(-1.0 * power, heading - 180);
+                } else if (heading < -90) {
+                    chassis.driveStraight(-1.0 * power, heading + 180);
+                } else {
+                    chassis.driveStraight(power, heading);
+                }
+            }
+        }, Events.Axis.BOTH, Events.Side.LEFT);
+    }
+
+    @MenuEntry(label = "Rotate in Place", group = "Test Chassis")
     public void testRotate(EventManager em) {
         telemetry.addLine().addData(" < (LS) >", "Power").setRetained(true);
         chassis.setupTelemetry(telemetry);

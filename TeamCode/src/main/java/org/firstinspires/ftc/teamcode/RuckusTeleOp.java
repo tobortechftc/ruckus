@@ -5,19 +5,10 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Adjuster;
-import org.firstinspires.ftc.teamcode.support.diagnostics.GamepadListener;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Menu;
-import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
-import org.firstinspires.ftc.teamcode.support.events.Button;
 import org.firstinspires.ftc.teamcode.support.events.EventManager;
-import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
-
-import java.lang.reflect.InvocationTargetException;
 
 @TeleOp(name="Ruckus-TeleOp", group="Ruckus")
 public class RuckusTeleOp extends LinearOpMode {
@@ -46,7 +37,7 @@ public class RuckusTeleOp extends LinearOpMode {
             eventManager1 = new EventManager(gamepad1, true);
             eventManager2 = new EventManager(gamepad2, true);
 
-            robot.testSticks(eventManager1, eventManager2); // define events for the chassis drive
+            robot.mainTeleOp(eventManager1, eventManager2); // define events for the chassis drive
 
             telemetry.addData("Robot is ready", "Press Play");
             telemetry.update();

@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class Configuration extends Logger<Configuration> {
     private String robotName;
     private Map<String, Configurable> components;
     private JsonObject adjustments;
+    private Date lastModified;
 
     /**
      * Constructs a new configuration for given robot. Invoked from
@@ -109,7 +111,7 @@ public class Configuration extends Logger<Configuration> {
      *  construction of this configuration and is loaded from settings folder first
      *  or, should that fail, from application assets.
      * Settings folder is defined in <code>AppUtil.ROBOT_SETTINGS</code> and is usually
-     *  located under FIXME: on the phone.
+     *  located under <code></code>/sdcard/FIRST/settings/</code> on the phone.
      * @return <code>true</code> if adjustments were successfully loaded and applied
      * @see AppUtil#ROBOT_SETTINGS
      */
@@ -121,6 +123,7 @@ public class Configuration extends Logger<Configuration> {
                 new FileInputStream(file) : hardwareMap.appContext.getAssets().open(robotName + ".json")
         ) {
             adjustments = (JsonObject) new JsonParser().parse(new InputStreamReader(is, "UTF-8"));
+            if (file.exists()) this.lastModified = new Date(file.lastModified());
         } catch (Exception E) {
             // could not read preferences
             warn("Unable to read %s or load asset: %s", file.getAbsolutePath(), E.getMessage(), E);
@@ -180,11 +183,31 @@ public class Configuration extends Logger<Configuration> {
         File file = AppUtil.getInstance().getSettingsFile(robotName + ".json");
         try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(file),"UTF-8")) {
             SimpleGson.getInstance().toJson(adjustments, writer);
+            this.lastModified = new Date();
         } catch (Exception E) {
             warn("Unable to write %s: %s", file.getAbsolutePath(), E.getMessage(), E);
             return false;
         }
         info("Saved adjustments to %s", file.getAbsolutePath());
         return true;
+    }
+
+    /**
+     * Returns last modification date / time for the configuration adjustments file stored on this phone
+     *  or <code>null</code> if file does not exist and adjustments were loaded from app assets
+     */
+    public Date getLastModified() {
+        return this.lastModified;
+    }
+
+    /**
+     * Removes configuration adjustments file stored on this phone if it exists
+     */
+    public void delete() {
+        if (this.lastModified!=null) {
+            File file = AppUtil.getInstance().getSettingsFile(robotName + ".json");
+            file.delete();
+            this.lastModified = null;
+        }
     }
 }

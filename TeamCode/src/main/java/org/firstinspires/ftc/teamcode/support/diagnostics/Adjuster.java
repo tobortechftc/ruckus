@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 import org.firstinspires.ftc.teamcode.support.hardware.Reflection;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +41,7 @@ public class Adjuster extends Logger<Adjuster> {
         Collections.sort(deviceNames);
     }
 
-    public void show() {
+    public void show(EventManager em) {
         if (deviceNames.isEmpty()) {
             telemetry.addData("No adjustable devices found", "");
             telemetry.update();
@@ -55,7 +56,23 @@ public class Adjuster extends Logger<Adjuster> {
                 line.addData(property, "%.3f", getProperty(selectedDevice, property));
             }
         }
+
+        if (cfg.getLastModified()!=null) {
+            telemetry.addLine().addData("Phone adjustments", new SimpleDateFormat("MMM d, HH:mm").format(cfg.getLastModified()));
+            telemetry.addLine().addData("[X] + [Y]", "Delete (Revert to Defaults)");
+        }
         telemetry.update();
+
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (!source.isPressed(Button.X) || !source.isPressed(Button.Y) || cfg.getLastModified()==null) return;
+                cfg.delete();
+                cfg.apply();
+                telemetry.addLine().addData("Deleted", "Reverted to Defaults");
+                show(source);
+            }
+        }, Button.X, Button.Y);
     }
 
     public void run(EventManager em) {
@@ -118,6 +135,7 @@ public class Adjuster extends Logger<Adjuster> {
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.START)) return;
                 if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY)!=0) return;
                 if (selectedDevice!=null) selectedDevice.setAdjustmentMode(false);
                 if (cfg.storе()) {
@@ -131,6 +149,7 @@ public class Adjuster extends Logger<Adjuster> {
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.START)) return;
                 if (selectedDevice!=null) selectedDevice.setAdjustmentMode(false);
                 if (cfg.apply()) {
                     updateTelemetry("Reverted configuration");
