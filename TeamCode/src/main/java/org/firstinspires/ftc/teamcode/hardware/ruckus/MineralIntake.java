@@ -1,13 +1,11 @@
 package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.components.AdjustableServo;
 import org.firstinspires.ftc.teamcode.components.Operation;
-import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
@@ -33,21 +31,17 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
     };
 
+    public enum SweeperMode { INTAKE, PUSH_OUT, VERTICAL_STOP, HORIZONTAL_STOP };
+
     private DcMotor sweeperMotor;
     private DcMotor sliderMotor;
     private AdjustableServo boxServo;
     private boolean adjustmentMode = false;
 
-    // sweeper intake / push out power values
     private double sweeperInPower = 0.7;
     private double sweeperOutPower = 0.7;
     // encoder value for sweeper rotating half circle
     private int sweeperHalfRotation = 240;
-    // maximum encoder value for sweeper motor
-    private int sweeperMaxPosition = 10000;
-
-    private int sweeperLastPosition = 0;
-    private int sweeperOverflowCount = 0;
 
     // slider encoder positions
     private int sliderContracted = 0; // contracted
@@ -72,8 +66,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                     sliderMotor.getMode(), sliderMotor.getCurrentPosition()
             );
         } else {
-            resetMotor(this.sliderMotor);
-            resetMotor(this.sweeperMotor);
+            this.sliderMotor.setPower(0);
+            this.sweeperMotor.setPower(0);
             this.boxServo.setPosition(BoxPosition.INITIAL.value);
             debug("Adjustment: OFF, box: %.1f, sweeper: %s / %d, slider: %s", boxServo.getPosition(),
                     sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
@@ -150,14 +144,6 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
     }
 
-    @Adjustable(min = 0, max = 20000, step = 5)
-    public int getSweeperMaxPosition() {
-        return sweeperMaxPosition;
-    }
-    public void setSweeperMaxPosition(int position) {
-        this.sweeperMaxPosition = position;
-    }
-
     public int getSliderContracted() {
         return sliderContracted;
     }
@@ -171,6 +157,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         if (adjustmentMode) {
             debug("Slider Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sliderMotor.getCurrentPosition(), sliderExtended, sliderMotor.getPower(), sliderPower);
             this.sliderMotor.setTargetPosition(this.sliderExtended);
+            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setPower(this.sliderPower);
         }
     }
@@ -199,6 +186,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         if (adjustmentMode) {
             debug("Slider Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sliderMotor.getCurrentPosition(), sliderDump, sliderMotor.getPower(), sliderPower);
             this.sliderMotor.setTargetPosition(sliderDump);
+            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setPower(this.sliderPower);
         }
     }
@@ -231,7 +219,6 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         boxServo.setPosition(BoxPosition.INITIAL.value);
         resetMotor(sweeperMotor);
         resetMotor(sliderMotor);
-        this.sweeperOverflowCount = 0;
         debug("Reset mineral intake, box: %.1f, sweeper: %s / %d, slider: %s / %d", boxServo.getPosition(),
                 sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
                 sliderMotor.getMode(), sliderMotor.getCurrentPosition()
@@ -245,11 +232,12 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
      */
     public Operation rotateBox(BoxPosition position) {
         double adjustment = Math.abs(boxServo.getPosition() - position.value);
-        if (arePositionsCompatible(position.value, this.sliderMotor.getCurrentPosition())) {
+        if (arePositionsCompatible(position.value, getSliderCurrent())) {
             boxServo.setPosition(position.value);
         } else {
             adjustment = 0;
         }
+        debug("rotateNox(): position: %.2f, adjustment: %.2f", position.value, adjustment);
         final long doneBy = System.currentTimeMillis() + Math.round(2 * adjustment);
         return new Operation() {
             @Override
@@ -268,55 +256,60 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         return BoxPosition.INITIAL;
     }
 
-    public enum SweeperMode { INTAKE, PUSH_OUT, VERTICAL_STOP, HORIZONTAL_STOP };
     /**
      * Rotates or parks the sweeper according to the mode specified
      * @param mode direction to rotate or position to park the sweeper in
      */
-    public void rotateSweeper(SweeperMode mode) {
-        double power = mode==SweeperMode.INTAKE ? sweeperInPower : (-1 * sweeperOutPower);
-        if ((mode==SweeperMode.INTAKE) || (mode==SweeperMode.PUSH_OUT)) {
-            int currentPosition = this.sweeperMotor.getCurrentPosition();
-            // determine if sweeper position has just crossed the maximum value
-            int difference = currentPosition - this.sweeperLastPosition;
-            if (difference * power < 0) {
-                this.sweeperOverflowCount += difference < 0 ? 1 : -1;
-                debug("rotateSweeper() overflow count: %d, last: %d, current: %d, power: %.2f",
-                        this.sweeperOverflowCount, this.sweeperLastPosition,
-                        currentPosition, power
-                );
-            }
-            this.sweeperLastPosition = currentPosition;
-            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            this.sweeperMotor.setPower(power);
-        } else {
-            this.sweeperMotor.setPower(0);
-            // find closest position evenly divisible by half rotation
-            int offset = (this.sweeperOverflowCount * this.sweeperMaxPosition) % this.sweeperHalfRotation;
-            int targetPosition = Math.round(1.0f * (this.sweeperMotor.getCurrentPosition() + offset) / this.sweeperHalfRotation) * this.sweeperHalfRotation;
-            if (mode==SweeperMode.HORIZONTAL_STOP) {
-                // adjust target position by quarter rotation
-                if (targetPosition > 0) {
-                    targetPosition += this.sweeperHalfRotation / 2;
-                } else {
-                    targetPosition -= this.sweeperHalfRotation / 2;
-                }
-            }
-            // make sure target position does not exceed overflow point
-            if (targetPosition > this.sweeperMaxPosition) {
-                targetPosition -= this.sweeperHalfRotation;
-            } else if (targetPosition < -1 * this.sweeperMaxPosition) {
-                targetPosition += this.sweeperHalfRotation;
-            }
-            debug("rotateSweeper() park: %d, overflow: %d, offset: %d, max: %d",
-                    targetPosition, this.sweeperOverflowCount,
-                    offset, this.sweeperMaxPosition
-            );
-            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            this.sweeperMotor.setTargetPosition(targetPosition);
-            this.sweeperLastPosition = targetPosition;
-            this.sweeperMotor.setPower(power);
+    public void rotateSweeper(SweeperMode mode) throws InterruptedException {
+        if (getBoxPosition()==BoxPosition.INITIAL && (mode==SweeperMode.INTAKE || mode==SweeperMode.PUSH_OUT)) {
+            // sweeper cannot be rotated fully if the box is in initial position
+            // determine its current position and toggle horizontal to vertical and vice versa
+            boolean isVertical = Math.abs(this.sweeperMotor.getCurrentPosition()) % this.sweeperHalfRotation < this.sweeperHalfRotation / 2;
+            mode = isVertical ? SweeperMode.HORIZONTAL_STOP : SweeperMode.VERTICAL_STOP;
         }
+        if ((mode==SweeperMode.INTAKE) || (mode==SweeperMode.PUSH_OUT)) {
+            this.sweeperMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            double power = mode==SweeperMode.INTAKE ? sweeperInPower : (-1 * sweeperOutPower);
+            this.sweeperMotor.setPower(power);
+            return;
+        }
+
+        this.sweeperMotor.setPower(0);
+        // wait for the motor to come to a stop for up to a second
+        int position = this.sweeperMotor.getCurrentPosition();
+        int count = 20;
+        while (count-->0) {
+            Thread.sleep(50);
+            int newPosition = this.sweeperMotor.getCurrentPosition();
+            if (Math.abs(newPosition - position) < 2) break;
+            debug("rotateSweeper(): wait pos=%d, new=%d", position, newPosition);
+            position = newPosition;
+        }
+        int targetPosition = 0;
+        if (mode==SweeperMode.HORIZONTAL_STOP) {
+            targetPosition = (int) Math.round(Math.floor(1.0d * position / this.sweeperHalfRotation)) - this.sweeperHalfRotation / 2;
+        } else {
+            targetPosition = (int) Math.round(Math.ceil(1.0d * position / this.sweeperHalfRotation)) * this.sweeperHalfRotation;
+        }
+        debug("rotateSweeper(): pos=%d, target=%d", position, targetPosition);
+
+        // position is within 6 degrees of target; do not adjust it any further
+        if (Math.abs(targetPosition - position) < this.sweeperHalfRotation / 30) return;
+
+        this.sweeperMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        this.sweeperMotor.setTargetPosition(targetPosition);
+        this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        double power = mode==SweeperMode.VERTICAL_STOP ? sweeperInPower : (-1 * sweeperOutPower);
+        this.sweeperMotor.setPower(power / 3);
+
+        // wait for the motor to come to a stop for up to half a second
+        count = 10;
+        while (this.sweeperMotor.isBusy() && count-->0) {
+            Thread.sleep(50);
+            debug("rotateSweeper(): wait2 pos=%d", this.sweeperMotor.getCurrentPosition());
+        }
+        this.sweeperMotor.setPower(0);
     }
 
     /**
@@ -333,8 +326,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
 
         if (arePositionsCompatible(this.boxServo.getPosition(), position)) {
-            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setTargetPosition(position);
+            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setPower(this.sliderPower);
         }
         return new Operation() {
@@ -350,7 +343,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     }
 
     public int getSliderCurrent() {
-        return this.sliderMotor.getCurrentPosition();
+        return this.sliderMotor.isBusy() ? this.sliderMotor.getCurrentPosition() : this.sliderMotor.getTargetPosition();
     }
 
     public int getSliderTarget() {
@@ -363,10 +356,21 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
      */
     public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
-        line.addData("Slide", "%d", new Func<Integer>() {
+        line.addData("Box", "%.1f", new Func<Double>() {
             @Override
-            public Integer value() {
-                return sliderMotor.getCurrentPosition();
+            public Double value() {
+                return boxServo.getPosition();
+            }
+        });
+        line.addData("Slide", new Func<String>() {
+            @Override
+            public String value() {
+                int position = sliderMotor.getTargetPosition();
+                String name = "0";
+                if (position==sliderSafe) name = "Safe";
+                if (position==sliderDump) name = "Dump";
+                if (position==sliderExtended) name = "Ext";
+                return String.format("%s:%d", name, sliderMotor.getCurrentPosition());
             }
         });
         line.addData("Sweep", "%d", new Func<Integer>() {
@@ -375,28 +379,22 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                 return sweeperMotor.getCurrentPosition();
             }
         });
-        line.addData("Box", "%.1f", new Func<Double>() {
-            @Override
-            public Double value() {
-                return boxServo.getPosition();
-            }
-        });
     }
 
     private boolean arePositionsCompatible(double boxPosition, int sliderPosition) {
-        boolean collectionMode = boxPosition==getBoxGoldCollection()
-                || boxPosition==getBoxSilverCollection();
-        if (collectionMode && sliderPosition < getSliderSafe()) return false;
-
-        if (boxPosition == getBoxDump() && sliderPosition!= getSliderDump()) return false;
-
+        if (boxPosition==getBoxGoldCollection() || boxPosition==getBoxSilverCollection()) {
+            return sliderPosition >= getSliderSafe();
+        }
+        if (boxPosition == getBoxDump()) {
+            return sliderPosition >= getSliderDump() && sliderPosition <= getSliderSafe();
+        }
         return true;
     }
 
     private void resetMotor(DcMotor motor) {
         motor.setPower(0d);
+        motor.setTargetPosition(0);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
