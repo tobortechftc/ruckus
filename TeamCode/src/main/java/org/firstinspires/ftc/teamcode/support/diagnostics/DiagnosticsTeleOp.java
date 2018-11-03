@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -59,7 +60,13 @@ public abstract class DiagnosticsTeleOp extends LinearOpMode {
         try {
             // configure robot and reset all hardware
             robot.configure(configuration, telemetry);
-            configuration.apply();
+            if (configuration.apply()) {
+                if (configuration.getLastModified()!=null) {
+                    telemetry.addData("Phone adjustments", new SimpleDateFormat("MMM d, HH:mm").format(configuration.getLastModified()));
+                }
+            } else {
+                telemetry.addData("WARNING", "Unable to load adjustments from phone or assets");
+            }
             robot.reset();
 
             // populate diagnostic menu entries
@@ -108,7 +115,7 @@ public abstract class DiagnosticsTeleOp extends LinearOpMode {
      */
     @MenuEntry(label = "View", group="Configuration")
     public void viewConfiguration(EventManager em) {
-        new Adjuster(configuration, telemetry).configureLogging("Adjuster", LOG_LEVEL).show();
+        new Adjuster(configuration, telemetry).configureLogging("Adjuster", LOG_LEVEL).show(em);
     }
 
     /**
@@ -196,6 +203,7 @@ public abstract class DiagnosticsTeleOp extends LinearOpMode {
         eventManager1.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.START)) return;
                 telemetry.clearAll();
                 telemetry.addData("[Back] + [Start]", "Return to Menu").setRetained(true);
                 try {

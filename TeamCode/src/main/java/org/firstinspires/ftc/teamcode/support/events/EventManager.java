@@ -187,7 +187,7 @@ public class EventManager extends Logger<EventManager> {
     public void updateTelemetry(final Telemetry telemetry, int interval) {
         this.onLoop(new Events.Listener() {
             @Override
-            public void idle() { telemetry.update(); }
+            public void idle(EventManager source) { telemetry.update(); }
         }.setInterval(interval));
     }
 
@@ -233,7 +233,7 @@ public class EventManager extends Logger<EventManager> {
             case BOTH:
                 float x = analogValues[move.ordinal()];
                 float y = analogValues[move.ordinal() + 1];
-                float distance = (float) Math.sqrt(x*x + y*y);
+                float distance = (float) Math.sqrt((x*x + y*y) / 2);
                 return y==0 ? (Math.signum(x) * distance) : (Math.signum(y) * distance);
         }
         throw new UnsupportedOperationException("Unknown axis value: " + axis); // unreachable
@@ -334,7 +334,7 @@ public class EventManager extends Logger<EventManager> {
         for (Events.Listener listener : loopListeners) {
             long now = System.currentTimeMillis();
             if (listener.lastTimeInvoked + listener.interval > now) continue;
-            listener.idle();
+            listener.idle(this);
             listener.lastTimeInvoked = now;
         }
 

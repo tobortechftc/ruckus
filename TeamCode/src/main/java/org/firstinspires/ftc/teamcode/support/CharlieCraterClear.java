@@ -1,31 +1,30 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.support;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
-import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.events.EventManager;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
-@TeleOp(name="Ruckus-TeleOp", group="Ruckus")
-public class RuckusTeleOp extends LinearOpMode {
+/**
+ * Created by 28761 on 10/27/2018.
+ */
+
+@Autonomous(name = "Ruckus :: Charlie Crater Clearance", group = "Ruckus")
+public class CharlieCraterClear extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
-
-    private EventManager eventManager1;
-    private EventManager eventManager2;
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Initializing Robot", "Please Wait ...");
         telemetry.update();
 
-        ToboRuckus robot = new ToboRuckus();
+        ToboRuckus robot = new ToboRuckus().configureLogging("ToboRuckus", LOG_LEVEL);
         configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
 
         try {
@@ -33,11 +32,6 @@ public class RuckusTeleOp extends LinearOpMode {
             robot.configure(configuration, telemetry);
             configuration.apply();
             robot.reset();
-
-            eventManager1 = new EventManager(gamepad1, true);
-            eventManager2 = new EventManager(gamepad2, true);
-
-            robot.mainTeleOp(eventManager1, eventManager2); // define events for the chassis drive
 
             telemetry.addData("Robot is ready", "Press Play");
             telemetry.update();
@@ -48,14 +42,23 @@ public class RuckusTeleOp extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+        resetStartTime();
 
-        // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
+        robot.chassis.driveStraightAuto(0.9,-40,0,2000);
+        //at this place, use open cv to determine the mineral configuration
+
+
+//        robot.AutoRoutineTest();
+        // run until driver presses STOP or runtime exceeds 30 seconds
+        while (opModeIsActive() && getRuntime() < 30) {
             try {
-                eventManager1.processEvents();
-                eventManager2.processEvents();
+                // TODO: invoke something like robot.autonomousProgram()
+                telemetry.addLine(String.format("distance Left:%.3f; distance front:%.3f",robot.chassis.distanceToLeft(),robot.chassis.distanceToFront()));
+                telemetry.update();
+//                robot.chassis.driveAndSteerAuto(0.5,560*3,-45);
+
             } catch (Exception E) {
-                telemetry.addData("Error in event handler", E.getMessage());
+                telemetry.addData("Error", E.getMessage());
                 handleException(E);
                 Thread.sleep(5000);
             }
@@ -65,7 +68,7 @@ public class RuckusTeleOp extends LinearOpMode {
     protected void handleException(Throwable T) {
         log.error(T.getMessage(), T);
         int linesToShow = 5;
-        for(StackTraceElement line : T.getStackTrace()) {
+        for (StackTraceElement line : T.getStackTrace()) {
             telemetry.log().add("%s.%s():%d", line.getClassName(), line.getMethodName(), line.getLineNumber());
             if (--linesToShow == 0) break;
         }

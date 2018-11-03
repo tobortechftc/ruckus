@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.components.AdjustableServo;
 import org.firstinspires.ftc.teamcode.components.Operation;
 import org.firstinspires.ftc.teamcode.support.Logger;
@@ -13,32 +15,41 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * MineralIntake consists of 2 motors (1 controlling the sweeper, and 1 controlling the slider)
  * and 1 servo controlling the angle of the collection box.<br />
  * Expected hardware configuration is:<br />
- * sweeper (motor), slider (motor), box (servo)
+ * sweeper (motor), sw_slider (motor), sv_sw_box (servo)
  */
 public class MineralIntake extends Logger<MineralIntake> implements Configurable {
 
-    public enum BoxPosition { INITIAL, GOLD_COLLECTION, SILVER_COLLECTION, DUMP };
+    public enum BoxPosition {
+        INITIAL(0),
+        GOLD_COLLECTION(100),
+        SILVER_COLLECTION(120),
+        DUMP(-100);
+
+        double value;
+        BoxPosition(double value) {
+            this.value = value;
+        }
+    };
+
+    public enum SweeperMode { INTAKE, PUSH_OUT, VERTICAL_STOP, HORIZONTAL_STOP };
 
     private DcMotor sweeperMotor;
     private DcMotor sliderMotor;
     private AdjustableServo boxServo;
     private boolean adjustmentMode = false;
 
-    // adjustable servo positions in order of BoxPosition constants
-    private double[] boxPositions = { 120, 20, 0, 240 };
-
-    // sweeper intake / push out power values
-    private double sweeperInPower = 0.4;
-    private double sweeperOutPower = 0.5;
-    private int sweeperHalfRotation = 275; // TBD
+    private double sweeperInPower = 0.7;
+    private double sweeperOutPower = 0.7;
+    // encoder value for sweeper rotating half circle
+    private int sweeperHalfRotation = 240;
 
     // slider encoder positions
-    private double sliderContracted = 0; // contracted
-    private double sliderExtended = 7777; // fully extended
+    private int sliderContracted = 0; // contracted
+    private int sliderExtended = 1400; // fully extended
     // minimally extended position that allows for box to be rotated to one of the collection positions
-    private double sliderSafe = 3500;
-    private double sliderDump = 3000; // allows box to rest on back bracket and dump
-    private double sliderPower = 0.5; // TBD
+    private int sliderSafe = 700;
+    private int sliderDump = 600; // allows box to rest on back bracket and dump
+    private double sliderPower = 0.2; // TBD
 
     @Override
     public String getUniqueName() {
@@ -47,42 +58,48 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     @Override
     public void setAdjustmentMode(boolean on) {
+        if (this.adjustmentMode == on) return;
         this.adjustmentMode = on;
+        if (on) {
+            debug("Adjustment: ON, box: %.1f, sweeper: %s / %d, slider: %s", boxServo.getPosition(),
+                    sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
+                    sliderMotor.getMode(), sliderMotor.getCurrentPosition()
+            );
+        } else {
+            this.sliderMotor.setPower(0);
+            this.sweeperMotor.setPower(0);
+            this.boxServo.setPosition(BoxPosition.INITIAL.value);
+            debug("Adjustment: OFF, box: %.1f, sweeper: %s / %d, slider: %s", boxServo.getPosition(),
+                    sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
+                    sliderMotor.getMode(), sliderMotor.getCurrentPosition()
+            );
+        }
     }
 
-    @Adjustable(min = 0, max = 250, step = 1)
-    public double getBoxInitial() {
-        return this.boxPositions[BoxPosition.INITIAL.ordinal()];
-    }
-    public void setBoxInitial(double position) {
-        this.boxPositions[BoxPosition.INITIAL.ordinal()] = position;
-        if (adjustmentMode) this.boxServo.setPosition(position);
-    }
-
-    @Adjustable(min = 0, max = 250, step = 1)
+    @Adjustable(min = 90, max = 125, step = 1)
     public double getBoxGoldCollection() {
-        return this.boxPositions[BoxPosition.GOLD_COLLECTION.ordinal()];
+        return BoxPosition.GOLD_COLLECTION.value;
     }
     public void setBoxGoldCollection(double position) {
-        this.boxPositions[BoxPosition.GOLD_COLLECTION.ordinal()] = position;
+        BoxPosition.GOLD_COLLECTION.value = position;
         if (adjustmentMode) this.boxServo.setPosition(position);
     }
 
-    @Adjustable(min = 0, max = 250, step = 1)
+    @Adjustable(min = 90, max = 125, step = 1)
     public double getBoxSilverCollection() {
-        return this.boxPositions[BoxPosition.SILVER_COLLECTION.ordinal()];
+        return BoxPosition.SILVER_COLLECTION.value;
     }
     public void setBoxSilverCollection(double position) {
-        this.boxPositions[BoxPosition.SILVER_COLLECTION.ordinal()] = position;
+        BoxPosition.SILVER_COLLECTION.value = position;
         if (adjustmentMode) this.boxServo.setPosition(position);
     }
 
-    @Adjustable(min = 0, max = 250, step = 1)
+    @Adjustable(min = -125, max = -75, step = 1)
     public double getBoxDump() {
-        return this.boxPositions[BoxPosition.DUMP.ordinal()];
+        return BoxPosition.DUMP.value;
     }
     public void setBoxDump(double position) {
-        this.boxPositions[BoxPosition.DUMP.ordinal()] = position;
+        BoxPosition.DUMP.value = position;
         if (adjustmentMode) this.boxServo.setPosition(position);
     }
 
@@ -94,6 +111,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         this.sweeperInPower = power;
         if (adjustmentMode) {
             this.sweeperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            this.sweeperMotor.setTargetPosition(0);
             this.sweeperMotor.setPower(power);
         }
     }
@@ -106,57 +124,69 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         this.sweeperOutPower = power;
         if (adjustmentMode) {
             this.sweeperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            this.sweeperMotor.setPower(power);
+            this.sweeperMotor.setTargetPosition(0);
+            this.sweeperMotor.setPower(-1 * power);
         }
     }
 
-    // getter and setter use double instead of int due to @Adjustable only supporting doubles
-    @Adjustable(min = 1, max = 1000, step = 1)
-    public double getSweeperHalfRotation() {
+    @Adjustable(min = 0, max = 1000, step = 5)
+    public int getSweeperHalfRotation() {
         return sweeperHalfRotation;
     }
-    public void setSweeperHalfRotation(double position) {
-        this.sweeperHalfRotation = (int) Math.floor(position);
+    public void setSweeperHalfRotation(int position) {
+        this.sweeperHalfRotation = position;
         if (adjustmentMode) {
-            this.sweeperMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            debug("Sweeper Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sweeperMotor.getCurrentPosition(), position, sweeperMotor.getPower(), sweeperInPower);
             this.sweeperMotor.setTargetPosition(sweeperHalfRotation);
+            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sweeperMotor.setPower(sweeperInPower);
+            debug("Sweeper Adjustment Running: ON, position: %d / %d, power: %.3f, mode: %s", sweeperMotor.getCurrentPosition(), sweeperMotor.getTargetPosition(), sweeperMotor.getPower(), sweeperMotor.getMode());
         }
     }
 
+    public int getSliderContracted() {
+        return sliderContracted;
+    }
+
     @Adjustable(min = 0.0, max = 8000.0, step = 1.0)
-    public double getSliderExtended() {
+    public int getSliderExtended() {
         return sliderExtended;
     }
-    public void setSliderExtended(double sliderExtended) {
+    public void setSliderExtended(int sliderExtended) {
         this.sliderExtended = sliderExtended;
         if (adjustmentMode) {
-            this.sliderMotor.setTargetPosition((int) Math.floor(sliderExtended));
+            debug("Slider Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sliderMotor.getCurrentPosition(), sliderExtended, sliderMotor.getPower(), sliderPower);
+            this.sliderMotor.setTargetPosition(this.sliderExtended);
+            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setPower(this.sliderPower);
         }
     }
 
     @Adjustable(min = 0.0, max = 8000.0, step = 1.0)
-    public double getSliderSafe() {
+    public int getSliderSafe() {
         return sliderSafe;
     }
-    public void setSliderSafe(double sliderSafe) {
+    public void setSliderSafe(int sliderSafe) {
         this.sliderSafe = sliderSafe;
         if (adjustmentMode) {
-            this.sliderMotor.setTargetPosition((int) Math.floor(sliderSafe));
+            debug("Slider Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sliderMotor.getCurrentPosition(), sliderSafe, sliderMotor.getPower(), sliderPower);
+            this.sliderMotor.setTargetPosition(sliderSafe);
+            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setPower(this.sliderPower);
+            debug("Slider Adjustment Running: ON, position: %d / %d, power: %.3f, mode: %s", sliderMotor.getCurrentPosition(), sliderMotor.getTargetPosition(), sliderMotor.getPower(), sliderMotor.getMode());
         }
     }
 
     @Adjustable(min = 0.0, max = 8000.0, step = 1.0)
-    public double getSliderDump() {
+    public int getSliderDump() {
         return sliderDump;
     }
-    public void setSliderDump(double sliderDump) {
+    public void setSliderDump(int sliderDump) {
         this.sliderDump = sliderDump;
         if (adjustmentMode) {
-            this.sliderMotor.setTargetPosition((int) Math.floor(sliderDump));
+            debug("Slider Adjustment: ON, position: %d / %d, power: %.3f / %.3f", sliderMotor.getCurrentPosition(), sliderDump, sliderMotor.getPower(), sliderPower);
+            this.sliderMotor.setTargetPosition(sliderDump);
+            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setPower(this.sliderPower);
         }
     }
@@ -170,10 +200,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     }
 
     public void configure(Configuration configuration) {
-        boxServo = new AdjustableServo(0, 250).configureLogging(
+        boxServo = new AdjustableServo(-125, 125).configureLogging(
                 logTag + ":servo" , logLevel
         );
-        boxServo.configure(configuration.getHardwareMap(), "box");
+        boxServo.configure(configuration.getHardwareMap(), "sv_sw_box");
         configuration.register(boxServo);
 
         sweeperMotor = configuration.getHardwareMap().tryGet(DcMotor.class, "sweeper");
@@ -186,9 +216,13 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     }
 
     public void reset() {
-        boxServo.setPosition(this.boxPositions[BoxPosition.INITIAL.ordinal()]);
+        boxServo.setPosition(BoxPosition.INITIAL.value);
         resetMotor(sweeperMotor);
         resetMotor(sliderMotor);
+        debug("Reset mineral intake, box: %.1f, sweeper: %s / %d, slider: %s / %d", boxServo.getPosition(),
+                sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
+                sliderMotor.getMode(), sliderMotor.getCurrentPosition()
+        );
     }
 
     /**
@@ -197,13 +231,13 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
      * @return operation showing whether rotation is complete
      */
     public Operation rotateBox(BoxPosition position) {
-        double targetPosition = this.boxPositions[position.ordinal()];
-        double adjustment = Math.abs(boxServo.getPosition() - targetPosition);
-        if (arePositionsCompatible(targetPosition, 1.0 * this.sliderMotor.getCurrentPosition())) {
-            boxServo.setPosition(targetPosition);
+        double adjustment = Math.abs(boxServo.getPosition() - position.value);
+        if (arePositionsCompatible(position.value, getSliderCurrent())) {
+            boxServo.setPosition(position.value);
         } else {
             adjustment = 0;
         }
+        debug("rotateNox(): position: %.2f, adjustment: %.2f", position.value, adjustment);
         final long doneBy = System.currentTimeMillis() + Math.round(2 * adjustment);
         return new Operation() {
             @Override
@@ -213,22 +247,69 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         };
     }
 
-    /**
-     * Rotates the sweeper half a circle for either intake or pushing out
-     * @param intake <code>true</code> for intake, <code>false</code> for pushing out
-     * @return operation showing whether rotation is complete
-     */
-    public Operation rotateSweeper(boolean intake) {
-        this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        this.sweeperMotor.setTargetPosition(this.sweeperMotor.getTargetPosition()
-                + (intake ? 1 : -1) * sweeperHalfRotation);
-        this.sweeperMotor.setPower(intake ? sweeperInPower : (-1 * sweeperOutPower));
-        return new Operation() {
-            @Override
-            public boolean isFinished() {
-                return sweeperMotor.isBusy();
+    public BoxPosition getBoxPosition() {
+        for (BoxPosition position : BoxPosition.values()) {
+            if (Math.abs(boxServo.getPosition() - position.value) < 0.1) {
+                return position;
             }
-        };
+        }
+        return BoxPosition.INITIAL;
+    }
+
+    /**
+     * Rotates or parks the sweeper according to the mode specified
+     * @param mode direction to rotate or position to park the sweeper in
+     */
+    public void rotateSweeper(SweeperMode mode) throws InterruptedException {
+        if (getBoxPosition()==BoxPosition.INITIAL && (mode==SweeperMode.INTAKE || mode==SweeperMode.PUSH_OUT)) {
+            // sweeper cannot be rotated fully if the box is in initial position
+            // determine its current position and toggle horizontal to vertical and vice versa
+            boolean isVertical = Math.abs(this.sweeperMotor.getCurrentPosition()) % this.sweeperHalfRotation < this.sweeperHalfRotation / 2;
+            mode = isVertical ? SweeperMode.HORIZONTAL_STOP : SweeperMode.VERTICAL_STOP;
+        }
+        if ((mode==SweeperMode.INTAKE) || (mode==SweeperMode.PUSH_OUT)) {
+            this.sweeperMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            this.sweeperMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            double power = mode==SweeperMode.INTAKE ? sweeperInPower : (-1 * sweeperOutPower);
+            this.sweeperMotor.setPower(power);
+            return;
+        }
+
+        this.sweeperMotor.setPower(0);
+        // wait for the motor to come to a stop for up to a second
+        int position = this.sweeperMotor.getCurrentPosition();
+        int count = 20;
+        while (count-->0) {
+            Thread.sleep(50);
+            int newPosition = this.sweeperMotor.getCurrentPosition();
+            if (Math.abs(newPosition - position) < 2) break;
+            debug("rotateSweeper(): wait pos=%d, new=%d", position, newPosition);
+            position = newPosition;
+        }
+        int targetPosition = 0;
+        if (mode==SweeperMode.HORIZONTAL_STOP) {
+            targetPosition = (int) Math.round(Math.floor(1.0d * position / this.sweeperHalfRotation)) - this.sweeperHalfRotation / 2;
+        } else {
+            targetPosition = (int) Math.round(Math.ceil(1.0d * position / this.sweeperHalfRotation)) * this.sweeperHalfRotation;
+        }
+        debug("rotateSweeper(): pos=%d, target=%d", position, targetPosition);
+
+        // position is within 6 degrees of target; do not adjust it any further
+        if (Math.abs(targetPosition - position) < this.sweeperHalfRotation / 30) return;
+
+        this.sweeperMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        this.sweeperMotor.setTargetPosition(targetPosition);
+        this.sweeperMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        double power = mode==SweeperMode.VERTICAL_STOP ? sweeperInPower : (-1 * sweeperOutPower);
+        this.sweeperMotor.setPower(power / 3);
+
+        // wait for the motor to come to a stop for up to half a second
+        count = 10;
+        while (this.sweeperMotor.isBusy() && count-->0) {
+            Thread.sleep(50);
+            debug("rotateSweeper(): wait2 pos=%d", this.sweeperMotor.getCurrentPosition());
+        }
+        this.sweeperMotor.setPower(0);
     }
 
     /**
@@ -236,7 +317,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
      * @param position to move slider to
      * @return operation showing whether movement is complete
      */
-    public Operation moveSlider(double position) {
+    public Operation moveSlider(int position) {
         if (position < this.sliderContracted) {
             throw new IllegalArgumentException("Slider position cannot be less than [sliderContracted]");
         }
@@ -245,8 +326,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
 
         if (arePositionsCompatible(this.boxServo.getPosition(), position)) {
+            this.sliderMotor.setTargetPosition(position);
             this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            this.sliderMotor.setTargetPosition((int) Math.round(position));
             this.sliderMotor.setPower(this.sliderPower);
         }
         return new Operation() {
@@ -257,21 +338,63 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         };
     }
 
-    private boolean arePositionsCompatible(double boxPosition, double sliderPosition) {
-        boolean collectionMode = boxPosition==getBoxGoldCollection()
-                || boxPosition==getBoxSilverCollection();
-        if (collectionMode && sliderPosition < getSliderSafe()) return false;
+    public void stopSlider() {
+        this.sliderMotor.setPower(0);
+    }
 
-        if (boxPosition == getBoxDump() && sliderPosition!= getSliderDump()) return false;
+    public int getSliderCurrent() {
+        return this.sliderMotor.isBusy() ? this.sliderMotor.getCurrentPosition() : this.sliderMotor.getTargetPosition();
+    }
 
+    public int getSliderTarget() {
+        return this.sliderMotor.getTargetPosition();
+    }
+
+    /**
+     * Set up telemetry lines for intake metrics
+     * Shows encoder values for slider / sweeper and box position
+     */
+    public void setupTelemetry(Telemetry telemetry) {
+        Telemetry.Line line = telemetry.addLine();
+        line.addData("Box", "%.1f", new Func<Double>() {
+            @Override
+            public Double value() {
+                return boxServo.getPosition();
+            }
+        });
+        line.addData("Slide", new Func<String>() {
+            @Override
+            public String value() {
+                int position = sliderMotor.getTargetPosition();
+                String name = "0";
+                if (position==sliderSafe) name = "Safe";
+                if (position==sliderDump) name = "Dump";
+                if (position==sliderExtended) name = "Ext";
+                return String.format("%s:%d", name, sliderMotor.getCurrentPosition());
+            }
+        });
+        line.addData("Sweep", "%d", new Func<Integer>() {
+            @Override
+            public Integer value() {
+                return sweeperMotor.getCurrentPosition();
+            }
+        });
+    }
+
+    private boolean arePositionsCompatible(double boxPosition, int sliderPosition) {
+        if (boxPosition==getBoxGoldCollection() || boxPosition==getBoxSilverCollection()) {
+            return sliderPosition >= getSliderSafe();
+        }
+        if (boxPosition == getBoxDump()) {
+            return sliderPosition >= getSliderDump() && sliderPosition <= getSliderSafe();
+        }
         return true;
     }
 
     private void resetMotor(DcMotor motor) {
-        motor.setPower(0.0d);
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setPower(0d);
+        motor.setTargetPosition(0);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
-
-
 }
