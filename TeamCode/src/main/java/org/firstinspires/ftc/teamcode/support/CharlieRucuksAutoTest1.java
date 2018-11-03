@@ -19,6 +19,8 @@ public class CharlieRucuksAutoTest1 extends LinearOpMode {
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
 
+    double toCm = 2.54;
+
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Initializing Robot", "Please Wait ...");
@@ -45,6 +47,20 @@ public class CharlieRucuksAutoTest1 extends LinearOpMode {
         resetStartTime();
 
 
+
+        if (robot.hanging!=null) {
+            robot.chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+            robot.hanging.latchUpInches(7);//Land
+            sleep(2000);
+        }
+        robot.chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+        sleep(200);
+        robot.chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
+        sleep(200);
+        robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+        sleep(200);
+        robot.chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
+
         //at this place, use open cv to determine the mineral configuration
         int mode = 0;
         if (mode == 0) {
@@ -56,44 +72,44 @@ public class CharlieRucuksAutoTest1 extends LinearOpMode {
         }
 
         sleep(500);
-        robot.chassis.driveStraightAuto(0.35, 40, 0,Integer.MAX_VALUE);
-
+        robot.chassis.driveStraightAuto(0.35, 45, 0,Integer.MAX_VALUE);
         sleep(1000);
-        robot.chassis.rotateTo(0.18, 45,telemetry);
-
-        //from here, three different routine will converge into the depot
-//        telemetry.addLine(String.format("detected distance to left: %.3f",robot.chassis.distanceToLeft()));
+        robot.chassis.rotateTo(0.25,-40,telemetry);
+//        robot.chassis.rotateTo(0.18, 45,telemetry);
+//
+//        //from here, three different routine will converge into the depot
+////        telemetry.addLine(String.format("detected distance to left: %.3f",robot.chassis.distanceToLeft()));
+////        telemetry.update();
+//        sleep(500);
+//        robot.chassis.driveStraightAuto(0.30, robot.chassis.distanceToLeft() - 10.0,-90,Integer.MAX_VALUE);
+////        telemetry.addLine(String.format("adjusted distance to left: %.3f",robot.chassis.distanceToLeft()));
+////        telemetry.update();
+//        sleep(500);
+//
+//
+//        robot.chassis.rotateTo(0.18, 45,telemetry);
+//
+//        telemetry.addLine(String.format("detected distance to front: %.3f",robot.chassis.distanceToFront()));
 //        telemetry.update();
-        sleep(500);
-        robot.chassis.driveStraightAuto(0.30, robot.chassis.distanceToLeft() - 10.0,-90,Integer.MAX_VALUE);
-//        telemetry.addLine(String.format("adjusted distance to left: %.3f",robot.chassis.distanceToLeft()));
+//        sleep(500);
+//        robot.chassis.driveStraightAuto(0.30, robot.chassis.distanceToFront() - 30.0,0,Integer.MAX_VALUE);
+//        telemetry.addLine(String.format("adjusted distance to front: %.3f",robot.chassis.distanceToFront()));
 //        telemetry.update();
-        sleep(500);
-
-
-        robot.chassis.rotateTo(0.18, 45,telemetry);
-
-        telemetry.addLine(String.format("detected distance to front: %.3f",robot.chassis.distanceToFront()));
-        telemetry.update();
-        sleep(500);
-        robot.chassis.driveStraightAuto(0.30, robot.chassis.distanceToFront() - 30.0,0,Integer.MAX_VALUE);
-        telemetry.addLine(String.format("adjusted distance to front: %.3f",robot.chassis.distanceToFront()));
-        telemetry.update();
-        sleep(500);
+//        sleep(500);
 
         //dump the marker here
         robot.hanging.markerDown();
         sleep(500);
 
-        robot.chassis.rotateTo(0.18, 46,telemetry);
-
-        sleep(500);
-        robot.chassis.driveStraightAuto(0.40, -180,0,Integer.MAX_VALUE);
-        sleep(200);
-        robot.chassis.driveStraightAuto(0.20, 5,90,Integer.MAX_VALUE);
-
-//        robot.chassis.rotateTo(0.18, 60,telemetry);
-        robot.chassis.driveStraightAuto(0.70, -40,0,2000);
+//        robot.chassis.rotateTo(0.18, 46,telemetry);
+//
+//        sleep(500);
+//        robot.chassis.driveStraightAuto(0.40, -180,0,Integer.MAX_VALUE);
+//        sleep(200);
+//        robot.chassis.driveStraightAuto(0.20, 5,90,Integer.MAX_VALUE);
+//
+////        robot.chassis.rotateTo(0.18, 60,telemetry);
+//        robot.chassis.driveStraightAuto(0.70, -40,0,2000);
 
 //        robot.chassis.driveAndSteerAuto(0.7, 1500, 45, telemetry);
 ////        robot.chassis.rotateDegree(0.4,45);
