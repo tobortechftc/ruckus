@@ -3,13 +3,13 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
-
 @Autonomous(name = "Ruckus :: OpenCV Testing", group = "Ruckus")
 public class MasonOpenCVTesting extends LinearOpMode {
     protected static int LOG_LEVEL = Log.INFO;
@@ -44,13 +44,13 @@ public class MasonOpenCVTesting extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
-        SwerveUtilLOP.MineralDetection mineralDetection = new SwerveUtilLOP.MineralDetection(robot.cameraSystem);
+        // SwerveUtilLOP.MineralDetection mineralDetection = new SwerveUtilLOP.MineralDetection(robot.cameraSystem);
 
         // run until driver presses STOP or runtime exceeds 30 seconds
         if (opModeIsActive() && getRuntime() < 30) {
             try {
-                String message = mineralDetection.getGoldPosition().toString();
-                telemetry.addData("", message);
+                //String message = mineralDetection.getGoldPosition().toString();
+                //telemetry.addData("", message);
 //                mineralDetection.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
 //                mineralDetection.enable();
 //                List<MatOfPoint> silverContours = mineralDetection.getSilverContours();

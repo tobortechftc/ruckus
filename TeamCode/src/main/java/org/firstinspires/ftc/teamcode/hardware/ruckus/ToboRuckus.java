@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
-import org.firstinspires.ftc.teamcode.components.CameraSystem;
+// import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
+// import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.support.Logger;
@@ -18,7 +18,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public MineralIntake intake;
     public MineralDelivery mineralDelivery;
     public Hanging hanging;
-    public CameraSystem cameraSystem;
+    // public CameraSystem cameraSystem;
 
 
 
@@ -31,8 +31,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void configure(Configuration configuration, Telemetry telemetry) {
         this.telemetry = telemetry;
         
-        cameraSystem = new CameraSystem(null);
-        cameraSystem.init(configuration.getHardwareMap());
+        // cameraSystem = new CameraSystem(null);
+        // cameraSystem.init(configuration.getHardwareMap());
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
         chassis.configure(configuration);
         intake = new MineralIntake().configureLogging("Intake", logLevel);
