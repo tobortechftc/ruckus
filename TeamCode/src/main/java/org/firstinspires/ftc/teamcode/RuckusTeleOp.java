@@ -32,7 +32,7 @@ public class RuckusTeleOp extends LinearOpMode {
             // configure robot and reset all hardware
             robot.configure(configuration, telemetry);
             configuration.apply();
-            robot.reset();
+            robot.reset(false);
 
             eventManager1 = new EventManager(gamepad1, true);
             eventManager2 = new EventManager(gamepad2, true);

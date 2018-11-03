@@ -48,9 +48,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @Override
-    public void reset() {
+    public void reset(boolean auto) {
         chassis.reset();
         intake.reset();
+        hanging.reset(auto);
     }
 
     @MenuEntry(label = "TeleOp", group = "Competition")
@@ -216,7 +217,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     if (source.isPressed(Button.START))
                         hanging.latchUpInches(1.0);
                     else
-                        hanging.latchUp();
+                        hanging.latchUp(source.isPressed(Button.BACK));
                 }
                 if (button==Button.B) {
                     if (source.isPressed(Button.BACK)) {

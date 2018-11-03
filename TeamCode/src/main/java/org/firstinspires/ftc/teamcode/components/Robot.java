@@ -28,6 +28,6 @@ public interface Robot {
     /**
      * Reset robot. All applicable hardware devices should be reset to their initial state.
      */
-    void reset();
+    void reset(boolean auto);
 
 }

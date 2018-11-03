@@ -31,7 +31,7 @@ public class CharlieRucuksAutoTest1 extends LinearOpMode {
             // configure robot and reset all hardware
             robot.configure(configuration, telemetry);
             configuration.apply();
-            robot.reset();
+            robot.reset(true);
 
             telemetry.addData("Robot is ready", "Press Play");
             telemetry.update();

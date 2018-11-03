@@ -67,7 +67,7 @@ public abstract class DiagnosticsTeleOp extends LinearOpMode {
             } else {
                 telemetry.addData("WARNING", "Unable to load adjustments from phone or assets");
             }
-            robot.reset();
+            robot.reset(false);
 
             // populate diagnostic menu entries
             menu.detectEntries(robot);

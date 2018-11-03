@@ -54,10 +54,14 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         //  that would react to track / wheel base / radius adjustments
     }
 
-    public void reset() {
+    public void reset(boolean Auto) {
         latch.setPower(0);
         hookClose();
         markerUp();
+        if (Auto && (latch!=null)) {
+            latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
     }
 
     public void configure(Configuration configuration) {
@@ -66,7 +70,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setPower(0);
         // latch.setDirection(DcMotorSimple.Direction.REVERSE);
         latch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         hook = configuration.getHardwareMap().servo.get("sv_hook");
         hookClose();
@@ -108,10 +112,10 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             markerDown();
         }
     }
-    public void latchUp(){ // encoder going up
+    public void latchUp(boolean force){ // encoder going up
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         int cur_pos = latch.getCurrentPosition();
-        if (cur_pos>=MAX_LATCH_POS) {
+        if (cur_pos>=MAX_LATCH_POS && force==false) {
             latch.setPower(0);
         } else {
             latch.setPower(latch_power);
