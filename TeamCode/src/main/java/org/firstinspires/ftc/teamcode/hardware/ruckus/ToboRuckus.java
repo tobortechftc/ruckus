@@ -198,7 +198,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (side==Events.Side.RIGHT) { // latch down
                     if (current>0.2) {
                         if (source.isPressed(Button.START))
-                            hanging.latchDownInches(2);
+                            hanging.latchDownInches(1.0);
                         else
                             hanging.latchDown(source.isPressed(Button.BACK));
                     } else {
@@ -214,7 +214,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     //mineralDelivery.liftUp();
                 } else if (button==Button.RIGHT_BUMPER) { // latch up
                     if (source.isPressed(Button.START))
-                        hanging.latchUpInches(2);
+                        hanging.latchUpInches(1.0);
                     else
                         hanging.latchUp();
                 }
