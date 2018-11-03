@@ -235,7 +235,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     }
                 }
                 if (button==Button.Y) {
-                    mineralDelivery.armUp();
+                    mineralDelivery.armDump();
                 } else if (button==Button.A){
                     mineralDelivery.armDown();
                 }
