@@ -5,26 +5,22 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Adjuster;
-import org.firstinspires.ftc.teamcode.support.diagnostics.GamepadListener;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Menu;
-import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
-import org.firstinspires.ftc.teamcode.support.events.Button;
-import org.firstinspires.ftc.teamcode.support.events.EventManager;
-import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
-import java.lang.reflect.InvocationTargetException;
+/**
+ * Created by 28761 on 10/13/2018.
+ */
 
-@Autonomous(name = "Ruckus :: Autonomous", group = "Ruckus")
-public class RuckusAutonomous extends LinearOpMode {
+@Autonomous(name = "Ruckus::Auto-Silver-1", group = "Ruckus")
+public class RuckusAutoSilver1 extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
+
+    double toCm = 2.54;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -51,22 +47,42 @@ public class RuckusAutonomous extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
-        // run until driver presses STOP or runtime exceeds 30 seconds
-        while (opModeIsActive() && getRuntime() < 30) {
-            try {
-                // TODO: invoke something like robot.autonomousProgram()
-            } catch (Exception E) {
-                telemetry.addData("Error", E.getMessage());
-                handleException(E);
-                Thread.sleep(5000);
-            }
+
+
+        if (robot.hanging!=null) {
+            robot.chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+            robot.hanging.latchUpInches(7);//Land
+            sleep(2000);
         }
+        robot.chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+        sleep(200);
+        robot.chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
+        sleep(200);
+        robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+        sleep(200);
+        robot.chassis.rotateTo(0.25, -75, telemetry); //Turn 90 degrees left
+
+        //at this place, use open cv to determine the mineral configuration
+        int mode = 0;
+        if (mode == 0) {
+            robot.chassis.driveStraightAuto(0.35, 43, 0,Integer.MAX_VALUE);
+        } else if (mode == 1) {
+            robot.chassis.driveStraightAuto(0.35, 58, 46,Integer.MAX_VALUE);
+        } else {
+            robot.chassis.driveStraightAuto(0.35, 58, -46,Integer.MAX_VALUE);
+        }
+
+        sleep(500);
+        robot.chassis.driveStraightAuto(0.4, 30, 0,Integer.MAX_VALUE);
+        // sleep(1000);
+        // robot.chassis.rotateTo(0.25,-40,telemetry);
+
     }
 
     protected void handleException(Throwable T) {
         log.error(T.getMessage(), T);
         int linesToShow = 5;
-        for(StackTraceElement line : T.getStackTrace()) {
+        for (StackTraceElement line : T.getStackTrace()) {
             telemetry.log().add("%s.%s():%d", line.getClassName(), line.getMethodName(), line.getLineNumber());
             if (--linesToShow == 0) break;
         }

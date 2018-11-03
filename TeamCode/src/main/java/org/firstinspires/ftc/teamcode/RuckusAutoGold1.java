@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.support;
+package org.firstinspires.ftc.teamcode;
 
 import android.util.Log;
 
@@ -6,14 +6,15 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
+import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "Ruckus :: Charlie Autonomous test", group = "Ruckus")
-public class CharlieRucuksAutoTest1 extends LinearOpMode {
+@Autonomous(name = "Ruckus::Auto-Gold-1", group = "Ruckus")
+public class RuckusAutoGold1 extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
