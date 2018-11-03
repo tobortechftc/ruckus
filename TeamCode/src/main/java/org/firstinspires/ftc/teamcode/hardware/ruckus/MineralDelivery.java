@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
@@ -22,12 +24,14 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private DcMotor lift;
     private Servo dumperArm;
     private Servo dumperGate;
-    private double gateClosePos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
-    private double gateOpenPos = .11200;    // maximum power that should be applied to the wheel motors
-    private double armDownPos = 0;
-    private double armUpPos = 0.1;
-    private double liftPower = .5;
+    private double gateClosePos = 0.01;
+    private double gateOpenPos = .8;
+    private double armDownPos = 0.05;
+    private double armUpPos = 0.95;
+    private double liftPower = -.5;
     private boolean gateIsOpened = false;
+    private final int MAX_LIFT_POS = 5300;
+    private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
     public String getUniqueName() {
@@ -47,16 +51,18 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     public void configure(Configuration configuration) {
         // set up motors / sensors as wheel assemblies
-        lift = configuration.getHardwareMap().dcMotor.get("lift");
+        lift = configuration.getHardwareMap().dcMotor.get("lift_slider");
         lift.setPower(0);
+        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         dumperGate = configuration.getHardwareMap().servo.get("sv_hp_gate");
+        gateOpen();
         dumperArm = configuration.getHardwareMap().servo.get("sv_hp_dump");
-        gateClose();
+        armDown();
 
-
-
-        // register chassis as configurable component
+        // register delivery as configurable component
         configuration.register(this);
     }
 
@@ -76,10 +82,20 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         }
     }
     public void liftUp(){
-        lift.setPower(liftPower);
+        int cur_pos = lift.getCurrentPosition();
+        if (cur_pos>MAX_LIFT_POS) {
+            lift.setPower(0);
+        } else {
+            lift.setPower(liftPower);
+        }
     }
-    public void liftDown(){
-        lift.setPower(-1 * liftPower);
+    public void liftDown(boolean force){
+        int cur_pos = lift.getCurrentPosition();
+        if (cur_pos<=0 && force==false) {
+            lift.setPower(0);
+        } else {
+            lift.setPower(-1 * liftPower);
+        }
     }
     public void liftStop(){
         lift.setPower(0);
@@ -90,22 +106,55 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void armDown(){
         dumperArm.setPosition(armDownPos);
     }
+    public void armDownInc() {
+        double cur_pos = dumperArm.getPosition();
+        double tar_pos = armDownPos;
+        if (cur_pos>armDownPos+0.02) {
+            tar_pos = cur_pos - 0.02;
+        }
+        dumperArm.setPosition(tar_pos);
+    }
+    public void armUpInc() {
+        double cur_pos = dumperArm.getPosition();
+        double tar_pos = armUpPos;
+        if (cur_pos<armUpPos-0.02) {
+            tar_pos = cur_pos + 0.02;
+        }
+        dumperArm.setPosition(tar_pos);
+    }
+    public void armStop() {
+        double cur_pos = dumperArm.getPosition();
+        dumperArm.setPosition(cur_pos);
+    }
+
     /**
      * Set up telemetry lines for chassis metrics
      * Shows current motor power, orientation sensors,
      *  drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
      *  and servo position for each wheel
      */
-    public void setup_telemetry(Telemetry telemetry) {
+    public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
         if (lift!=null)
-           line.addData("Latch", "pw=%.2f pos=%.2f", lift.getPower(), lift.getCurrentPosition());
+           line.addData("Lift", "enc=%d", new Func<Integer>() {
+               @Override
+               public Integer value() {
+                   return lift.getCurrentPosition();
+               }});
 
         if(dumperGate!=null){
-            line.addData("Hook", "pos=%.2f", dumperGate.getPosition());
+            line.addData("Gate", "pos=%.2f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return dumperGate.getPosition();
+                }});
         }
         if(dumperArm!=null){
-            line.addData("Hook", "pos=%.2f", dumperArm.getPosition());
+            line.addData("Arm", "pos=%.2f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return dumperArm.getPosition();
+                }});
         }
     }
 

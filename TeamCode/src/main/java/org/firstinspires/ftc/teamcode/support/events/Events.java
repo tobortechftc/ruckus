@@ -83,7 +83,7 @@ public interface Events {
          * Will not be invoked more often than every <code>interval</code> ms.
          * @see Listener#setInterval(int)
          */
-        public void idle() throws InterruptedException {
+        public void idle(EventManager source) throws InterruptedException {
             throw new UnsupportedOperationException("Not implemented");
         }
 

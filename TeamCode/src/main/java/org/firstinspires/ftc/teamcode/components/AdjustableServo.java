@@ -102,12 +102,14 @@ public class AdjustableServo extends Logger<AdjustableServo> implements Configur
                     + " and " + rangeMax + " degrees");
         }
         double hwPosition; // actual hardware position set on servo
-        if (degrees < (rangeMin + rangeMax) / 2) {
+        double halfPoint = (rangeMin + rangeMax) / 2;
+        double halfDistance = (rangeMax - rangeMin) / 2;
+        if (degrees < halfPoint) {
             // transform "rangeMin / half point" to "left / center" interval
-            hwPosition = (degrees / (rangeMax - rangeMin) * 2 + 1.0) * (center - left) + left;
+            hwPosition = (degrees - rangeMin) / halfDistance * (center - left) + left;
         } else {
             // transform "half point / rangeMax" to "center / right" interval
-            hwPosition = degrees / (rangeMax - rangeMin) * 2 * (right - center) + center;
+            hwPosition = (degrees - halfPoint) / halfDistance * (right - center) + center;
         }
         verbose("position: %.2f -> %.2f, hw: %.2f", position, degrees, hwPosition);
         servo.setPosition(hwPosition);
