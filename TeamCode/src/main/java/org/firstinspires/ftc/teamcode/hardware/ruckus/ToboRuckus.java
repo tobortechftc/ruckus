@@ -131,7 +131,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             }
         }, Button.LEFT_BUMPER);
 
-        em.onButtonDown(new Events.Listener() {
+        em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 if (button==Button.DPAD_RIGHT) {
@@ -152,13 +152,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
-        em.onButtonUp(new Events.Listener() {
+        em2.onButtonUp(new Events.Listener() {
             @Override
             public void buttonUp(EventManager source, Button button) throws InterruptedException {
                 if (intake.getSliderCurrent() >= intake.getSliderSafe()) intake.stopSlider();
             }
         }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
-        em.onButtonDown(new Events.Listener() {
+        em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 if (button==Button.DPAD_UP) {
