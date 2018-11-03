@@ -5,24 +5,14 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.components.Robot;
-import org.firstinspires.ftc.teamcode.hardware.CameraSystem;
+import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Adjuster;
-import org.firstinspires.ftc.teamcode.support.diagnostics.GamepadListener;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Menu;
-import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
-import org.firstinspires.ftc.teamcode.support.events.Button;
-import org.firstinspires.ftc.teamcode.support.events.EventManager;
-import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
-
-import java.lang.reflect.InvocationTargetException;
 
 @Autonomous(name = "Ruckus :: OpenCV Testing", group = "Ruckus")
 public class MasonOpenCVTesting extends LinearOpMode {
-    protected static int LOG_LEVEL = Log.VERBOSE;
+    protected static int LOG_LEVEL = Log.INFO;
 
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
@@ -38,8 +28,10 @@ public class MasonOpenCVTesting extends LinearOpMode {
         try {
             // configure robot and reset all hardware
             robot.configure(configuration, telemetry);
-            configuration.apply();
-            robot.reset();
+//            configuration.apply();
+//            robot.reset();
+
+
 
             telemetry.addData("Robot is ready", "Press Play");
             telemetry.update();
@@ -52,12 +44,28 @@ public class MasonOpenCVTesting extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
+        SwerveUtilLOP.MineralDetection mineralDetection = new SwerveUtilLOP.MineralDetection(robot.cameraSystem);
+
         // run until driver presses STOP or runtime exceeds 30 seconds
-        while (opModeIsActive() && getRuntime() < 30) {
+        if (opModeIsActive() && getRuntime() < 30) {
             try {
-                SwerveUtilLOP.OpenCV openCV = new SwerveUtilLOP.OpenCV();
-                openCV.findGold();
-                openCV.findSilver();
+                String message = mineralDetection.getGoldPosition().toString();
+                telemetry.addData("", message);
+//                mineralDetection.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
+//                mineralDetection.enable();
+//                List<MatOfPoint> silverContours = mineralDetection.getSilverContours();
+//                List<MatOfPoint> goldContours = mineralDetection.getGoldContours();
+//                for (int i = 0; i < silverContours.size(); i++) {
+//                    Rect boundingRect = Imgproc.boundingRect(silverContours.get(i));
+//                    telemetry.addData("Silver contour" + Integer.toString(i),
+//                            String.format(Locale.getDefault(), "(%d, %d)", (boundingRect.x + boundingRect.width) / 2, (boundingRect.y + boundingRect.height) / 2));
+//                }
+//                for (int i = 0; i < goldContours.size(); i++) {
+//                    Rect boundingRect = Imgproc.boundingRect(goldContours.get(i));
+//                    telemetry.addData("Gold contour" + Integer.toString(i),
+//                            String.format(Locale.getDefault(), "(%d, %d)", (boundingRect.x + boundingRect.width) / 2, (boundingRect.y + boundingRect.height) / 2));
+//                }
+
             } catch (Exception E) {
                 telemetry.addData("Error", E.getMessage());
                 handleException(E);

@@ -3,14 +3,14 @@ package org.firstinspires.ftc.teamcode.hardware;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.Supplier;
 import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
+import org.firstinspires.ftc.teamcode.components.CameraSystem;
 
 /**
  * Main container class for this robot's subsystems.
  * Its methods influence how the entire robot operates
  */
-public class GreenManba {
+public class GreenMamba {
 
     public CoreSystem coreSystem;
 
@@ -52,14 +52,14 @@ public class GreenManba {
     /**
      * Create a SystemControl object.
      */
-    public GreenManba() {
+    public GreenMamba() {
         this.coreSystem = new CoreSystem();
         this.relicReachSystem = new MineralReachSystem(this.coreSystem);
         this.swerve = new SwerveSystem(this.coreSystem);
         this.intake = new MineralIntakeSystem(this.coreSystem);
         this.dumper = new MineralDumperSystem(this.coreSystem);
         this.jewel = new MarkerSystem(this.coreSystem);
-        this.camera = new CameraSystem(this.coreSystem);
+        //this.camera = new CameraSystem(this.camera);
     }
 
     /**

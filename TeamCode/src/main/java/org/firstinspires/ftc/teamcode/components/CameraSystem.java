@@ -1,7 +1,9 @@
-package org.firstinspires.ftc.teamcode.hardware;
+package org.firstinspires.ftc.teamcode.components;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.hardware.usb.*;
+import android.hardware.camera2.*;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,17 +13,23 @@ import com.vuforia.Vuforia;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
+import org.firstinspires.ftc.teamcode.components.SwerveChassis;
+import org.firstinspires.ftc.teamcode.hardware.CoreSystem;
+import org.firstinspires.ftc.teamcode.hardware.TaintedAccess;
+import org.firstinspires.ftc.teamcode.support.Logger;
+import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
 
 /**
  * Put brief class description here...
  */
-public class CameraSystem{
+public class CameraSystem {
     public boolean use_verbose = false;
     public boolean use_Vuforia = true;
     public boolean use_camera = false;
@@ -31,6 +39,8 @@ public class CameraSystem{
     public SwerveUtilLOP.TeamColor rightJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
     public Bitmap bitmap = null;
     public boolean camReady = false;
+
+    WebcamName webcamName;
 
     VuforiaLocalizer vuforia;
 
@@ -48,7 +58,7 @@ public class CameraSystem{
         this.taintedAccess = taintedAccess;
     }
 
-    CameraSystem(CoreSystem core) {
+    public CameraSystem(CoreSystem core) {
         this.core = core;
     }
 
@@ -69,16 +79,19 @@ public class CameraSystem{
         use_camera = false;
     }
 
-    void init(HardwareMap hwMap) {
+    public void init(HardwareMap hwMap) {
 
         if (use_Vuforia) {
+//            webcamName = hwMap.get(WebcamName.class, "Webcam 1");
             int cameraMonitorViewId = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName());
             parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
             parameters.vuforiaLicenseKey = "AaaZDWL/////AAAAGYIaD+Gn/UUDhEiR/gcOJxdEJlKEpCOKSLPfhYJfYthUNZ0vnEGm0VGPutkNgRq8bq1ufm3eAySnLhkJQ7d4w6VDT7os5FGPEOGPfsIWMYNAFMdX+wlJo2JCyljeSxQtXUd/YileyfYKBXOl2uFA4KnStCC9WkYTUBrAof3H7RGKorzYixDeOpbmCsf25rayjtAUQrKCwG4j6P5rRdxy7SC//v4VC6NirNwgJ/xn1r02/jbx8vUDrDODGyut9iLk06IzMnrq/P01yKOp48clTw0WIKNmVT7WUQweXy+E1w6xwFplTlPkjC+gzerDOpxHPqYg8RusWD2Y/IMlmnk1yzJba1B9Xf9Ih6BJbm/fVwL4";
 
             parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+//            parameters.cameraName = webcamName;
             this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+            vuforia.enableConvertFrameToBitmap();
             relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
             relicTemplate = relicTrackables.get(0);
             relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
@@ -182,15 +195,15 @@ public class CameraSystem{
         return destBitmap;
     }
 
+    enum CameraSelect {
+        PHONE,
+    }
+
     /**
      * @author Mason Mann
-     * @param xOffsetF
-     * @param yOffsetF
-     * @param widthF
-     * @param heightF
-     * @return
+     * @return Bitmap
      */
-    public Bitmap captureBitmap(double xOffsetF, double yOffsetF, double widthF, double heightF) {
+    public Bitmap captureVuforiaBitmap(/*double xOffsetF, double yOffsetF, double widthF, double heightF*/) {
         Bitmap bitmapTemp = null;
         lastError = "";
         int capacity = vuforia.getFrameQueueCapacity();
@@ -210,8 +223,8 @@ public class CameraSystem{
 
         }
         //White Balance applied here
-        int whitestPixel = getWhitestPixel(bitmapTemp);
-        applyWhiteBalance(bitmapTemp, whitestPixel);
+//        int whitestPixel = getWhitestPixel(bitmapTemp);
+//        applyWhiteBalance(bitmapTemp, whitestPixel);
 
         //Bitmap bitmap = cropBitmap(bitmapTemp, xOffsetF, yOffsetF, widthF, heightF);
         Bitmap bitmap = bitmapTemp;

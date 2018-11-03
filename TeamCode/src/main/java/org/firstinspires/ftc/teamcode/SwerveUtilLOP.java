@@ -3,6 +3,10 @@ package org.firstinspires.ftc.teamcode;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.util.Log;
+
+import org.firstinspires.ftc.teamcode.support.Logger;
+import org.opencv.android.Utils;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -10,9 +14,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.firstinspires.ftc.robotcore.external.Supplier;
+import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.teamcode.hardware.MineralDumperSystem;
-import org.firstinspires.ftc.teamcode.hardware.MineralIntakeSystem;
-import org.firstinspires.ftc.teamcode.hardware.GreenManba;
+import org.firstinspires.ftc.teamcode.hardware.GreenMamba;
 import org.firstinspires.ftc.teamcode.hardware.SwerveSystem;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -33,7 +37,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
 
     /* Declare OpMode members. */
     // public SwerveDriveHardware robot           = new SwerveDriveHardware();
-    public GreenManba robot = new GreenManba();
+    public GreenMamba robot = new GreenMamba();
 
     /**
      * Is used for checking or determining a color based on an alliance
@@ -180,7 +184,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
                     robot.camera.activate();
 
                     do{
-                        robot.camera.bitmap = robot.camera.captureBitmap(IMAGE_OFFSET_X, IMAGE_OFFSET_Y, IMAGE_WIDTH_CROP, IMAGE_HEIGHT_CROP);
+                        robot.camera.bitmap = robot.camera.captureVuforiaBitmap(/*IMAGE_OFFSET_X, IMAGE_OFFSET_Y, IMAGE_WIDTH_CROP, IMAGE_HEIGHT_CROP*/);
                     }
                     while (runTime.seconds() < 0.5 && robot.camera.bitmap == null);
 
@@ -874,17 +878,28 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         return got_two;
     }
 
-    public static class OpenCV extends OpenCVPipeline{
-        private boolean showContours = false;
-        private Mat silverHSV = new Mat();
-        private Mat silverThresholded = new Mat();
-        private Mat goldHSV = new Mat();
-        private Mat goldThresholded = new Mat();
-        private List<MatOfPoint> silverContours = new ArrayList<>();
-        private List<MatOfPoint> goldContours = new ArrayList<>();
+    public static class MineralDetection extends OpenCVPipeline{
+        static Logger<MineralDetection> logger = new Logger<>();
+        CameraSystem cameraSystem;
+
+        static {
+            logger.configureLogging("Mineral_Detection", Log.VERBOSE);
+        }
+
+        public MineralDetection(CameraSystem cameraSystem) {
+            this.cameraSystem = cameraSystem;
+        }
 
         @Override
         public Mat processFrame(Mat rgba, Mat grayscale){
+            boolean showContours = false;
+            Mat silverHSV = new Mat();
+            Mat silverThresholded = new Mat();
+            Mat goldHSV = new Mat();
+            Mat goldThresholded = new Mat();
+            List<MatOfPoint> silverContours;
+            List<MatOfPoint> goldContours;
+
             Imgproc.cvtColor(rgba, silverHSV,Imgproc.COLOR_RGB2HSV,3);
             Imgproc.cvtColor(rgba, goldHSV, Imgproc.COLOR_RGB2HSV, 3);
             Core.inRange(silverHSV, new Scalar(0,0,90), new Scalar(0,0,100), silverThresholded);
@@ -904,24 +919,115 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             }
             return rgba;
         }
-        public Point[] findSilver(){
-            List<Moments> mu = new ArrayList<>(silverContours.size());
-            Point[] coordCenter = new Point[mu.size()];
+
+        public enum SampleLocation {
+            LEFT, CENTER, RIGHT, UNKNOWN
+        }
+
+        public Mat getMatFromCamera(){
+            Mat mat = new Mat();
+            cameraSystem.activate();
+            Bitmap bitmap = cameraSystem.captureVuforiaBitmap();
+            Utils.bitmapToMat(bitmap, mat);
+            return mat;
+        }
+
+        public SampleLocation getGoldPosition() {
+            Mat mat = getMatFromCamera();
+            Mat goldHSV = new Mat();
+            Mat silverHSV = new Mat();
+            Mat silverThresholded = new Mat();
+            Mat goldThresholded = new Mat();
+            List<MatOfPoint> silverContours;
+            List<MatOfPoint> goldContours;
+
+
+            // Changes mat color format from RGB565 to HSV
+            Imgproc.cvtColor(mat, goldHSV, Imgproc.COLOR_RGB2HSV, 3);
+            Imgproc.cvtColor(mat, silverHSV, Imgproc.COLOR_RGB2HSV, 3);
+            logger.verbose("Variable goldHSV size: %s", goldHSV.size());
+            logger.verbose("Variable silverHSV size: %s", silverHSV.size());
+
+            // Thresholds color to become binary image of sample and background
+            Core.inRange(silverHSV, new Scalar(0, 0, 90), new Scalar(16, 15, 100), silverThresholded);
+            Core.inRange(goldHSV, new Scalar(29, 163, 177), new Scalar(51, 223, 255), goldThresholded);
+            logger.verbose("Thresholded Gold mat size: %s", goldThresholded.size());
+            logger.verbose("Thresholded Silver mat size: %s", silverThresholded.size());
+            Imgproc.blur(silverThresholded, silverThresholded, new Size(3, 3));
+            Imgproc.blur(goldThresholded, goldThresholded, new Size(3, 3));
+
+            // Places images into contour variables to find the mass centers of the objects
+            silverContours = new ArrayList<>();
+            goldContours = new ArrayList<>();
+            Imgproc.findContours(silverThresholded, silverContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(goldThresholded, goldContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+            logger.verbose("Gold Contours Size: %s", goldContours.size());
+            logger.verbose("Silver Contours Size: %s", silverContours.size());
+
+            List<Moments> silverMu = new ArrayList<>();
+            Point[] silverCoordCenter = new Point[silverMu.size()];
             for (int i = 0; i < silverContours.size(); i++) {
-                mu.add(Imgproc.moments(silverContours.get(i)));
-                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
+                silverMu.add(Imgproc.moments(silverContours.get(i)));
+                logger.verbose("Silver Moments Size: %s Index: %s", silverMu.size(), i);
+                silverCoordCenter[i] = new Point((int) (silverMu.get(i).m10 / silverMu.get(i).m00), (int) (silverMu.get(i).m01 / silverMu.get(i).m00));
             }
-            return coordCenter;
-        }
-        public Point[] findGold(){
-            List<Moments> mu = new ArrayList<>(goldContours.size());
-            Point[] coordCenter = new Point[mu.size()];
+            List<Moments> goldMu = new ArrayList<>(goldContours.size());
+            Point[] goldCoordCenter = new Point[goldMu.size()];
             for (int i = 0; i < goldContours.size(); i++) {
-                mu.add(Imgproc.moments(goldContours.get(i)));
-                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
+                goldMu.add(Imgproc.moments(goldContours.get(i)));
+                logger.verbose("Gold Moments Size: %s Index: %s", goldMu.size(), i);
+                goldCoordCenter[i] = new Point((int) (goldMu.get(i).m10 / goldMu.get(i).m00), (int) (goldMu.get(i).m01 / goldMu.get(i).m00));
             }
-            return coordCenter;
+
+            boolean isLeft = true;
+            boolean isRight = true;
+
+            for (int i = 0; i < silverCoordCenter.length; i++){
+                if(goldCoordCenter[0].x > silverCoordCenter[i].x) {
+                    isLeft = false;
+                }
+            }
+            for (int i = 0; i < silverCoordCenter.length; i++){
+                if(goldCoordCenter[0].x < silverCoordCenter[i].x) {
+                    isRight = false;
+                }
+            }
+            if (isLeft && !isRight){
+                return SampleLocation.LEFT;
+            }
+            if (!isLeft && isRight) {
+                return SampleLocation.RIGHT;
+            }
+            if (!isLeft && !isRight){
+                return SampleLocation.CENTER;
+            }
+            return SampleLocation.UNKNOWN;
         }
+
+//        public synchronized List<MatOfPoint> getGoldContours() {
+//            return goldContours;
+//        }
+//        public synchronized  List<MatOfPoint> getSilverContours(){
+//            return silverContours;
+//        }
+//        public Point[] findSilver(){
+//            List<Moments> mu = new ArrayList<>(silverContours.size());
+//            Point[] coordCenter = new Point[mu.size()];
+//            for (int i = 0; i < silverContours.size(); i++) {
+//                mu.add(Imgproc.moments(silverContours.get(i)));
+//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
+//            }
+//            return coordCenter;
+//        }
+//        public Point[] findGold(){
+//            List<Moments> mu = new ArrayList<>(goldContours.size());
+//            Point[] coordCenter = new Point[mu.size()];
+//            for (int i = 0; i < goldContours.size(); i++) {
+//                mu.add(Imgproc.moments(goldContours.get(i)));
+//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
+//            }
+//            return coordCenter;
+//        }
     }
 
 }

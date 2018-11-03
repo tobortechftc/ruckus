@@ -5,25 +5,25 @@ package org.firstinspires.ftc.teamcode.hardware;
  */
 public class TaintedAccess {
 
-    private GreenManba greenManba;
+    private GreenMamba greenMamba;
 
-    TaintedAccess(GreenManba greenManba) {
-        this.greenManba = greenManba;
+    TaintedAccess(GreenMamba greenMamba) {
+        this.greenMamba = greenMamba;
     }
 
 //    SwerveUtilLOP getSwerveUtilLOP() {
-//        if (this.greenManba.swerveUtilLOP == null) {
+//        if (this.greenMamba.swerveUtilLOP == null) {
 //            throw new IllegalStateException ("Internal TaintedAccess.swerveUtilLOP object must be set. ");
 //        }
-//        return this.greenManba.swerveUtilLOP;
+//        return this.greenMamba.swerveUtilLOP;
 //    }
 
     void stop_chassis() {
-        greenManba.swerve.stop_chassis();
+        greenMamba.swerve.stop_chassis();
     }
 
     void intakeGateInit() {
-        greenManba.intake.intakeGateInit();
+        greenMamba.intake.intakeGateInit();
     }
 
 }

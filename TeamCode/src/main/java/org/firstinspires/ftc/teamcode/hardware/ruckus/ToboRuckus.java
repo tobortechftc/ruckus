@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
+import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.support.Logger;
@@ -15,6 +17,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public SwerveChassis chassis;
     public MineralIntake mineralIntake;
     public Hanging hanging;
+    public CameraSystem cameraSystem;
+
+
 
     @Override
     public String getName() {
@@ -25,10 +30,12 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void configure(Configuration configuration, Telemetry telemetry) {
         this.telemetry = telemetry;
 
-        chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
-        chassis.configure(configuration);
-        hanging = new Hanging().configureLogging("Hanging", logLevel);
-        hanging.configure(configuration);
+//        chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
+//        chassis.configure(configuration);
+//        hanging = new Hanging().configureLogging("Hanging", logLevel);
+//        hanging.configure(configuration);
+        cameraSystem = new CameraSystem(null);
+        cameraSystem.init(configuration.getHardwareMap());
     }
 
     public void AutoRoutineTest() throws InterruptedException {
