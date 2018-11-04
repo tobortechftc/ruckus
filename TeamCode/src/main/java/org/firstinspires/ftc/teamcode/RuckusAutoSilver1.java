@@ -60,7 +60,7 @@ public class RuckusAutoSilver1 extends LinearOpMode {
         sleep(200);
         robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
         sleep(200);
-        robot.chassis.rotateTo(0.25, -75, telemetry); //Turn 90 degrees left
+        robot.chassis.rotateTo(0.25, -75); //Turn 90 degrees left
 
         //at this place, use open cv to determine the mineral configuration
         int mode = 0;

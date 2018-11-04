@@ -76,7 +76,7 @@ public class NickTest extends LinearOpMode {
                 sleep(300);
                 robot.chassis.driveStraightAuto(.2, 100, -90, timeout);
                 sleep(300);
-                robot.chassis.rotateTo(.4, -135, telemetry);
+                robot.chassis.rotateTo(.4, -135);
                 robot.chassis.driveStraightAuto(.2,8,90, timeout);
                 sleep(300);
                 robot.chassis.driveStraightAuto(.2, 100, 0, timeout);
