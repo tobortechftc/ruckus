@@ -329,6 +329,22 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
     }
 
+    @MenuEntry(label = "Test Land", group = "Test Auto")
+    public void landAndDetach(EventManager em) throws InterruptedException{
+        chassis.resetOrientation();
+        chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+        hanging.latchUpInches(7); //Land
+        chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+        chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
+        chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+        chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
+    }
+
+    @MenuEntry(label = "Retract Latch", group = "Test Auto")
+    public void retractLatch(EventManager em) throws InterruptedException{
+        hanging.latchDownInches(7);
+    }
+
     /**
      * Returns angle (-180 to 180 degrees) between positive Y axis
      *  and a line drawn from center of coordinates to (x, y).

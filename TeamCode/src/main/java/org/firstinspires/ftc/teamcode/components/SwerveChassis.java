@@ -561,6 +561,10 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         }
     }
 
+    public void resetOrientation(){
+        orientationSensor.reset();
+    }
+
     final class WheelAssembly {
         AdjustableServo servo;
         DcMotor motor;
