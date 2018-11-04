@@ -27,6 +27,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double gateClosePos = 0.01;
     private double gateOpenPos = .8;
     private double armDownPos = 0.05;
+    private double armDumpPos = 0.85;
     private double armUpPos = 0.95;
     private double liftPower = -.5;
     private boolean gateIsOpened = false;
@@ -106,19 +107,22 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void armDown(){
         dumperArm.setPosition(armDownPos);
     }
+    public void armDump(){
+        dumperArm.setPosition(armDumpPos);
+    }
     public void armDownInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armDownPos;
-        if (cur_pos>armDownPos+0.02) {
-            tar_pos = cur_pos - 0.02;
+        if (cur_pos>armDownPos+0.03) {
+            tar_pos = cur_pos - 0.03;
         }
         dumperArm.setPosition(tar_pos);
     }
     public void armUpInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armUpPos;
-        if (cur_pos<armUpPos-0.02) {
-            tar_pos = cur_pos + 0.02;
+        if (cur_pos<armUpPos-0.03) {
+            tar_pos = cur_pos + 0.03;
         }
         dumperArm.setPosition(tar_pos);
     }

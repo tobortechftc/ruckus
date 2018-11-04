@@ -228,7 +228,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(scalePower(power));
     }
 
-    double TICKS_PER_CM = 16.04;
+    double TICKS_PER_CM = 16.86;
 
     //using the indicated absolute power to drive a certain distance at a certain heading
     public void driveStraightAuto(double power, double cm, double heading, int timeout) throws InterruptedException {

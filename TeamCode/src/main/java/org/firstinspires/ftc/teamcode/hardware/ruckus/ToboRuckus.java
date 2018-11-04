@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+// import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
+// import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.support.Logger;
@@ -16,6 +18,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public MineralIntake intake;
     public MineralDelivery mineralDelivery;
     public Hanging hanging;
+    // public CameraSystem cameraSystem;
+
+
 
     @Override
     public String getName() {
@@ -25,7 +30,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     @Override
     public void configure(Configuration configuration, Telemetry telemetry) {
         this.telemetry = telemetry;
-
+        
+        // cameraSystem = new CameraSystem(null);
+        // cameraSystem.init(configuration.getHardwareMap());
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
         chassis.configure(configuration);
         intake = new MineralIntake().configureLogging("Intake", logLevel);
@@ -41,9 +48,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @Override
-    public void reset() {
+    public void reset(boolean auto) {
         chassis.reset();
         intake.reset();
+        hanging.reset(auto);
     }
 
     @MenuEntry(label = "TeleOp", group = "Competition")
@@ -124,7 +132,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             }
         }, Button.LEFT_BUMPER);
 
-        em.onButtonDown(new Events.Listener() {
+        em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 if (button==Button.DPAD_RIGHT) {
@@ -145,13 +153,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
-        em.onButtonUp(new Events.Listener() {
+        em2.onButtonUp(new Events.Listener() {
             @Override
             public void buttonUp(EventManager source, Button button) throws InterruptedException {
                 if (intake.getSliderCurrent() >= intake.getSliderSafe()) intake.stopSlider();
             }
         }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
-        em.onButtonDown(new Events.Listener() {
+        em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 if (button==Button.DPAD_UP) {
@@ -191,7 +199,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (side==Events.Side.RIGHT) { // latch down
                     if (current>0.2) {
                         if (source.isPressed(Button.START))
-                            hanging.latchDownInches(2);
+                            hanging.latchDownInches(1.0);
                         else
                             hanging.latchDown(source.isPressed(Button.BACK));
                     } else {
@@ -207,9 +215,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     //mineralDelivery.liftUp();
                 } else if (button==Button.RIGHT_BUMPER) { // latch up
                     if (source.isPressed(Button.START))
-                        hanging.latchUpInches(2);
+                        hanging.latchUpInches(1.0);
                     else
-                        hanging.latchUp();
+                        hanging.latchUp(source.isPressed(Button.BACK));
                 }
                 if (button==Button.B) {
                     if (source.isPressed(Button.BACK)) {
@@ -227,7 +235,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     }
                 }
                 if (button==Button.Y) {
-                    mineralDelivery.armUp();
+                    mineralDelivery.armDump();
                 } else if (button==Button.A){
                     mineralDelivery.armDown();
                 }

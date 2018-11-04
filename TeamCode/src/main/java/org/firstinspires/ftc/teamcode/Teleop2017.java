@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.SwerveSystem;
@@ -9,7 +10,7 @@ import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CRAB;
 import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.ORBIT;
 import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.TURN;
 
-
+@Disabled
 @TeleOp(name="TeleOp-2017", group="Relic")
 public class Teleop2017 extends SwerveUtilLOP {
 

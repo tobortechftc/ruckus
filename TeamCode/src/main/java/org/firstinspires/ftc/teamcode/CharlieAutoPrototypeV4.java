@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.minibot.Robot;
@@ -9,7 +10,7 @@ import org.firstinspires.ftc.teamcode.support.YieldHandler;
 /**
  * Created by 28761 on 9/15/2018.
  */
-
+@Disabled
 @Autonomous(name = "MiniBot: CharlieAutoTest V4", group = "MiniBot")
 public class CharlieAutoPrototypeV4 extends LinearOpMode implements YieldHandler {
 

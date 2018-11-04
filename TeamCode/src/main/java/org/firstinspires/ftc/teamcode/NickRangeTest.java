@@ -2,13 +2,14 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.minibot.Robot;
 import org.firstinspires.ftc.teamcode.support.YieldHandler;
-
+@Disabled
 @TeleOp(name = "NickRangeTest", group = "test")
 public class NickRangeTest extends LinearOpMode implements YieldHandler {
 

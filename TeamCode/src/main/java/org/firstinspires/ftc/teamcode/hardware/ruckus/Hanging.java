@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.hardware.ruckus;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -33,14 +34,15 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
     private double hook_up = 0.55;
     private double hook_down = 0.05;
-    private double latch_power = -.5;
+    private double latch_power = .95;
     private boolean hookIsOpened = false;
     private final double MARKER_UP = 0.4;
     private final double MARKER_DOWN = 0.9;
     private final int MAX_LATCH_POS = 8900;
+    private final int MIN_LATCH_POS = 50;
     private final int LATCH_COUNT_PER_INCH = 1305;
     private boolean markerIsDown = false;
-
+    private ElapsedTime runtime = new ElapsedTime();
     @Override
     public String getUniqueName() {
         return "hanging";
@@ -52,19 +54,23 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         //  that would react to track / wheel base / radius adjustments
     }
 
-    public void reset() {
+    public void reset(boolean Auto) {
         latch.setPower(0);
         hookClose();
         markerUp();
+        if (Auto && (latch!=null)) {
+            latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
     }
 
     public void configure(Configuration configuration) {
         // set up motors / sensors as wheel assemblies
         latch = configuration.getHardwareMap().dcMotor.get("latch");
         latch.setPower(0);
-        latch.setDirection(DcMotorSimple.Direction.REVERSE);
+        // latch.setDirection(DcMotorSimple.Direction.REVERSE);
         latch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         hook = configuration.getHardwareMap().servo.get("sv_hook");
         hookClose();
@@ -106,19 +112,19 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             markerDown();
         }
     }
-    public void latchUp(){
+    public void latchUp(boolean force){ // encoder going up
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         int cur_pos = latch.getCurrentPosition();
-        if (cur_pos>MAX_LATCH_POS) {
+        if (cur_pos>=MAX_LATCH_POS && force==false) {
             latch.setPower(0);
         } else {
             latch.setPower(latch_power);
         }
     }
-    public void latchDown(boolean force){
+    public void latchDown(boolean force){ // encoder going down
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         int cur_pos = latch.getCurrentPosition();
-        if (cur_pos<=0 && force==false) {
+        if ((cur_pos<=MIN_LATCH_POS) && force==false) {
             latch.setPower(0);
         } else {
             latch.setPower(-latch_power);
@@ -128,7 +134,9 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         if (!latch.isBusy())
             latch.setPower(0);
     }
-    public void latchUpInches(double inches) {
+
+    public void latchUpInches(double inches) { // encoder going down
+        runtime.reset();
         int cur_pos = latch.getCurrentPosition();
         int tar_pos = cur_pos + (int)(inches*LATCH_COUNT_PER_INCH);
         if (tar_pos>MAX_LATCH_POS)
@@ -136,16 +144,25 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setTargetPosition(tar_pos);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
+        while (latch.isBusy() && (runtime.seconds()<5.0)) {
+            cur_pos = latch.getCurrentPosition();
+        }
+        latchStop();
     }
 
-    public void latchDownInches(double inches) {
+    public void latchDownInches(double inches) { // encoder going up
+        runtime.reset();
         int cur_pos = latch.getCurrentPosition();
         int tar_pos = cur_pos - (int)(inches*LATCH_COUNT_PER_INCH);
-        if (tar_pos<=0)
-            tar_pos = 0;
+        if (tar_pos< MIN_LATCH_POS)
+            tar_pos = MIN_LATCH_POS;
         latch.setTargetPosition(tar_pos);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
+        while (latch.isBusy() && (runtime.seconds()<5.0)) {
+            cur_pos = latch.getCurrentPosition();
+        }
+        latchStop();
     }
 
     public boolean latchIsBusy() {
