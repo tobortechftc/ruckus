@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "Ruckus::Auto-Gold-1", group = "Ruckus")
-public class RuckusAutoGold1 extends LinearOpMode {
+@Autonomous(name = "Ruckus::Auto-Gold-Land", group = "Ruckus")
+public class RuckusAutoGoldLand extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -49,18 +49,18 @@ public class RuckusAutoGold1 extends LinearOpMode {
 
 
 
-//        if (robot.hanging!=null) {
-//            robot.chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-//            robot.hanging.latchUpInches(7);//Land
-//            sleep(2000);
-//        }
-//        robot.chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
-//        sleep(200);
-//        robot.chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
-//        sleep(200);
-//        robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
-//        sleep(200);
-//        robot.chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
+        if (robot.hanging!=null) {
+            robot.chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+            robot.hanging.latchUpInches(7);//Land
+            sleep(2000);
+        }
+        robot.chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+        sleep(200);
+        robot.chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
+        sleep(200);
+        robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+        sleep(200);
+        robot.chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
 
         //at this place, use open cv to determine the mineral configuration
         int mode = 0;
@@ -73,7 +73,7 @@ public class RuckusAutoGold1 extends LinearOpMode {
         }
 
         sleep(500);
-        robot.chassis.driveStraightAuto(0.35, 55, 0,Integer.MAX_VALUE);
+        robot.chassis.driveStraightAuto(0.35, 45, 0,Integer.MAX_VALUE);
         sleep(1000);
 
         //robot.chassis.rotateTo(0.25,-40,telemetry);

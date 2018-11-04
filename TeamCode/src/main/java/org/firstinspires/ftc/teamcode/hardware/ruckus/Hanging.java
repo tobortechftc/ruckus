@@ -34,7 +34,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
     private double hook_up = 0.55;
     private double hook_down = 0.05;
-    private double latch_power = .7;
+    private double latch_power = .95;
     private boolean hookIsOpened = false;
     private final double MARKER_UP = 0.4;
     private final double MARKER_DOWN = 0.9;
