@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.hardware17;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -15,9 +15,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.firstinspires.ftc.robotcore.external.Supplier;
 import org.firstinspires.ftc.teamcode.components.CameraSystem;
-import org.firstinspires.ftc.teamcode.hardware.MineralDumperSystem;
-import org.firstinspires.ftc.teamcode.hardware.GreenMamba;
-import org.firstinspires.ftc.teamcode.hardware.SwerveSystem;
+import org.firstinspires.ftc.teamcode.hardware17.MineralDumperSystem;
+import org.firstinspires.ftc.teamcode.hardware17.GreenMamba;
+import org.firstinspires.ftc.teamcode.hardware17.SwerveSystem;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -29,8 +29,8 @@ import org.opencv.imgproc.Moments;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CAR;
-import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CRAB;
+import static org.firstinspires.ftc.teamcode.hardware17.SwerveSystem.CarMode.CAR;
+import static org.firstinspires.ftc.teamcode.hardware17.SwerveSystem.CarMode.CRAB;
 
 
 public abstract class SwerveUtilLOP extends LinearOpMode {
