@@ -135,7 +135,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
-                if (button==Button.DPAD_RIGHT) {
+                if (button==Button.DPAD_LEFT) {
                     if (intake.getSliderTarget()==intake.getSliderContracted() || intake.getSliderTarget()==intake.getSliderDump()) {
                         // slider is currently contracted or is in dump position or is moving there
                         intake.moveSlider(intake.getSliderSafe());
@@ -279,6 +279,12 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
+        em2.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                mineralDelivery.operateDelivery();
+            }
+        }, Button.RIGHT_STICK);
     }
 
     @MenuEntry(label = "Drive Straight", group = "Test Chassis")

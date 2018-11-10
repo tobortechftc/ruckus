@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.components.AdjustableServo;
-import org.firstinspires.ftc.teamcode.components.Operation;
+import org.firstinspires.ftc.teamcode.support.tasks.Progress;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
@@ -230,7 +230,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
      * @param position {@link BoxPosition}
      * @return operation showing whether rotation is complete
      */
-    public Operation rotateBox(BoxPosition position) {
+    public Progress rotateBox(BoxPosition position) {
         double adjustment = Math.abs(boxServo.getPosition() - position.value);
         if (arePositionsCompatible(position.value, getSliderCurrent())) {
             boxServo.setPosition(position.value);
@@ -239,9 +239,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
         debug("rotateNox(): position: %.2f, adjustment: %.2f", position.value, adjustment);
         final long doneBy = System.currentTimeMillis() + Math.round(2 * adjustment);
-        return new Operation() {
+        return new Progress() {
             @Override
-            public boolean isFinished() {
+            public boolean isDone() {
                 return System.currentTimeMillis() >= doneBy;
             }
         };
@@ -317,7 +317,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
      * @param position to move slider to
      * @return operation showing whether movement is complete
      */
-    public Operation moveSlider(int position) {
+    public Progress moveSlider(int position) {
         if (position < this.sliderContracted) {
             throw new IllegalArgumentException("Slider position cannot be less than [sliderContracted]");
         }
@@ -330,9 +330,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setPower(this.sliderPower);
         }
-        return new Operation() {
+        return new Progress() {
             @Override
-            public boolean isFinished() {
+            public boolean isDone() {
                 return sliderMotor.isBusy();
             }
         };

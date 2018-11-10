@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.support.events.Button;
 import org.firstinspires.ftc.teamcode.support.events.EventManager;
 import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
+import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
@@ -92,6 +93,7 @@ public abstract class DiagnosticsTeleOp extends LinearOpMode {
             try {
                 eventManager1.processEvents();
                 eventManager2.processEvents();
+                TaskManager.processTasks();
             } catch (Exception E) {
                 telemetry.addData("Error in event handler", E.getMessage());
                 handleException(E);

@@ -6,9 +6,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.support.tasks.Progress;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
+import org.firstinspires.ftc.teamcode.support.tasks.Task;
+import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
 /**
  * Swerve chassis consists of 4 wheels with a Servo and DcMotor attached to each.
@@ -27,11 +30,13 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double gateClosePos = 0.01;
     private double gateOpenPos = .8;
     private double armDownPos = 0.05;
-    private double armDumpPos = 0.85;
-    private double armUpPos = 0.95;
+    private double armSafePos = 0.11;
+    private double armDumpPos = 0.85; //actual dump position
+    private double armUpPos = 0.95; //max arm position
     private double liftPower = -.5;
     private boolean gateIsOpened = false;
     private final int MAX_LIFT_POS = 5300;
+    private final int AUTO_LIFT_POS = 4100;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
@@ -82,11 +87,12 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
             gateOpen();
         }
     }
-    public void liftUp(){
+    public void liftUp() {
         int cur_pos = lift.getCurrentPosition();
         if (cur_pos>MAX_LIFT_POS) {
             lift.setPower(0);
         } else {
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             lift.setPower(liftPower);
         }
     }
@@ -95,20 +101,52 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         if (cur_pos<=0 && force==false) {
             lift.setPower(0);
         } else {
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             lift.setPower(-1 * liftPower);
         }
     }
+
+    public Progress liftAuto(boolean up) {
+        lift.setPower(0);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift.setTargetPosition(up ? AUTO_LIFT_POS : 0);
+        lift.setPower(liftPower * (up ? 1 : -1));
+        return new Progress() {
+            @Override
+            public boolean isDone() {
+                return !lift.isBusy();
+            }
+        };
+    }
+
     public void liftStop(){
         lift.setPower(0);
     }
-    public void armUp(){
-        dumperArm.setPosition(armUpPos);
+
+    private Progress moveArm(double position) {
+        double adjustment = Math.abs(position - dumperArm.getPosition());
+        dumperArm.setPosition(position);
+        // 2ms per degree of rotation
+        final long doneBy = System.currentTimeMillis() + Math.round(adjustment * 360);
+        return new Progress() {
+            @Override
+            public boolean isDone() {
+                return System.currentTimeMillis() >= doneBy;
+            }
+        };
     }
-    public void armDown(){
-        dumperArm.setPosition(armDownPos);
+
+    public Progress armUp() {
+        return moveArm(armUpPos);
     }
-    public void armDump(){
-        dumperArm.setPosition(armDumpPos);
+    public Progress armDown() {
+        return moveArm(armDownPos);
+    }
+    public Progress armDump() {
+        return moveArm(armDumpPos);
+    }
+    public Progress armSafeLift() {
+        return moveArm(armSafePos);
     }
     public void armDownInc() {
         double cur_pos = dumperArm.getPosition();
@@ -129,6 +167,39 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void armStop() {
         double cur_pos = dumperArm.getPosition();
         dumperArm.setPosition(cur_pos);
+    }
+
+    public void operateDelivery() {
+        final String taskName = "delivery";
+        if (!TaskManager.isComplete(taskName)) return;
+
+        final boolean up = this.lift.getCurrentPosition() < AUTO_LIFT_POS / 2;
+        if (up) this.gateClose();
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return armSafeLift();
+            }
+        }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return liftAuto(up);
+            }
+        }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return up ? armDump() : armDown();
+            }
+        }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                gateOpen();
+                return null;
+            }
+        }, taskName);
     }
 
     /**
