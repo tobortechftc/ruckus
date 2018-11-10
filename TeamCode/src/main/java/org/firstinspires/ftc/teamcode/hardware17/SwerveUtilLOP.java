@@ -1,36 +1,45 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.hardware17;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.util.Log;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.opencv.android.Utils;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.vuforia.Vuforia;
 
 import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.firstinspires.ftc.robotcore.external.Supplier;
 import org.firstinspires.ftc.teamcode.components.CameraSystem;
-import org.firstinspires.ftc.teamcode.hardware.MineralDumperSystem;
-import org.firstinspires.ftc.teamcode.hardware.GreenMamba;
-import org.firstinspires.ftc.teamcode.hardware.SwerveSystem;
+import org.firstinspires.ftc.teamcode.hardware17.MineralDumperSystem;
+import org.firstinspires.ftc.teamcode.hardware17.GreenMamba;
+import org.firstinspires.ftc.teamcode.hardware17.SwerveSystem;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.imgproc.Moments;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CAR;
-import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CRAB;
+import static org.firstinspires.ftc.teamcode.hardware17.SwerveSystem.CarMode.CAR;
+import static org.firstinspires.ftc.teamcode.hardware17.SwerveSystem.CarMode.CRAB;
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_GOLD_MINERAL;
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_SILVER_MINERAL;
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.TFOD_MODEL_ASSET;
 
 
 public abstract class SwerveUtilLOP extends LinearOpMode {
@@ -54,7 +63,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             UNKNOWN.opposite = UNKNOWN;
         }
 
-        public TeamColor getOpposingColor(){
+        public TeamColor getOpposingColor() {
             return opposite;
         }
     }
@@ -91,7 +100,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         //if (robot.use_dumper) {
         //    lift_to_target(robot.LIFT_INIT_COUNT);
         //}
-        if (robot.jewel.use_arm && (robot.jewel.sv_jkicker!=null)) {
+        if (robot.jewel.use_arm && (robot.jewel.sv_jkicker != null)) {
             robot.jewel.sv_jkicker.setPosition(robot.jewel.SV_JKICKER_UP);
         }
         if (robot.relicReachSystem.use_relic_grabber) {
@@ -107,7 +116,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             telemetry.update();
         }
         if (robot.swerve.use_imu) {
-            if (robot.swerve.imu.getSystemStatus()== BNO055IMU.SystemStatus.SYSTEM_ERROR && robot.swerve.imu2!=null) {
+            if (robot.swerve.imu.getSystemStatus() == BNO055IMU.SystemStatus.SYSTEM_ERROR && robot.swerve.imu2 != null) {
                 robot.swerve.use_imu2 = true;
             }
         }
@@ -140,6 +149,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         robot.jewel.disable();
         robot.relicReachSystem.disable();
     }
+
     public void enable_hardware_for_teleop_2017() {
         robot.swerve.enable(false);
         robot.swerve.use_2017 = true;
@@ -154,6 +164,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
      * doPlatformMission is meant to execute everything that needs to be done on the starting platform, including
      * determining what the bonus column is for the cryptobox from the pictograph, determining the jewel colors and
      * knocking off the opposing alliance ball based on the colors from the color class.
+     *
      * @param isBlueAlliance Used to determine which ball to hit
      * @throws InterruptedException
      */
@@ -162,13 +173,13 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
 
         if (!opModeIsActive()) return 0;
 
-        if (robot.targetColumn<0) {
+        if (robot.targetColumn < 0) {
             robot.targetColumn = robot.camera.get_cryptobox_column();
         }
 
         robot.jewel.r_arm_down();
 
-        if(robot.camera.use_camera) {
+        if (robot.camera.use_camera) {
             new Thread(new Runnable() {
                 //These constants are for setting a selected portion of the image from Camera
                 //(Assuming portrait) Top left is (0,0), Top right (0,1), Bottom left is (1,0), Bottom right is (1,1)
@@ -181,9 +192,9 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
 
                 @Override
                 public void run() {
-                    robot.camera.activate();
+                    robot.camera.initVuforia();
 
-                    do{
+                    do {
                         robot.camera.bitmap = robot.camera.captureVuforiaBitmap(/*IMAGE_OFFSET_X, IMAGE_OFFSET_Y, IMAGE_WIDTH_CROP, IMAGE_HEIGHT_CROP*/);
                     }
                     while (runTime.seconds() < 0.5 && robot.camera.bitmap == null);
@@ -231,10 +242,10 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             directionI *= -1;
         }
         if (!opModeIsActive()) return 0;
-        if (robot.jewel.sv_jkicker!=null) {
-            if (directionI<0)
+        if (robot.jewel.sv_jkicker != null) {
+            if (directionI < 0)
                 robot.jewel.jkick_left();
-            else if (directionI>0)
+            else if (directionI > 0)
                 robot.jewel.jkick_right();
             robot.jewel.r_arm_up();
         } else { // move chassis to knoc the jewel
@@ -281,7 +292,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         robot.stop_on_bump = false;
     }
 
-    public void deliverGlyph() throws InterruptedException{
+    public void deliverGlyph() throws InterruptedException {
         if (!opModeIsActive()) return;
         robot.swerve.StraightIn(0.6, 2);
         if (!opModeIsActive()) return;
@@ -302,18 +313,18 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         }
     }
 
-    void go_to_crypto(double next_dist, double power, int targetColumn, boolean isBlue, boolean isSideBox)throws InterruptedException {
+    void go_to_crypto(double next_dist, double power, int targetColumn, boolean isBlue, boolean isSideBox) throws InterruptedException {
         if (targetColumn < 0) targetColumn = 1;
         boolean nearest_col = false;
-        if ((targetColumn==0 && isBlue==true) || (targetColumn==2 && isBlue==false))
+        if ((targetColumn == 0 && isBlue == true) || (targetColumn == 2 && isBlue == false))
             nearest_col = true;
 
-        int direction = (!isBlue?1:-1);
+        int direction = (!isBlue ? 1 : -1);
         double dist = next_dist + (isSideBox ? 20 : 24);
         if (nearest_col)
             dist += 3;
-        robot.swerve.StraightIn(direction*.3, dist); // Drive off the balance stone
-        if (direction==1 && !isSideBox) { // red front need to setPosition 180 degree
+        robot.swerve.StraightIn(direction * .3, dist); // Drive off the balance stone
+        if (direction == 1 && !isSideBox) { // red front need to setPosition 180 degree
             robot.swerve.TurnLeftD(0.4, 180);
             robot.swerve.alignUsingIMU(0.18, 178.0);
         } else {
@@ -325,8 +336,9 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         if (isSideBox) {
             if (isBlue) driveDistance = 6 + (18.5 * targetColumn); // 18cm between columns
             else driveDistance = 6 + (18.5 * (2 - targetColumn));
-            if (driveDistance<7) driveDistance=7; // ensure setPosition not hitting balance stone
-            robot.swerve.StraightCm(direction*power, driveDistance); // drive to cryptobox
+            if (driveDistance < 7)
+                driveDistance = 7; // ensure setPosition not hitting balance stone
+            robot.swerve.StraightCm(direction * power, driveDistance); // drive to cryptobox
 
             {
                 robot.swerve.TurnLeftD(0.35, 90);
@@ -334,15 +346,15 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             }
             if (!opModeIsActive()) return;
             enable_bump_detection();
-            for(int i = 0 ; i < 3 ; i++) {
+            for (int i = 0; i < 3; i++) {
                 dist = Math.max(robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_LEFT), robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_RIGHT)) - 15;
                 if (dist > 30) dist = 7;
-                if (dist<1) break;
+                if (dist < 1) break;
                 robot.swerve.StraightCm(-.3, dist); // drive close to cryptobox
             }
             if (robot.bump_detected) {
                 // hit divider, forward 2 cm
-                robot.bump_detected=false;
+                robot.bump_detected = false;
                 robot.swerve.StraightCm(.3, 2);
             }
             disable_bump_detection();
@@ -364,18 +376,17 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             else
                 robot.swerve.StraightCm(power, driveDistance);
             robot.swerve.change_swerve_pos(CAR);
-            if(isBlue){
+            if (isBlue) {
                 robot.swerve.StraightCm(-0.2, 10);
-            }
-            else {
-                robot.swerve.StraightCm(-.2,5);
+            } else {
+                robot.swerve.StraightCm(-.2, 5);
             }
 
             enable_bump_detection();
-            for (int i=1; i<3; i++) {
+            for (int i = 1; i < 3; i++) {
                 dist = Math.max(robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_LEFT), robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_RIGHT)) - 15;
-                if (dist<2) break;
-                if (dist > 50 || (dist <= 5 && i==0)) {
+                if (dist < 2) break;
+                if (dist > 50 || (dist <= 5 && i == 0)) {
                     robot.swerve.StraightCm(-.25, 16);
                 } else if (dist > 1) {
                     robot.swerve.StraightCm(-.25, dist); // forward using front range sensor, so it is close to cryptobox
@@ -383,11 +394,11 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             }
             if (robot.bump_detected) {
                 // hit divider, forward 2 cm
-                robot.bump_detected=false;
+                robot.bump_detected = false;
                 robot.swerve.StraightCm(.3, 2);
             }
             disable_bump_detection();
-            robot.swerve.alignUsingIMU(0.18, (isBlue?0:178));
+            robot.swerve.alignUsingIMU(0.18, (isBlue ? 0 : 178));
         }
 
         robot.swerve.change_swerve_pos(CRAB);
@@ -405,12 +416,12 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         }
         if (!opModeIsActive()) return;
 
-        boolean edge_undetected_L=true;// robot.proxSensor.getState(); // false = something within proximity
-        boolean edge_undetected_R=true;
+        boolean edge_undetected_L = true;// robot.proxSensor.getState(); // false = something within proximity
+        boolean edge_undetected_R = true;
         robot.runtime.reset();
         do {
             edge_undetected_L = robot.swerve.proxL.getState();
-            edge_undetected_R = (nearest_col&&isBlue?true:robot.swerve.proxR.getState());
+            edge_undetected_R = (nearest_col && isBlue ? true : robot.swerve.proxR.getState());
             if (!opModeIsActive()) return;
         } while ((edge_undetected_L && edge_undetected_R) && (robot.runtime.seconds() < 1.5));
 
@@ -435,6 +446,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
      * Determines if jewel color is blue, red, or other/unsure.
      * Expects majority of bitmap to be either red or blue.
      * Outputs string as either "Red", "Blue", or "Unsure"
+     *
      * @param bitmap
      * @return String
      */
@@ -444,13 +456,11 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
 
         int[] pixels = new int[bitmap.getWidth()];
 
-        if (robot.allianceColor == TeamColor.BLUE){
+        if (robot.allianceColor == TeamColor.BLUE) {
             bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, bitmap.getHeight() * 7 / 8, bitmap.getWidth(), 1);
-        }
-        else if (robot.allianceColor == TeamColor.RED){
+        } else if (robot.allianceColor == TeamColor.RED) {
             bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, bitmap.getHeight() * 5 / 6, bitmap.getWidth(), 1);
-        }
-        else if (robot.allianceColor == TeamColor.UNKNOWN){
+        } else if (robot.allianceColor == TeamColor.UNKNOWN) {
             throw new IllegalStateException("Variable allianceColor is set to Unknown");
         } else {
             throw new IllegalStateException("There is something wrong with variable allianceColor");
@@ -462,27 +472,25 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         int redStart = -1;
         int blueStart = -1;
 
-        for (int pixelI = 0; pixelI < pixels.length; pixelI++){
+        for (int pixelI = 0; pixelI < pixels.length; pixelI++) {
             int pixelRed = Color.red(pixels[pixelI]);
             int pixelGreen = Color.green(pixels[pixelI]);
             int pixelBlue = Color.blue(pixels[pixelI]);
 
-            double greenToBlueRatio = (double)pixelGreen / (double)pixelBlue;
-            double greenToRedRatio = (double)pixelGreen / (double)pixelRed;
+            double greenToBlueRatio = (double) pixelGreen / (double) pixelBlue;
+            double greenToRedRatio = (double) pixelGreen / (double) pixelRed;
 
-            if((pixelRed > (pixelGreen * 1.4)) && (pixelRed > (pixelBlue * 1.4)) && (greenToRedRatio < .3)){
+            if ((pixelRed > (pixelGreen * 1.4)) && (pixelRed > (pixelBlue * 1.4)) && (greenToRedRatio < .3)) {
                 redCount++;
-                if (redStart == -1 && pixelI > 250){
+                if (redStart == -1 && pixelI > 250) {
                     redStart = pixelI;
                 }
-            }
-            else if ((pixelBlue > (pixelRed * 1.4)) && (greenToBlueRatio > .65) && (greenToBlueRatio < .9)){
+            } else if ((pixelBlue > (pixelRed * 1.4)) && (greenToBlueRatio > .65) && (greenToBlueRatio < .9)) {
                 blueCount++;
-                if (blueStart == -1 && pixelI > 250){
+                if (blueStart == -1 && pixelI > 250) {
                     blueStart = pixelI;
                 }
-            }
-            else {
+            } else {
                 unknownCount++;
             }
         }
@@ -495,10 +503,9 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             telemetry.update();
         }
 
-        if(redStart < blueStart && redStart != -1 && blueStart != -1){
+        if (redStart < blueStart && redStart != -1 && blueStart != -1) {
             return TeamColor.RED;
-        }
-        else if (blueStart < redStart && blueStart != -1 && redStart != -1){
+        } else if (blueStart < redStart && blueStart != -1 && redStart != -1) {
             return TeamColor.BLUE;
         } else {
             return TeamColor.UNKNOWN;
@@ -508,28 +515,28 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
     void stop_tobot() {
         if (robot.swerve.use_swerve)
             robot.swerve.stop_chassis();
-        if (robot.jewel!=null)
+        if (robot.jewel != null)
             robot.jewel.stop();
         // stop all sensors
     }
 
     void show_telemetry() throws InterruptedException {
         telemetry.addData("1. Team", " %s sw/IMU/Vu = %s%s/%s/%s",
-                robot.allianceColor, (robot.swerve.use_swerve ?"Y":"N"),
-                (robot.isTesting?"-T":""), (robot.swerve.use_imu?"Y":"N"),
-                (robot.camera.use_Vuforia ?"Y":"N"));
+                robot.allianceColor, (robot.swerve.use_swerve ? "Y" : "N"),
+                (robot.isTesting ? "-T" : ""), (robot.swerve.use_imu ? "Y" : "N"),
+                (robot.camera.use_Vuforia ? "Y" : "N"));
         telemetry.addData("2. PW-r/L/R/Sl-En =", "%.2f,%.2f/%.2f/%s",
-                robot.swerve.drivePowerRatio, robot.swerve.motorPowerLeft,robot.swerve.motorPowerRight,(robot.gg_slider_encoder_ok ?"Y":"N"));
+                robot.swerve.drivePowerRatio, robot.swerve.motorPowerLeft, robot.swerve.motorPowerRight, (robot.gg_slider_encoder_ok ? "Y" : "N"));
         telemetry.addData("3. W-sv angle FL/FR/BL/BR =", "%.3f/%.3f/%.3f/%.3f",
                 robot.swerve.servoPosFL, robot.swerve.servoPosFR, robot.swerve.servoPosBL, robot.swerve.servoPosBR);
         double range_front_left = robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_LEFT);
         double range_front_right = robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_RIGHT);
         double range_back = robot.swerve.getRange(SwerveSystem.RangeSensor.BACK);
         boolean glyph_stuck = GlyphStuck();
-        if (robot.swerve.use_imu||robot.swerve.use_range_sensor) {
+        if (robot.swerve.use_imu || robot.swerve.use_range_sensor) {
             telemetry.addData("4.1 IMU/Range", "%s=%.2f(i2=%.0f)/L=%.0f/R=%.0f/B%s=%.0fcm",
-                    (robot.swerve.use_imu2?"i2":"i1"),robot.swerve.imu_heading(),robot.swerve.imu_heading(), range_front_left,range_front_right,
-                    (glyph_stuck?"(S)":""), range_back);
+                    (robot.swerve.use_imu2 ? "i2" : "i1"), robot.swerve.imu_heading(), robot.swerve.imu_heading(), range_front_left, range_front_right,
+                    (glyph_stuck ? "(S)" : ""), range_back);
         }
         if (robot.swerve.use_proximity_sensor) {
             telemetry.addData("4.2.1 ProxSensorLeft =", robot.swerve.proxL.getState());
@@ -543,20 +550,20 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         if (robot.camera.use_Vuforia) {
             telemetry.addData("5. Vuforia Column = ", "%d", robot.camera.get_cryptobox_column());
         }
-        if ((robot.swerve.use_swerve)&& !robot.servo_tune_up) {
+        if ((robot.swerve.use_swerve) && !robot.servo_tune_up) {
             telemetry.addData("6. Drive Mode = ", "%s", robot.swerve.cur_mode);
             telemetry.addData("6.1 SW-Enc FL/FR/BL/BR = ", "%d/%d/%d/%d",
                     robot.swerve.motorFrontLeft.getCurrentPosition(),
                     robot.swerve.motorFrontRight.getCurrentPosition(),
-                    (robot.swerve.motorBackLeft!=null?robot.swerve.motorBackLeft.getCurrentPosition():0),
-                    (robot.swerve.motorBackRight!=null?robot.swerve.motorBackRight.getCurrentPosition():0));
+                    (robot.swerve.motorBackLeft != null ? robot.swerve.motorBackLeft.getCurrentPosition() : 0),
+                    (robot.swerve.motorBackRight != null ? robot.swerve.motorBackRight.getCurrentPosition() : 0));
         }
         if (robot.intake.use_intake) {
             telemetry.addData("7. Intake r = ", "%2.2f", robot.intake.intakeRatio);
         }
 
-        if (robot.dumper.use_dumper)  {
-            telemetry.addData("8.1 dumper slide / pos = ","%d (pw=%.2f)/%3.3f",
+        if (robot.dumper.use_dumper) {
+            telemetry.addData("8.1 dumper slide / pos = ", "%d (pw=%.2f)/%3.3f",
                     robot.dumper.mt_lift.getCurrentPosition(), robot.dumper.mt_lift.getPower(),
                     robot.dumper.sv_dumper.getPosition());
         }
@@ -564,15 +571,15 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         if (robot.relicReachSystem.use_relic_grabber) {
             telemetry.addData("9.1 relic gr/wrist/elbow = ", "%4.4f/%4.3f/%4.3f",
                     robot.relicReachSystem.sv_relic_grabber.getPosition(), robot.relicReachSystem.sv_relic_wrist.getPosition(),
-                    (robot.relicReachSystem.sv_relic_elbow!=null?robot.relicReachSystem.sv_relic_elbow.getPosition():0));
+                    (robot.relicReachSystem.sv_relic_elbow != null ? robot.relicReachSystem.sv_relic_elbow.getPosition() : 0));
         }
         if (robot.relicReachSystem.use_relic_slider) {
-            telemetry.addData("9.2 r-slider pwr/enc = ","%3.2f/%d",
-                    robot.relicReachSystem.mt_relic_slider.getPower(),robot.relicReachSystem.mt_relic_slider.getCurrentPosition());
+            telemetry.addData("9.2 r-slider pwr/enc = ", "%3.2f/%d",
+                    robot.relicReachSystem.mt_relic_slider.getPower(), robot.relicReachSystem.mt_relic_slider.getCurrentPosition());
         }
-        if (robot.isTesting){
+        if (robot.isTesting) {
             telemetry.addData("11. CRAB_LEFT_DIFF/CRAB_RIGHT_DIFF = ", "%.4f/%.4f", robot.swerve.NB_LEFT_SV_DIFF, robot.swerve.NB_RIGHT_SV_DIFF);
-            telemetry.addData("12. CRAB_90_DIFF_DEC_FR/BR = ", "%.4f/%.4f",robot.swerve.NB_CRAB_DIFF_INC_FR, robot.swerve.NB_CRAB_DIFF_DEC_BR);
+            telemetry.addData("12. CRAB_90_DIFF_DEC_FR/BR = ", "%.4f/%.4f", robot.swerve.NB_CRAB_DIFF_INC_FR, robot.swerve.NB_CRAB_DIFF_DEC_BR);
             telemetry.addData("13. CRAB_90_DIFF_INC_FL/BL = ", "%.4f/%.4f", robot.swerve.NB_CRAB_DIFF_DEC_FL, robot.swerve.NB_CRAB_DIFF_INC_BL);
 
         }
@@ -612,9 +619,9 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         intakeGateMid();
         double orig_imu = robot.swerve.imu_heading();
 
-        if (opModeIsActive()==false ||
-                (isSide==true && robot.runtimeAuto.seconds() > 24) ||
-                (isSide==false && robot.runtimeAuto.seconds() > 22)) {
+        if (opModeIsActive() == false ||
+                (isSide == true && robot.runtimeAuto.seconds() > 24) ||
+                (isSide == false && robot.runtimeAuto.seconds() > 22)) {
             return;
         }
         if (opModeIsActive()) {
@@ -629,22 +636,22 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
             if (isSide)
                 robot.swerve.StraightCm(.95, 75);
             else
-                robot.swerve.StraightCm(.95,115);
+                robot.swerve.StraightCm(.95, 115);
             robot.swerve.fast_mode = false;
         }
         boolean got_one = autoIntakeGlyphs(isSide, isBlue);
 
-        if(isSide) robot.swerve.alignUsingIMU(0.3, orig_imu);
-        else robot.swerve.alignUsingIMU(0.3, orig_imu + (isBlue?14:-14));
+        if (isSide) robot.swerve.alignUsingIMU(0.3, orig_imu);
+        else robot.swerve.alignUsingIMU(0.3, orig_imu + (isBlue ? 14 : -14));
 
         if (opModeIsActive()) {
             enable_bump_detection();
-            for (int i=0; i<2 && robot.bump_detected==false; i++) {
-                double dist = (isSide? Math.max(robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_LEFT),
-                        robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_RIGHT)) - 20:
+            for (int i = 0; i < 2 && robot.bump_detected == false; i++) {
+                double dist = (isSide ? Math.max(robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_LEFT),
+                        robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_RIGHT)) - 20 :
                         Math.min(robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_LEFT),
                                 robot.swerve.getRange(SwerveSystem.RangeSensor.FRONT_RIGHT)) - 20);
-                if (i==0) {
+                if (i == 0) {
                     if (isSide) {
                         if (dist < 53) dist = 53;
                         else if (dist > 80)
@@ -657,22 +664,21 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
                     if (robot.runtimeAuto.seconds() > 27.5 || !got_one) {
                         dist -= 15;
                     }
-                } else if (dist<1) break;
-                if (i==0)robot.swerve.fast_mode = true;
-                robot.swerve.StraightCm((i==0?-0.9:-0.5), dist);
-                robot.swerve.fast_mode =false;
+                } else if (dist < 1) break;
+                if (i == 0) robot.swerve.fast_mode = true;
+                robot.swerve.StraightCm((i == 0 ? -0.9 : -0.5), dist);
+                robot.swerve.fast_mode = false;
                 if (robot.runtimeAuto.seconds() > 29) return;
             }
             if (robot.bump_detected) {
-                robot.swerve.StraightCm(0.6,5);
+                robot.swerve.StraightCm(0.6, 5);
             }
             disable_bump_detection();
             robot.swerve.StraightCm(0.6, 4);
         }
-        if((robot.runtimeAuto.seconds() > 29 || !got_one) && !robot.servo_tune_up){
+        if ((robot.runtimeAuto.seconds() > 29 || !got_one) && !robot.servo_tune_up) {
             return;
-        }
-        else if (got_one && opModeIsActive()) {
+        } else if (got_one && opModeIsActive()) {
             //lift_up_level_half();
             quickDump(isSide);
             //lift_back_init();
@@ -697,8 +703,7 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
                 robot.swerve.TurnLeftD(0.6, 5);
             }
             robot.swerve.change_swerve_pos(SwerveSystem.CarMode.CAR);
-        }
-        else {
+        } else {
             if (robot.allianceColor == TeamColor.RED) {
                 robot.swerve.TurnLeftD(0.6, 3);
             } else {
@@ -710,21 +715,21 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         if (!opModeIsActive()) return;
         sleep(300);
         if (!opModeIsActive()) return;
-        if (robot.runtimeAuto.seconds() < 29 || robot.servo_tune_up==true) {
+        if (robot.runtimeAuto.seconds() < 29 || robot.servo_tune_up == true) {
             // sleep(100);
             robot.swerve.driveTT(0.6, 0.6); // drive backward for .2 sec
             sleep(300);
             robot.swerve.driveTT(0, 0);
             if (!opModeIsActive()) return;
-            robot.swerve.StraightIn(0.9,3); // out 5.5 in
+            robot.swerve.StraightIn(0.9, 3); // out 5.5 in
             if (!opModeIsActive()) return;
             if (robot.runtimeAuto.seconds() < 29.5)
                 sleep(100);
-            robot.swerve.StraightIn(0.9,4); // out 5.5 in
+            robot.swerve.StraightIn(0.9, 4); // out 5.5 in
             if (!opModeIsActive()) return;
             robot.dumper.dumper_down(false);
         } else {
-            robot.swerve.StraightIn(0.9,5.5);
+            robot.swerve.StraightIn(0.9, 5.5);
         }
         if (!opModeIsActive()) return;
     }
@@ -733,17 +738,18 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         boolean got_at_least_one = false;
         boolean got_two = false;
         boolean tried_two = false;
-        double time_out = (isSide?20:19);
+        double time_out = (isSide ? 20 : 19);
         robot.swerve.reset_prox();
-        for (int i=0; i<1; i++) {
+        for (int i = 0; i < 1; i++) {
             // StraightIn(0.2,6);
             got_at_least_one = autoIntakeOneGlyph(isSide, isBlue);
         }
-        if(/*robot.runtimeAuto.seconds() < time_out-4 && got_at_least_one && !gotTwoGlyphs()*/ false) {
+        if (/*robot.runtimeAuto.seconds() < time_out-4 && got_at_least_one && !gotTwoGlyphs()*/ false) {
             robot.snaked_left = false;
             got_two = autoIntakeSecondGlyph(isSide, isBlue);
         }
-        if(robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up==false) return got_at_least_one;
+        if (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up == false)
+            return got_at_least_one;
         if (got_at_least_one && opModeIsActive()) {
             //dumper_shake();
             //intakeIn();
@@ -756,36 +762,38 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
     }
 
     public boolean autoIntakeOneGlyph(boolean isSide, boolean isBlue) throws InterruptedException {
-        double time_out = (isSide?26:24.5);
+        double time_out = (isSide ? 26 : 24.5);
 
-        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up==false)) {
+        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up == false)) {
             return false;
         }
         boolean got_one = autoIntake(isSide, true, isBlue);
-        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up==false)) {
+        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up == false)) {
             return false;
         }
 
-        for (int i=0; (i<3) && !got_one; i++) { // try upto 3 times
-            if(robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up==false) return false;
+        for (int i = 0; (i < 3) && !got_one; i++) { // try upto 3 times
+            if (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up == false)
+                return false;
             got_one = autoIntake(isSide, true, isBlue);
             if (!opModeIsActive()) return false;
         }
         return got_one;
     }
 
-    public boolean autoIntakeSecondGlyph(boolean isSide,boolean isBlue) throws InterruptedException {
-        double time_out = (isSide?22:20);
-        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up==false)) {
+    public boolean autoIntakeSecondGlyph(boolean isSide, boolean isBlue) throws InterruptedException {
+        double time_out = (isSide ? 22 : 20);
+        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up == false)) {
             return false;
         }
-        robot.swerve.StraightCm(0.4,15);
+        robot.swerve.StraightCm(0.4, 15);
         boolean got_two = autoIntake(isSide, false, isBlue);
-        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up==false)) {
+        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up == false)) {
             return false;
         }
-        for (int i=0; (i<1) && !got_two; i++) { // try upto 1 time
-            if(robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up==false) return false;
+        for (int i = 0; (i < 1) && !got_two; i++) { // try upto 1 time
+            if (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up == false)
+                return false;
             got_two = autoIntake(isSide, false, isBlue);
             if (!opModeIsActive()) return false;
         }
@@ -800,10 +808,10 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
     }
 
     public boolean autoIntake(boolean isSide, boolean isFirstGlyph, boolean isBlue) throws InterruptedException {
-        double time_out = (isSide?26:24.5);
+        double time_out = (isSide ? 26 : 24.5);
         boolean got_one = false;
         boolean curve_right = robot.snaked_left;
-        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > (time_out-1) && robot.servo_tune_up==false)) {
+        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > (time_out - 1) && robot.servo_tune_up == false)) {
             robot.intake.intakeStop();
             robot.swerve.stop_chassis();
             return false;
@@ -814,56 +822,57 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
 //        } else {
 //            driveTT(-0.1,-0.2);
 //        }
-        robot.swerve.driveTTSnake(-0.5,(float) 1.0,curve_right);
+        robot.swerve.driveTTSnake(-0.5, (float) 1.0, curve_right);
         robot.snaked_left = !robot.snaked_left;
         robot.intake.intakeIn();
         sleep(700);
-        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > (time_out-.5) && robot.servo_tune_up==false)) {
-            robot.intake.intakeStop(); robot.swerve.stop_chassis();return false;
+        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > (time_out - .5) && robot.servo_tune_up == false)) {
+            robot.intake.intakeStop();
+            robot.swerve.stop_chassis();
+            return false;
         }
         robot.swerve.stop_chassis();
-        if(GlyphStuck()) {
-            if(!robot.tried_clockwise) {
+        if (GlyphStuck()) {
+            if (!robot.tried_clockwise) {
                 robot.intake.correctGlyph(false);
                 robot.tried_clockwise = true;
-            }
-            else{
+            } else {
                 robot.intake.correctGlyph(false);
                 robot.tried_clockwise = false;
             }
-        }
-        else{
+        } else {
             robot.intake.intakeOut();
             sleep(300);
         }
-        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up==false)) {
-            robot.intake.intakeStop(); robot.swerve.stop_chassis();return false;
+        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > time_out && robot.servo_tune_up == false)) {
+            robot.intake.intakeStop();
+            robot.swerve.stop_chassis();
+            return false;
         }
         //driveTTSnake(-0.3,(float) 1.0,!curve_right);
         robot.intake.intakeIn();
         sleep(600);
         robot.intake.intakeStop();
         robot.swerve.stop_chassis();
-        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > (time_out+0.5) && robot.servo_tune_up==false)) {
+        if (!opModeIsActive() || (robot.runtimeAuto.seconds() > (time_out + 0.5) && robot.servo_tune_up == false)) {
             return false;
         }
-        if(isFirstGlyph) {
+        if (isFirstGlyph) {
             got_one = gotOneGlyph();
-        }
-        else{
+        } else {
             got_one = gotTwoGlyphs();
         }
         return got_one;
     }
 
     public boolean GlyphStuck() {
-        if (robot.swerve.rangeSensorBack==null)
+        if (robot.swerve.rangeSensorBack == null)
             return false;
-        return (robot.swerve.getRange(SwerveSystem.RangeSensor.BACK)<5.1);
+        return (robot.swerve.getRange(SwerveSystem.RangeSensor.BACK) < 5.1);
     }
 
     boolean gotOneGlyph() {
-        boolean got_one=false;
+        boolean got_one = false;
         if (robot.swerve.use_proximity_sensor) {
             got_one = !robot.swerve.proxFL.getState() || !robot.swerve.proxML.getState();
         }
@@ -871,163 +880,11 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
     }
 
     boolean gotTwoGlyphs() {
-        boolean got_two=false;
+        boolean got_two = false;
         if (robot.swerve.use_proximity_sensor) {
             got_two = !robot.swerve.proxML.getState() && !robot.swerve.proxFL.getState();
         }
         return got_two;
-    }
-
-    public static class MineralDetection extends OpenCVPipeline{
-        static Logger<MineralDetection> logger = new Logger<>();
-        CameraSystem cameraSystem;
-
-        static {
-            logger.configureLogging("Mineral_Detection", Log.VERBOSE);
-        }
-
-        public MineralDetection(CameraSystem cameraSystem) {
-            this.cameraSystem = cameraSystem;
-        }
-
-        @Override
-        public Mat processFrame(Mat rgba, Mat grayscale){
-            boolean showContours = false;
-            Mat silverHSV = new Mat();
-            Mat silverThresholded = new Mat();
-            Mat goldHSV = new Mat();
-            Mat goldThresholded = new Mat();
-            List<MatOfPoint> silverContours;
-            List<MatOfPoint> goldContours;
-
-            Imgproc.cvtColor(rgba, silverHSV,Imgproc.COLOR_RGB2HSV,3);
-            Imgproc.cvtColor(rgba, goldHSV, Imgproc.COLOR_RGB2HSV, 3);
-            Core.inRange(silverHSV, new Scalar(0,0,90), new Scalar(0,0,100), silverThresholded);
-            Core.inRange(goldHSV, new Scalar (27,223,69.8), new Scalar(51,160,100), goldThresholded);
-
-            Imgproc.blur(silverThresholded, silverThresholded, new Size(3,3));
-
-            Imgproc.blur(goldThresholded, goldThresholded, new Size(3,3));
-            silverContours = new ArrayList<>();
-            goldContours = new ArrayList<>();
-            Imgproc.findContours(silverThresholded, silverContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-            Imgproc.findContours(goldThresholded, goldContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-
-            if (showContours){
-                Imgproc.drawContours(rgba, silverContours, -1, new Scalar(144, 255, 255), 2, 8);
-                Imgproc.drawContours(rgba, goldContours, -1, new Scalar(255, 144, 255), 2, 8);
-            }
-            return rgba;
-        }
-
-        public enum SampleLocation {
-            LEFT, CENTER, RIGHT, UNKNOWN
-        }
-
-        public Mat getMatFromCamera(){
-            Mat mat = new Mat();
-            cameraSystem.activate();
-            Bitmap bitmap = cameraSystem.captureVuforiaBitmap();
-            Utils.bitmapToMat(bitmap, mat);
-            return mat;
-        }
-
-        public SampleLocation getGoldPosition() {
-            Mat mat = getMatFromCamera();
-            Mat goldHSV = new Mat();
-            Mat silverHSV = new Mat();
-            Mat silverThresholded = new Mat();
-            Mat goldThresholded = new Mat();
-            List<MatOfPoint> silverContours;
-            List<MatOfPoint> goldContours;
-
-
-            // Changes mat color format from RGB565 to HSV
-            Imgproc.cvtColor(mat, goldHSV, Imgproc.COLOR_RGB2HSV, 3);
-            Imgproc.cvtColor(mat, silverHSV, Imgproc.COLOR_RGB2HSV, 3);
-            logger.verbose("Variable goldHSV size: %s", goldHSV.size());
-            logger.verbose("Variable silverHSV size: %s", silverHSV.size());
-
-            // Thresholds color to become binary image of sample and background
-            Core.inRange(silverHSV, new Scalar(0, 0, 90), new Scalar(16, 15, 100), silverThresholded);
-            Core.inRange(goldHSV, new Scalar(29, 163, 177), new Scalar(51, 223, 255), goldThresholded);
-            logger.verbose("Thresholded Gold mat size: %s", goldThresholded.size());
-            logger.verbose("Thresholded Silver mat size: %s", silverThresholded.size());
-            Imgproc.blur(silverThresholded, silverThresholded, new Size(3, 3));
-            Imgproc.blur(goldThresholded, goldThresholded, new Size(3, 3));
-
-            // Places images into contour variables to find the mass centers of the objects
-            silverContours = new ArrayList<>();
-            goldContours = new ArrayList<>();
-            Imgproc.findContours(silverThresholded, silverContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-            Imgproc.findContours(goldThresholded, goldContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-            logger.verbose("Gold Contours Size: %s", goldContours.size());
-            logger.verbose("Silver Contours Size: %s", silverContours.size());
-
-            List<Moments> silverMu = new ArrayList<>();
-            Point[] silverCoordCenter = new Point[silverMu.size()];
-            for (int i = 0; i < silverContours.size(); i++) {
-                silverMu.add(Imgproc.moments(silverContours.get(i)));
-                logger.verbose("Silver Moments Size: %s Index: %s", silverMu.size(), i);
-                silverCoordCenter[i] = new Point((int) (silverMu.get(i).m10 / silverMu.get(i).m00), (int) (silverMu.get(i).m01 / silverMu.get(i).m00));
-            }
-            List<Moments> goldMu = new ArrayList<>(goldContours.size());
-            Point[] goldCoordCenter = new Point[goldMu.size()];
-            for (int i = 0; i < goldContours.size(); i++) {
-                goldMu.add(Imgproc.moments(goldContours.get(i)));
-                logger.verbose("Gold Moments Size: %s Index: %s", goldMu.size(), i);
-                goldCoordCenter[i] = new Point((int) (goldMu.get(i).m10 / goldMu.get(i).m00), (int) (goldMu.get(i).m01 / goldMu.get(i).m00));
-            }
-
-            boolean isLeft = true;
-            boolean isRight = true;
-
-            for (int i = 0; i < silverCoordCenter.length; i++){
-                if(goldCoordCenter[0].x > silverCoordCenter[i].x) {
-                    isLeft = false;
-                }
-            }
-            for (int i = 0; i < silverCoordCenter.length; i++){
-                if(goldCoordCenter[0].x < silverCoordCenter[i].x) {
-                    isRight = false;
-                }
-            }
-            if (isLeft && !isRight){
-                return SampleLocation.LEFT;
-            }
-            if (!isLeft && isRight) {
-                return SampleLocation.RIGHT;
-            }
-            if (!isLeft && !isRight){
-                return SampleLocation.CENTER;
-            }
-            return SampleLocation.UNKNOWN;
-        }
-
-//        public synchronized List<MatOfPoint> getGoldContours() {
-//            return goldContours;
-//        }
-//        public synchronized  List<MatOfPoint> getSilverContours(){
-//            return silverContours;
-//        }
-//        public Point[] findSilver(){
-//            List<Moments> mu = new ArrayList<>(silverContours.size());
-//            Point[] coordCenter = new Point[mu.size()];
-//            for (int i = 0; i < silverContours.size(); i++) {
-//                mu.add(Imgproc.moments(silverContours.get(i)));
-//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
-//            }
-//            return coordCenter;
-//        }
-//        public Point[] findGold(){
-//            List<Moments> mu = new ArrayList<>(goldContours.size());
-//            Point[] coordCenter = new Point[mu.size()];
-//            for (int i = 0; i < goldContours.size(); i++) {
-//                mu.add(Imgproc.moments(goldContours.get(i)));
-//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
-//            }
-//            return coordCenter;
-//        }
     }
 
 }

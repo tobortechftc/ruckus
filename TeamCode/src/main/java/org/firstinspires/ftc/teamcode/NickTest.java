@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 10/13/2018.
  */
-@Disabled
 @Autonomous(name = "NickAutonomousTest", group = "Ruckus")
 public class NickTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
@@ -22,7 +21,7 @@ public class NickTest extends LinearOpMode {
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
 
     int targetMineral = 1; // 0=left, 1=center, 2=right. default to center as it is fastest
-    int timeout = 10; // timeout time for driveStraightAuto
+    int timeout = 10000; // timeout time for driveStraightAuto
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -49,8 +48,6 @@ public class NickTest extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
-        robot.AutoRoutineTest();
-
         if (opModeIsActive()) {
             try {
                 // Forward a bit
@@ -58,6 +55,7 @@ public class NickTest extends LinearOpMode {
                 sleep(500);
 
                 // Knock off mineral and go back
+                robot.intake.setSweeperInPower(.3);
                 if (targetMineral == 0) {
                     robot.chassis.driveStraightAuto(.2, 56.6, -49, timeout);
                     sleep(300);
@@ -66,20 +64,22 @@ public class NickTest extends LinearOpMode {
                 else if (targetMineral == 1) {
                     robot.chassis.driveStraightAuto(.2, 40.6, 0, timeout);
                     sleep(300);
-                    robot.chassis.driveStraightAuto(.2, -40.6, 0, timeout);
+                    robot.chassis.driveStraightAuto(.2, -32.6, 0, timeout);
                 }
                 else {
                     robot.chassis.driveStraightAuto(.2, 56.6, 49, timeout);
                     sleep(300);
                     robot.chassis.driveStraightAuto(.2, -42.2, 55, timeout);
                 }
+                robot.intake.setSweeperInPower(0);
                 sleep(300);
                 robot.chassis.driveStraightAuto(.2, 100, -90, timeout);
                 sleep(300);
-                robot.chassis.rotateTo(.4, -135, telemetry);
+                robot.chassis.rotateTo(.4, -135);
                 robot.chassis.driveStraightAuto(.2,8,90, timeout);
                 sleep(300);
                 robot.chassis.driveStraightAuto(.2, 100, 0, timeout);
+
 
             } catch (Exception e) {
                 telemetry.addData("Error", e.getMessage());

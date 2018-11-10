@@ -45,6 +45,10 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
             return;
         }
 
+        reset();
+    }
+
+    public void reset(){
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
 
@@ -58,6 +62,8 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
             entry.getValue().initialize(parameters);
         }
     }
+
+
 
     /**
      * Enables or disables correction mode. If enabled, sensor readings will be compared

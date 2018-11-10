@@ -1,18 +1,23 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Camera;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.robotcore.internal.tfod.TFObjectDetectorImpl;
 import org.firstinspires.ftc.teamcode.components.CameraSystem;
+import org.firstinspires.ftc.teamcode.hardware.rover.Core;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 @Disabled
-@Autonomous(name = "Ruckus :: OpenCV Testing", group = "Ruckus")
-public class MasonOpenCVTesting extends LinearOpMode {
+@Autonomous(name = "Ruckus :: Sample Recognition Testing", group = "Ruckus")
+public class MasonSampleRecognitionTesting extends LinearOpMode {
     protected static int LOG_LEVEL = Log.INFO;
 
     private Configuration configuration;
@@ -29,7 +34,7 @@ public class MasonOpenCVTesting extends LinearOpMode {
         try {
             // configure robot and reset all hardware
             robot.configure(configuration, telemetry);
-//            configuration.apply();
+            configuration.apply();
 //            robot.reset();
 
 
@@ -45,13 +50,11 @@ public class MasonOpenCVTesting extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
-        // SwerveUtilLOP.MineralDetection mineralDetection = new SwerveUtilLOP.MineralDetection(robot.cameraSystem);
-
         // run until driver presses STOP or runtime exceeds 30 seconds
         if (opModeIsActive() && getRuntime() < 30) {
             try {
-                //String message = mineralDetection.getGoldPosition().toString();
-                //telemetry.addData("", message);
+                ToboRuckus.MineralDetection mineralDetection = new ToboRuckus.MineralDetection(robot.cameraSystem);
+
 //                mineralDetection.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
 //                mineralDetection.enable();
 //                List<MatOfPoint> silverContours = mineralDetection.getSilverContours();

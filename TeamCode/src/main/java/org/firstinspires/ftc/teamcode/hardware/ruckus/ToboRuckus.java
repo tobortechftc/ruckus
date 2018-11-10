@@ -1,8 +1,18 @@
 package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
+import android.graphics.Bitmap;
+import android.util.Log;
+
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-// import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
-// import org.firstinspires.ftc.teamcode.components.CameraSystem;
+import org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP;
+import org.firstinspires.ftc.teamcode.components.CameraSystem;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.support.Logger;
@@ -11,6 +21,21 @@ import org.firstinspires.ftc.teamcode.support.events.EventManager;
 import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_GOLD_MINERAL;
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_SILVER_MINERAL;
 
 public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private Telemetry telemetry;
@@ -18,8 +43,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public MineralIntake intake;
     public MineralDelivery mineralDelivery;
     public Hanging hanging;
-    // public CameraSystem cameraSystem;
-
+    public CameraSystem cameraSystem;
 
 
     @Override
@@ -30,9 +54,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     @Override
     public void configure(Configuration configuration, Telemetry telemetry) {
         this.telemetry = telemetry;
-        
-        // cameraSystem = new CameraSystem(null);
-        // cameraSystem.init(configuration.getHardwareMap());
+
+        cameraSystem = new CameraSystem(null);
+        cameraSystem.init(configuration.getHardwareMap());
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
         chassis.configure(configuration);
         intake = new MineralIntake().configureLogging("Intake", logLevel);
@@ -44,7 +68,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     public void AutoRoutineTest() throws InterruptedException {
-        chassis.driveAndSteerAuto(0.6, 560*3, 45);
+        chassis.driveAndSteerAuto(0.6, 560 * 3, 45);
     }
 
     @Override
@@ -52,6 +76,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.reset();
         intake.reset();
         hanging.reset(auto);
+        if (auto) {
+            chassis.setupTelemetry(telemetry);
+        }
     }
 
     @MenuEntry(label = "TeleOp", group = "Competition")
@@ -113,22 +140,22 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
                 // 0.2 is a dead zone threshold for the trigger
                 if (current > 0.2) {
-                    intake.rotateSweeper( MineralIntake.SweeperMode.PUSH_OUT);
+                    intake.rotateSweeper(MineralIntake.SweeperMode.PUSH_OUT);
                 } else if (current == 0) {
-                    intake.rotateSweeper( MineralIntake.SweeperMode.HORIZONTAL_STOP);
+                    intake.rotateSweeper(MineralIntake.SweeperMode.HORIZONTAL_STOP);
                 }
             }
         }, Events.Side.LEFT);
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
-                intake.rotateSweeper( MineralIntake.SweeperMode.INTAKE);
+                intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
             }
         }, Button.LEFT_BUMPER);
         em.onButtonUp(new Events.Listener() {
             @Override
             public void buttonUp(EventManager source, Button button) throws InterruptedException {
-                intake.rotateSweeper( MineralIntake.SweeperMode.VERTICAL_STOP);
+                intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
             }
         }, Button.LEFT_BUMPER);
 
@@ -143,9 +170,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         intake.moveSlider(intake.getSliderExtended());
                     }
                 } else {
-                    if (intake.getSliderTarget()==intake.getSliderSafe()) {
+                    if (intake.getSliderTarget() == intake.getSliderSafe()) {
                         intake.moveSlider(intake.getSliderDump());
-                    } else if (intake.getSliderTarget()==intake.getSliderDump()) {
+                    } else if (intake.getSliderTarget() == intake.getSliderDump()) {
                         intake.moveSlider(intake.getSliderContracted());
                     } else if (intake.getSliderCurrent() >= intake.getSliderSafe()) {
                         intake.moveSlider(intake.getSliderSafe());
@@ -162,22 +189,22 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
-                if (button==Button.DPAD_UP) {
-                    if (intake.getBoxPosition()==MineralIntake.BoxPosition.GOLD_COLLECTION
-                            || intake.getBoxPosition()==MineralIntake.BoxPosition.SILVER_COLLECTION
-                    ) {
+                if (button == Button.DPAD_UP) {
+                    if (intake.getBoxPosition() == MineralIntake.BoxPosition.GOLD_COLLECTION
+                            || intake.getBoxPosition() == MineralIntake.BoxPosition.SILVER_COLLECTION
+                            ) {
                         intake.rotateBox(MineralIntake.BoxPosition.INITIAL);
-                    } else if (intake.getBoxPosition()==MineralIntake.BoxPosition.INITIAL) {
+                    } else if (intake.getBoxPosition() == MineralIntake.BoxPosition.INITIAL) {
                         intake.rotateBox(MineralIntake.BoxPosition.DUMP);
                     }
                 } else {
-                    if (intake.getBoxPosition()==MineralIntake.BoxPosition.GOLD_COLLECTION) {
+                    if (intake.getBoxPosition() == MineralIntake.BoxPosition.GOLD_COLLECTION) {
                         intake.rotateBox(MineralIntake.BoxPosition.SILVER_COLLECTION);
-                    } else if (intake.getBoxPosition()==MineralIntake.BoxPosition.SILVER_COLLECTION) {
+                    } else if (intake.getBoxPosition() == MineralIntake.BoxPosition.SILVER_COLLECTION) {
                         intake.rotateBox(MineralIntake.BoxPosition.GOLD_COLLECTION);
-                    } else if (intake.getBoxPosition()==MineralIntake.BoxPosition.INITIAL) {
+                    } else if (intake.getBoxPosition() == MineralIntake.BoxPosition.INITIAL) {
                         intake.rotateBox(MineralIntake.BoxPosition.GOLD_COLLECTION);
-                    } else if (intake.getBoxPosition()==MineralIntake.BoxPosition.DUMP) {
+                    } else if (intake.getBoxPosition() == MineralIntake.BoxPosition.DUMP) {
                         intake.rotateBox(MineralIntake.BoxPosition.INITIAL);
                     }
                 }
@@ -189,15 +216,15 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
                 // do not rotate if the robot is currently moving
-                if (side==Events.Side.LEFT) { // lift down
-                    if (current>0.2) {
+                if (side == Events.Side.LEFT) { // lift down
+                    if (current > 0.2) {
                         //mineralDelivery.liftDown();
                     } else {
                         //mineralDelivery.liftStop();
                     }
                 }
-                if (side==Events.Side.RIGHT) { // latch down
-                    if (current>0.2) {
+                if (side == Events.Side.RIGHT) { // latch down
+                    if (current > 0.2) {
                         if (source.isPressed(Button.START))
                             hanging.latchDownInches(1.0);
                         else
@@ -211,47 +238,46 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
-                if (button==Button.LEFT_BUMPER) { // lift up
+                if (button == Button.LEFT_BUMPER) { // lift up
                     //mineralDelivery.liftUp();
-                } else if (button==Button.RIGHT_BUMPER) { // latch up
+                } else if (button == Button.RIGHT_BUMPER) { // latch up
                     if (source.isPressed(Button.START))
                         hanging.latchUpInches(1.0);
                     else
                         hanging.latchUp(source.isPressed(Button.BACK));
                 }
-                if (button==Button.B) {
+                if (button == Button.B) {
                     if (source.isPressed(Button.BACK)) {
                         hanging.markerAuto();
-                    }
-                    else if (source.isPressed(Button.START)==false) {
+                    } else if (source.isPressed(Button.START) == false) {
                         hanging.hookAuto();
                     }
                 }
-                if (button==Button.X){
+                if (button == Button.X) {
                     if (source.isPressed(Button.BACK)) {
                         hanging.markerDown();
                     } else {
                         mineralDelivery.gateAuto();
                     }
                 }
-                if (button==Button.Y) {
+                if (button == Button.Y) {
                     mineralDelivery.armDump();
-                } else if (button==Button.A){
+                } else if (button == Button.A) {
                     mineralDelivery.armDown();
                 }
             }
-        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER,Button.B, Button.X, Button.Y, Button.A);
+        }, Button.LEFT_BUMPER, Button.RIGHT_BUMPER, Button.B, Button.X, Button.Y, Button.A);
 
         em2.onButtonUp(new Events.Listener() {
             @Override
             public void buttonUp(EventManager source, Button button) throws InterruptedException {
-                if (button==Button.LEFT_BUMPER) { // lift stop
+                if (button == Button.LEFT_BUMPER) { // lift stop
                     //mineralDelivery.liftStop();
-                } else if (button==Button.RIGHT_BUMPER) { // latch stop
+                } else if (button == Button.RIGHT_BUMPER) { // latch stop
                     hanging.latchStop();
                 }
             }
-        }, Button.LEFT_BUMPER,Button.RIGHT_BUMPER);
+        }, Button.LEFT_BUMPER, Button.RIGHT_BUMPER);
 
         em2.onStick(new Events.Listener() {
             @Override
@@ -335,13 +361,29 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
     }
 
+    @MenuEntry(label = "Test Land", group = "Test Auto")
+    public void landAndDetach(EventManager em) throws InterruptedException{
+        chassis.resetOrientation();
+        chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+        hanging.latchUpInches(7); //Land
+        chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+        chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
+        chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+        chassis.rotateTo(0.25, -80); //Turn 90 degrees left
+    }
+
+    @MenuEntry(label = "Retract Latch", group = "Test Auto")
+    public void retractLatch(EventManager em) throws InterruptedException{
+        hanging.latchDownInches(7);
+    }
+
     /**
      * Returns angle (-180 to 180 degrees) between positive Y axis
-     *  and a line drawn from center of coordinates to (x, y).
+     * and a line drawn from center of coordinates to (x, y).
      * Negative values are to the left of Y axis, positive are to the right
      */
     private double toDegrees(double x, double y) {
-        if (x == 0) return y>=0 ? 0 : 180;
+        if (x == 0) return y >= 0 ? 0 : 180;
         return Math.atan2(x, y) / Math.PI * 180;
     }
 
@@ -362,5 +404,254 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             adjustment = 0.6 + 0.4 * source.getTrigger(Events.Side.RIGHT);
         }
         return adjustment;
+    }
+
+    public static class MineralDetection extends OpenCVPipeline {
+        static Logger<MineralDetection> logger = new Logger<>();
+        CameraSystem cameraSystem;
+
+        static {
+            logger.configureLogging("Mineral_Detection", Log.VERBOSE);
+        }
+
+        /**
+         * @param cameraSystem
+         * @author Mason Mann
+         * Used for sampling during autonomous
+         * Rover Ruckus 2018-19
+         */
+        public MineralDetection(CameraSystem cameraSystem) {
+            this.cameraSystem = cameraSystem;
+        }
+
+        @Override
+        public Mat processFrame(Mat rgba, Mat grayscale) {
+//            boolean showContours = false;
+//            Mat silverHSV = new Mat();
+//            Mat silverThresholded = new Mat();
+//            Mat goldHSV = new Mat();
+//            Mat goldThresholded = new Mat();
+//            List<MatOfPoint> silverContours;
+//            List<MatOfPoint> goldContours;
+//
+//            Imgproc.cvtColor(rgba, silverHSV, Imgproc.COLOR_RGB2HSV, 3);
+//            Imgproc.cvtColor(rgba, goldHSV, Imgproc.COLOR_RGB2HSV, 3);
+//            Core.inRange(silverHSV, new Scalar(0, 0, 90), new Scalar(0, 0, 100), silverThresholded);
+//            Core.inRange(goldHSV, new Scalar(27, 223, 69.8), new Scalar(51, 160, 100), goldThresholded);
+//
+//            Imgproc.blur(silverThresholded, silverThresholded, new Size(3, 3));
+//
+//            Imgproc.blur(goldThresholded, goldThresholded, new Size(3, 3));
+//            silverContours = new ArrayList<>();
+//            goldContours = new ArrayList<>();
+//            Imgproc.findContours(silverThresholded, silverContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+//            Imgproc.findContours(goldThresholded, goldContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+//
+//            if (showContours) {
+//                Imgproc.drawContours(rgba, silverContours, -1, new Scalar(144, 255, 255), 2, 8);
+//                Imgproc.drawContours(rgba, goldContours, -1, new Scalar(255, 144, 255), 2, 8);
+//            }
+            return rgba;
+        }
+
+        public enum SampleLocation {
+            LEFT, CENTER, RIGHT, UNKNOWN
+        }
+
+        public Mat getMatFromCamera() {
+            Mat mat = new Mat();
+            cameraSystem.initVuforia();
+            Bitmap bitmap = cameraSystem.captureVuforiaBitmap();
+            Utils.bitmapToMat(bitmap, mat);
+            return mat;
+        }
+
+        /**
+         * Determines location of gold sample using OpenCV
+         * @return SampleLocation Left, Right, Center, or Unknown
+         */
+        public SampleLocation getGoldPositionCV() {
+            Mat mat = getMatFromCamera();
+            Mat goldHSV = new Mat();
+            Mat silverHSV = new Mat();
+            Mat silverThresholded = new Mat();
+            Mat goldThresholded = new Mat();
+            List<MatOfPoint> silverContours;
+            List<MatOfPoint> goldContours;
+
+
+            // Changes mat color format from RGB565 to HSV
+            Imgproc.cvtColor(mat, goldHSV, Imgproc.COLOR_RGB2HSV, 3);
+            Imgproc.cvtColor(mat, silverHSV, Imgproc.COLOR_RGB2HSV, 3);
+            logger.verbose("Variable goldHSV size: %s", goldHSV.size());
+            logger.verbose("Variable silverHSV size: %s", silverHSV.size());
+
+            // Thresholds color to become binary image of sample and background
+            Core.inRange(silverHSV, new Scalar(0, 0, 90), new Scalar(16, 15, 100), silverThresholded);
+            Core.inRange(goldHSV, new Scalar(29, 163, 177), new Scalar(51, 223, 255), goldThresholded);
+            logger.verbose("Thresholded Gold mat size: %s", goldThresholded.size());
+            logger.verbose("Thresholded Silver mat size: %s", silverThresholded.size());
+            Imgproc.blur(silverThresholded, silverThresholded, new Size(20, 20));
+            Imgproc.blur(goldThresholded, goldThresholded, new Size(20, 20));
+
+            // Places images into contour variables to find the mass centers of the objects
+            silverContours = new ArrayList<>();
+            goldContours = new ArrayList<>();
+            Imgproc.findContours(silverThresholded, silverContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(goldThresholded, goldContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+            logger.verbose("Gold Contours Size: %s", goldContours.size());
+            logger.verbose("Silver Contours Size: %s", silverContours.size());
+
+
+            MatOfPoint2f goldCurve = new MatOfPoint2f();
+            List<Rect> goldRects = new ArrayList<>();
+            for (int i = 0; i < goldContours.size(); i++) {
+                MatOfPoint2f contour2f = new MatOfPoint2f(goldContours.get(i).toArray());
+                double distance = Imgproc.arcLength(contour2f, true) * 0.02;
+                Imgproc.approxPolyDP(contour2f, goldCurve, distance, true);
+
+                MatOfPoint points = new MatOfPoint(goldCurve.toArray());
+
+                goldRects.add(Imgproc.boundingRect(points));
+            }
+            MatOfPoint2f silverCurve = new MatOfPoint2f();
+            List<Rect> silverRects = new ArrayList<>();
+            for (int i = 0; i < silverContours.size(); i++) {
+                MatOfPoint2f contour2f = new MatOfPoint2f(silverContours.get(i).toArray());
+                double distance = Imgproc.arcLength(contour2f, true) * 0.02;
+                Imgproc.approxPolyDP(contour2f, silverCurve, distance, true);
+
+                MatOfPoint points = new MatOfPoint(silverCurve.toArray());
+
+                silverRects.add(Imgproc.boundingRect(points));
+            }
+
+//            List<Moments> silverMu = new ArrayList<>();
+//            Point[] silverCoordCenter = new Point[silverMu.size()];
+//            for (int i = 0; i < silverContours.size(); i++) {
+//                silverMu.add(Imgproc.moments(silverContours.get(i)));
+//                logger.verbose("Silver Moments Size: %s Index: %s", silverMu.size(), i);
+//                silverCoordCenter[i] = new Point((int) (silverMu.get(i).m10 / silverMu.get(i).m00), (int) (silverMu.get(i).m01 / silverMu.get(i).m00));
+//            }
+//            List<Moments> goldMu = new ArrayList<>(goldContours.size());
+//            Point[] goldCoordCenter = new Point[goldMu.size()];
+//            for (int i = 0; i < goldContours.size(); i++) {
+//                goldMu.add(Imgproc.moments(goldContours.get(i)));
+//                logger.verbose("Gold Moments Size: %s Index: %s", goldMu.size(), i);
+//                goldCoordCenter[i] = new Point((int) (goldMu.get(i).m10 / goldMu.get(i).m00), (int) (goldMu.get(i).m01 / goldMu.get(i).m00));
+//            }
+
+            boolean isLeft = true;
+            boolean isRight = true;
+
+//            for (int i = 0; i < silverCoordCenter.length; i++){
+//                if(goldCoordCenter[0].x > silverCoordCenter[i].x) {
+//                    isLeft = false;
+//                }
+//            }
+//            for (int i = 0; i < silverCoordCenter.length; i++){
+//                if(goldCoordCenter[0].x < silverCoordCenter[i].x) {
+//                    isRight = false;
+//                }
+//            }
+
+            for (int i = 0; i < silverRects.size(); i++) {
+                logger.verbose("Silver Rectangle X: %s", silverRects.get(i).x);
+                for (int j = 0; j < goldRects.size(); j++) {
+                    logger.verbose("Gold Rectangle X: %s", goldRects.get(j).x);
+                    if (goldRects.get(j).x > silverRects.get(i).x)
+                        logger.verbose("Gold is not on left");
+                    isLeft = false;
+                    break;
+                }
+            }
+            for (int i = 0; i < silverRects.size(); i++) {
+                for (int j = 0; j < goldRects.size(); j++) {
+                    if (goldRects.get(j).x < silverRects.get(i).x)
+                        logger.verbose("Gold is not on right");
+                    isRight = false;
+                    break;
+                }
+            }
+
+            if (isLeft && !isRight)
+                return SampleLocation.LEFT;
+
+            if (!isLeft && isRight)
+                return SampleLocation.RIGHT;
+
+            if (!isLeft && !isRight)
+                return SampleLocation.CENTER;
+
+            return SampleLocation.UNKNOWN;
+        }
+
+        private TFObjectDetector tfObjectDetector;
+        private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
+        private static final String LABEL_GOLD = "Gold Mineral";
+        private static final String LABEL_SILVER = "Silver Mineral";
+
+        /**
+         * Determines location of gold sample using TensorFlow Lite ML
+         * Assumes only 2 leftmost minerals are visible to camera
+         * @return SampleLocation Left, Right, Center, or Unknown
+         */
+        public SampleLocation getGoldPositionTF(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
+            int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                    "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+            TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+            tfObjectDetector = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+            tfObjectDetector.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+
+            List<Recognition> updatedRecognitions = tfObjectDetector.getUpdatedRecognitions();
+            if (updatedRecognitions != null) {
+                int goldXCoord = -1;
+                int silverXCoord = -1;
+                for (Recognition recognition :
+                        updatedRecognitions) {
+                    if (recognition.getLabel().equals(LABEL_GOLD)) {
+                        goldXCoord = (int) recognition.getLeft();
+                    } else if (recognition.getLabel().equals(LABEL_SILVER)) {
+                        silverXCoord = (int) recognition.getLeft();
+                    }
+                }
+                if (goldXCoord < silverXCoord){
+                    return SampleLocation.LEFT;
+                }
+                else if (goldXCoord > silverXCoord) {
+                    return SampleLocation.CENTER;
+                }
+                else if (goldXCoord == -1 && silverXCoord != -1){
+                    return SampleLocation.RIGHT;
+                }
+                else return SampleLocation.UNKNOWN;
+            }
+            return SampleLocation.UNKNOWN;
+        }
+
+//        public synchronized List<MatOfPoint> getGoldContours() {
+//            return goldContours;
+//        }
+//        public synchronized  List<MatOfPoint> getSilverContours(){
+//            return silverContours;
+//        }
+//        public Point[] findSilver(){
+//            List<Moments> mu = new ArrayList<>(silverContours.size());
+//            Point[] coordCenter = new Point[mu.size()];
+//            for (int i = 0; i < silverContours.size(); i++) {
+//                mu.add(Imgproc.moments(silverContours.get(i)));
+//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
+//            }
+//            return coordCenter;
+//        }
+//        public Point[] findGold(){
+//            List<Moments> mu = new ArrayList<>(goldContours.size());
+//            Point[] coordCenter = new Point[mu.size()];
+//            for (int i = 0; i < goldContours.size(); i++) {
+//                mu.add(Imgproc.moments(goldContours.get(i)));
+//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
+//            }
+//            return coordCenter;
+//        }
     }
 }
