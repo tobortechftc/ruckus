@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.components;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.hardware.usb.*;
-import android.hardware.camera2.*;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -14,23 +12,13 @@ import com.vuforia.Vuforia;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP;
-import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.hardware17.CoreSystem;
-import org.firstinspires.ftc.teamcode.hardware17.TaintedAccess;
 import org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP;
-import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
-
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_GOLD_MINERAL;
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_SILVER_MINERAL;
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.TFOD_MODEL_ASSET;
+import org.firstinspires.ftc.teamcode.hardware17.TaintedAccess;
 
 /**
  * Put brief class description here...
@@ -48,7 +36,7 @@ public class CameraSystem {
 
     WebcamName webcamName;
 
-    VuforiaLocalizer vuforia;
+    public VuforiaLocalizer vuforia;
 
     public VuforiaTrackables relicTrackables;
     public VuforiaTrackable relicTemplate;
@@ -115,42 +103,42 @@ public class CameraSystem {
         this.vuforia = vuforia;
     }
 
-    int getColumnIndex(RelicRecoveryVuMark vuMark) throws InterruptedException {
-        // return row index for Cryptograph
-        // unknown : -1
-        // left    :  0
-        // center  :  1
-        // right   :  2
-        if (vuMark == RelicRecoveryVuMark.LEFT)
-            return 0;
-        else if (vuMark == RelicRecoveryVuMark.CENTER)
-            return 1;
-        else if (vuMark == RelicRecoveryVuMark.RIGHT)
-            return 2;
+//    int getColumnIndex(RelicRecoveryVuMark vuMark) throws InterruptedException {
+//        // return row index for Cryptograph
+//        // unknown : -1
+//        // left    :  0
+//        // center  :  1
+//        // right   :  2
+//        if (vuMark == RelicRecoveryVuMark.LEFT)
+//            return 0;
+//        else if (vuMark == RelicRecoveryVuMark.CENTER)
+//            return 1;
+//        else if (vuMark == RelicRecoveryVuMark.RIGHT)
+//            return 2;
+//
+//        return -1;
+//    }
 
-        return -1;
-    }
-
-    public int get_cryptobox_column() throws InterruptedException {
-
-        int column = -1;
-        if (!use_Vuforia)
-            return column;
-
-        relicTrackables.activate();
-        runtime.reset();
-        while (runtime.seconds() < 2.0 && column == -1) {
-            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-            if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
-
-                /* Found an instance of the template. In the actual game, you will probably
-                 * loop until this condition occurs, then move on to act accordingly depending
-                 * on which VuMark was visible. */
-                column = getColumnIndex(vuMark);
-            }
-        }
-        return column;
-    }
+//    public int get_cryptobox_column() throws InterruptedException {
+//
+//        int column = -1;
+//        if (!use_Vuforia)
+//            return column;
+//
+//        relicTrackables.activate();
+//        runtime.reset();
+//        while (runtime.seconds() < 2.0 && column == -1) {
+//            RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+//            if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
+//
+//                /* Found an instance of the template. In the actual game, you will probably
+//                 * loop until this condition occurs, then move on to act accordingly depending
+//                 * on which VuMark was visible. */
+//                column = getColumnIndex(vuMark);
+//            }
+//        }
+//        return column;
+//    }
 
     /**
      * Opposite of stopCamera(), it sets the Vuforia frame queue capacity to one and sets the color format of the frames to allow it to be processed
@@ -162,17 +150,9 @@ public class CameraSystem {
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
     }
 
-    public void initTensorFlow(HardwareMap hardwareMap, TFObjectDetector tfod) {
-        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
-    }
-
-    String getLastError() {
-        return lastError;
-    }
+//    String getLastError() {
+//        return lastError;
+//    }
 
     /**
      * Takes in a Vuforia CloseableFrame and converts it to a Bitmap variable to be processed

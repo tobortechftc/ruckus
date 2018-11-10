@@ -40,7 +40,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 /**
- * This 2018-2019 OpMode illustrates the basics of using the TensorFlow Object Detection API to
+ * This 2018-2019 OpMode illustrates the basics of using the CameraMineralDetector Object Detection API to
  * determine the position of the gold and silver minerals.
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
@@ -49,7 +49,7 @@ import java.util.List;
  * IMPORTANT: In order to use this OpMode, you need to obtain your own Vuforia license key as
  * is explained below.
  */
-@TeleOp(name = "TensorFlow Object Detection", group = "Concept")
+@TeleOp(name = "CameraMineralDetector Object Detection", group = "Concept")
 public class ConceptTensorFlowObjectDetection extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";

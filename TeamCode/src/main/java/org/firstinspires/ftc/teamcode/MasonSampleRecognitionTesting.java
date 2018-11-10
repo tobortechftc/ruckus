@@ -1,17 +1,11 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Camera;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.robotcore.internal.tfod.TFObjectDetectorImpl;
-import org.firstinspires.ftc.teamcode.components.CameraSystem;
-import org.firstinspires.ftc.teamcode.hardware.rover.Core;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
@@ -53,22 +47,8 @@ public class MasonSampleRecognitionTesting extends LinearOpMode {
         // run until driver presses STOP or runtime exceeds 30 seconds
         if (opModeIsActive() && getRuntime() < 30) {
             try {
-                ToboRuckus.MineralDetection mineralDetection = new ToboRuckus.MineralDetection(robot.cameraSystem);
-
-//                mineralDetection.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
-//                mineralDetection.enable();
-//                List<MatOfPoint> silverContours = mineralDetection.getSilverContours();
-//                List<MatOfPoint> goldContours = mineralDetection.getGoldContours();
-//                for (int i = 0; i < silverContours.size(); i++) {
-//                    Rect boundingRect = Imgproc.boundingRect(silverContours.get(i));
-//                    telemetry.addData("Silver contour" + Integer.toString(i),
-//                            String.format(Locale.getDefault(), "(%d, %d)", (boundingRect.x + boundingRect.width) / 2, (boundingRect.y + boundingRect.height) / 2));
-//                }
-//                for (int i = 0; i < goldContours.size(); i++) {
-//                    Rect boundingRect = Imgproc.boundingRect(goldContours.get(i));
-//                    telemetry.addData("Gold contour" + Integer.toString(i),
-//                            String.format(Locale.getDefault(), "(%d, %d)", (boundingRect.x + boundingRect.width) / 2, (boundingRect.y + boundingRect.height) / 2));
-//                }
+                telemetry.addData("Gold Position = ", robot.cameraMineralDetector.getGoldPositionTF());
+                telemetry.update();
 
             } catch (Exception E) {
                 telemetry.addData("Error", E.getMessage());

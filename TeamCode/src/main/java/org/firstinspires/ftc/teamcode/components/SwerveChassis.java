@@ -56,7 +56,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private CombinedOrientationSensor orientationSensor;
 
     private DistanceSensor frontRangeSensor;
+    private DistanceSensor backRangeSensor;
     private DistanceSensor leftRangeSensor;
+    private DistanceSensor rightRangeSensor;
 
     private DriveMode driveMode = DriveMode.STOP;      // current drive mode
     private double targetHeading;     // intended heading for DriveMode.STRAIGHT as reported by orientation sensor
@@ -139,19 +141,29 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         orientationSensor = new CombinedOrientationSensor().configureLogging(logTag + "-sensor", logLevel);
         orientationSensor.configure(configuration.getHardwareMap(), "imu", "imu2");
 
-        leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
         frontRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "front_range");
+        backRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
+        leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
+        rightRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "right_range");
 
         // register chassis as configurable component
         configuration.register(this);
+    }
+
+    public double distanceToFront() {
+        return frontRangeSensor.getDistance(DistanceUnit.CM);
+    }
+
+    public double distanceToBack() {
+        return backRangeSensor.getDistance(DistanceUnit.CM);
     }
 
     public double distanceToLeft() {
         return leftRangeSensor.getDistance(DistanceUnit.CM);
     }
 
-    public double distanceToFront() {
-        return frontRangeSensor.getDistance(DistanceUnit.CM);
+    public double distanceToRight() {
+        return rightRangeSensor.getDistance(DistanceUnit.CM);
     }
 
     public void reset() {
@@ -396,6 +408,10 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         driveAndSteer(0, angle, true);
     }
 
+    public void driveAlongWall(double power, double distance, double wallDistance) {
+
+    }
+
     /**
      * Rotate in place using currently specified power
      */
@@ -435,7 +451,10 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     public void rotateDegree(double power, double deltaD) throws InterruptedException {
         double iniHeading = orientationSensor.getHeading();
         double finalHeading = iniHeading + deltaD;
-        finalHeading += finalHeading < -180 ? +360 : (finalHeading > 180 ? -360 : 0);
+        if (finalHeading > 180)
+            finalHeading -= 360;
+        else if (finalHeading < -180)
+            finalHeading += 360;
 
         rotateTo(power, finalHeading);
 

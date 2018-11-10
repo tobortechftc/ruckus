@@ -43,6 +43,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public MineralDelivery mineralDelivery;
     public Hanging hanging;
     public CameraSystem cameraSystem;
+    public CameraMineralDetector cameraMineralDetector;
 
 
     @Override
@@ -54,8 +55,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void configure(Configuration configuration, Telemetry telemetry) {
         this.telemetry = telemetry;
 
-        cameraSystem = new CameraSystem(null);
-        cameraSystem.init(configuration.getHardwareMap());
+//        cameraSystem = new CameraSystem(null);
+//        cameraSystem.init(configuration.getHardwareMap());
+        cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
+        cameraMineralDetector.configure(configuration);
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
         chassis.configure(configuration);
         intake = new MineralIntake().configureLogging("Intake", logLevel);
@@ -575,18 +578,21 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         private static final String LABEL_GOLD = "Gold Mineral";
         private static final String LABEL_SILVER = "Silver Mineral";
 
-        /**
-         * Determines location of gold sample using TensorFlow Lite ML
-         * Assumes only 2 leftmost minerals are visible to camera
-         * @return SampleLocation Left, Right, Center, or Unknown
-         */
-        public SampleLocation getGoldPositionTF(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
+        public void initTensorFlow(HardwareMap hardwareMap, VuforiaLocalizer vuforia) {
             int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                     "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
             TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
             tfObjectDetector = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
             tfObjectDetector.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+        }
 
+        /**
+         * Determines location of gold sample using CameraMineralDetector Lite ML
+         * Assumes only 2 leftmost minerals are visible to camera
+         * @return SampleLocation Left, Right, Center, or Unknown
+         */
+        public SampleLocation getGoldPositionTF() {
+            tfObjectDetector.activate();
             List<Recognition> updatedRecognitions = tfObjectDetector.getUpdatedRecognitions();
             if (updatedRecognitions != null) {
                 int goldXCoord = -1;
@@ -610,6 +616,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
                 else return SampleLocation.UNKNOWN;
             }
+            tfObjectDetector.shutdown();
             return SampleLocation.UNKNOWN;
         }
 
