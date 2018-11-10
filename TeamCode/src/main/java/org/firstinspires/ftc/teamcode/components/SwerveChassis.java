@@ -436,16 +436,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         double iniHeading = orientationSensor.getHeading();
         double finalHeading = iniHeading + deltaD;
         finalHeading += finalHeading < -180 ? +360 : (finalHeading > 180 ? -360 : 0);
-//        rotateTo(power,finalHeading);
-//        for (WheelAssembly wheel : wheels)
-//            wheel.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//        rotate(Math.signum(deltaD) * power);
-//        while (true) {
-//            if (Math.abs(finalHeading - orientationSensor.getHeading()) < 1.0)
-//                break;
-//        }
-//        for (WheelAssembly wheel : wheels)
-//            wheel.motor.setPower(0);
+
+        rotateTo(power, finalHeading);
+
     }
 
     //final heading needs to be with in range(-180,180]
@@ -569,7 +562,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         }
     }
 
-    public void resetOrientation(){
+    public void resetOrientation() {
         orientationSensor.reset();
     }
 
