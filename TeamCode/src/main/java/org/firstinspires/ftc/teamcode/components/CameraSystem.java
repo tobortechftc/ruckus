@@ -19,12 +19,18 @@ import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.teamcode.SwerveUtilLOP;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
-import org.firstinspires.ftc.teamcode.hardware.CoreSystem;
-import org.firstinspires.ftc.teamcode.hardware.TaintedAccess;
+import org.firstinspires.ftc.teamcode.hardware17.CoreSystem;
+import org.firstinspires.ftc.teamcode.hardware17.TaintedAccess;
+import org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
+
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_GOLD_MINERAL;
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_SILVER_MINERAL;
+import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.TFOD_MODEL_ASSET;
 
 /**
  * Put brief class description here...
@@ -35,7 +41,7 @@ public class CameraSystem {
     public boolean use_camera = false;
     public boolean use_OpenCV = true;
 
-    public SwerveUtilLOP.TeamColor leftJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
+    public org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP.TeamColor leftJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
     public SwerveUtilLOP.TeamColor rightJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
     public Bitmap bitmap = null;
     public boolean camReady = false;
@@ -54,6 +60,7 @@ public class CameraSystem {
     ElapsedTime runtime;
 
     private TaintedAccess taintedAccess;
+
     void setTaintedAccess(TaintedAccess taintedAccess) {
         this.taintedAccess = taintedAccess;
     }
@@ -104,7 +111,7 @@ public class CameraSystem {
         }
     }
 
-    CameraSystem(VuforiaLocalizer vuforia){
+    CameraSystem(VuforiaLocalizer vuforia) {
         this.vuforia = vuforia;
     }
 
@@ -147,11 +154,20 @@ public class CameraSystem {
 
     /**
      * Opposite of stopCamera(), it sets the Vuforia frame queue capacity to one and sets the color format of the frames to allow it to be processed
+     *
      * @author Mason Mann
      */
-    public void activate() {
+    public void initVuforia() {
         this.vuforia.setFrameQueueCapacity(1);
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
+    }
+
+    public void initTensorFlow(HardwareMap hardwareMap, TFObjectDetector tfod) {
+        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
 
     String getLastError() {
@@ -160,9 +176,10 @@ public class CameraSystem {
 
     /**
      * Takes in a Vuforia CloseableFrame and converts it to a Bitmap variable to be processed
-     * @author Mason Mann
+     *
      * @param frame
      * @return
+     * @author Mason Mann
      */
     private Bitmap convertFrameToBitmap(VuforiaLocalizer.CloseableFrame frame) {
         long numImages = frame.getNumImages();
@@ -181,16 +198,16 @@ public class CameraSystem {
             lastError = "Failed to get RGB565 image format!";
             return null;
         }
-        Bitmap bitmap = Bitmap.createBitmap(image.getWidth(),image.getHeight(), Bitmap.Config.RGB_565);
+        Bitmap bitmap = Bitmap.createBitmap(image.getWidth(), image.getHeight(), Bitmap.Config.RGB_565);
         bitmap.copyPixelsFromBuffer(image.getPixels());
         return bitmap;
     }
 
     private Bitmap cropBitmap(Bitmap source, double xOffsetF, double yOffsetF, double widthF, double heightF) {
-        int offset_x = (int)(source.getWidth() * xOffsetF);
-        int offset_y = (int)(source.getHeight() * yOffsetF);
-        int width = (int)(source.getWidth() * widthF);
-        int height = (int)(source.getHeight() * heightF);
+        int offset_x = (int) (source.getWidth() * xOffsetF);
+        int offset_y = (int) (source.getHeight() * yOffsetF);
+        int width = (int) (source.getWidth() * widthF);
+        int height = (int) (source.getHeight() * heightF);
         Bitmap destBitmap = Bitmap.createBitmap(source, offset_x, offset_y, width, height);
         return destBitmap;
     }
@@ -200,8 +217,8 @@ public class CameraSystem {
     }
 
     /**
-     * @author Mason Mann
      * @return Bitmap
+     * @author Mason Mann
      */
     public Bitmap captureVuforiaBitmap(/*double xOffsetF, double yOffsetF, double widthF, double heightF*/) {
         Bitmap bitmapTemp = null;
@@ -232,12 +249,12 @@ public class CameraSystem {
     }
 
     /**
-     * @author Mason Mann
-     * Takes a Bitmap as input and outputs an integer of the color constant of the "whitest" pixel
      * @param source
      * @return
+     * @author Mason Mann
+     * Takes a Bitmap as input and outputs an integer of the color constant of the "whitest" pixel
      */
-    int getWhitestPixel(Bitmap source){
+    int getWhitestPixel(Bitmap source) {
         int[] pixels = new int[source.getHeight() * source.getWidth()];
 
         int whitestPixel = 0;
@@ -245,7 +262,7 @@ public class CameraSystem {
 
         source.getPixels(pixels, 0, source.getWidth(), 0, 0, source.getWidth(), source.getHeight());
 
-        for(int pixeli = 0; pixeli < pixels.length; pixeli++){
+        for (int pixeli = 0; pixeli < pixels.length; pixeli++) {
 
             int pixelRed = Color.red(pixels[pixeli]);
             int pixelGreen = Color.green(pixels[pixeli]);
@@ -253,32 +270,30 @@ public class CameraSystem {
 
             int pixeliColorAvg = (pixelRed + pixelGreen + pixelBlue) / 3;
 
-            if(pixeliColorAvg > whitestPixelColorAvg){
+            if (pixeliColorAvg > whitestPixelColorAvg) {
                 whitestPixel = pixeliColorAvg;
                 whitestPixelColorAvg = pixeliColorAvg;
             }
         }
-        if (whitestPixel / Color.WHITE > .8){
+        if (whitestPixel / Color.WHITE > .8) {
             return whitestPixel;
-        }
-        else{
+        } else {
             whitestPixel = 2;
             return whitestPixel;
         }
     }
 
     /**
-     * @author Mason Mann
-     * Takes returned integer from getWhitestPixel and a source bitmap then returns a white balanced bitmap
      * @param source
      * @param whitestPixel
      * @return
+     * @author Mason Mann
+     * Takes returned integer from getWhitestPixel and a source bitmap then returns a white balanced bitmap
      */
     Bitmap applyWhiteBalance(Bitmap source, int whitestPixel) {
-        if (whitestPixel == 2){
+        if (whitestPixel == 2) {
             return source;
-        }
-        else {
+        } else {
             if (Color.red(whitestPixel) != 0 && Color.green(whitestPixel) != 0 && Color.red(whitestPixel) != 0) {
                 double rComp = 255.0 / Color.red(whitestPixel);
                 double gComp = 255.0 / Color.green(whitestPixel);
@@ -312,10 +327,11 @@ public class CameraSystem {
     }
 
     /**
-     * Opposite of activate(), sets frame queue capacity to zero and disables the frame format set by activate()
+     * Opposite of initVuforia(), sets frame queue capacity to zero and disables the frame format set by initVuforia()
+     *
      * @author Mason Mann
      */
-    public void stopCamera(){
+    public void stopCamera() {
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, false);
         this.vuforia.setFrameQueueCapacity(0);
     }
@@ -323,4 +339,5 @@ public class CameraSystem {
     public void show_telemetry(Telemetry telemetry) {
         telemetry.addData("VuMark", "%s visible", RelicRecoveryVuMark.from(relicTemplate));
     }
+
 }
