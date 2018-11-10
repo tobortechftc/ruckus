@@ -62,25 +62,25 @@ public class NickTest extends LinearOpMode {
                     robot.chassis.driveStraightAuto(.2, -37, -55, timeout);
                 }
                 else if (targetMineral == 1) {
-                    robot.chassis.driveStraightAuto(.2, 40.6, 0, timeout);
+                    robot.chassis.driveStraightAuto(.2, 38.6, 0, timeout);
                     sleep(300);
-                    robot.chassis.driveStraightAuto(.2, -32.6, 0, timeout);
+                    robot.chassis.driveStraightAuto(.2, -26.6, 0, timeout);
                 }
                 else {
                     robot.chassis.driveStraightAuto(.2, 56.6, 49, timeout);
                     sleep(300);
-                    robot.chassis.driveStraightAuto(.2, -42.2, 55, timeout);
+                    robot.chassis.driveStraightAuto(.2, -37, 55, timeout);
                 }
                 robot.intake.setSweeperInPower(0);
                 sleep(300);
                 robot.chassis.driveStraightAuto(.2, 100, -90, timeout);
                 sleep(300);
-                robot.chassis.rotateTo(.4, -135);
-                robot.chassis.driveStraightAuto(.2,8,90, timeout);
+                robot.chassis.rotateDegree(.2, 37);
+                robot.chassis.driveStraightAuto(.2, 23, -90, timeout);
                 sleep(300);
-                robot.chassis.driveStraightAuto(.2, 100, 0, timeout);
-
-
+                robot.chassis.driveStraightAuto(.2, -100, 0, timeout);
+                sleep(300);
+                //robot.chassis.driveStraightAuto(.2, -170,0, timeout); disable this line until angle fixed
             } catch (Exception e) {
                 telemetry.addData("Error", e.getMessage());
                 handleException(e);
