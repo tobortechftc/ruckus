@@ -110,11 +110,11 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
         if (robot.intake.use_intake) {
             robot.intake.intakeGateUp();
         }
-        if (robot.camera.use_Vuforia) {
-            robot.targetColumn = robot.camera.get_cryptobox_column();
-            telemetry.addData("0: Crypto Column =", robot.targetColumn);
-            telemetry.update();
-        }
+//        if (robot.camera.use_Vuforia) {
+//            robot.targetColumn = robot.camera.get_cryptobox_column();
+//            telemetry.addData("0: Crypto Column =", robot.targetColumn);
+//            telemetry.update();
+//        }
         if (robot.swerve.use_imu) {
             if (robot.swerve.imu.getSystemStatus() == BNO055IMU.SystemStatus.SYSTEM_ERROR && robot.swerve.imu2 != null) {
                 robot.swerve.use_imu2 = true;
@@ -173,9 +173,9 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
 
         if (!opModeIsActive()) return 0;
 
-        if (robot.targetColumn < 0) {
-            robot.targetColumn = robot.camera.get_cryptobox_column();
-        }
+//        if (robot.targetColumn < 0) {
+//            robot.targetColumn = robot.camera.get_cryptobox_column();
+//        }
 
         robot.jewel.r_arm_down();
 
@@ -547,9 +547,9 @@ public abstract class SwerveUtilLOP extends LinearOpMode {
                     robot.jewel.r_colorSensor.blue(), robot.jewel.r_colorSensor.red());
         }
 
-        if (robot.camera.use_Vuforia) {
-            telemetry.addData("5. Vuforia Column = ", "%d", robot.camera.get_cryptobox_column());
-        }
+//        if (robot.camera.use_Vuforia) {
+//            telemetry.addData("5. Vuforia Column = ", "%d", robot.camera.get_cryptobox_column());
+//        }
         if ((robot.swerve.use_swerve) && !robot.servo_tune_up) {
             telemetry.addData("6. Drive Mode = ", "%s", robot.swerve.cur_mode);
             telemetry.addData("6.1 SW-Enc FL/FR/BL/BR = ", "%d/%d/%d/%d",
