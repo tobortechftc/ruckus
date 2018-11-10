@@ -28,19 +28,20 @@
   },
   "sv_sw_box": {
     "center": 0.5,
-    "left": 0.026,
-    "right": 0.949
+    "left": 0.477,
+    "right": 0.563
+  },
+  "sv_box_lift": {
+    "center": 0.4,
+    "left": 0.322,
+    "right": 0.521
   },
   "intake": {
-    "boxDump": -106.0,
-    "boxGoldCollection": 100.0,
-    "boxSilverCollection": 110.0,
     "sweeperInPower": 0.7,
     "sweeperOutPower": 0.7,
     "sweeperHalfRotation": 180.0,
-    "sliderDump": 490.0,
-    "sliderExtended": 1400.0,
-    "sliderSafe": 550.0,
+    "sliderDump": 220.0,
+    "sliderExtended": 800.0,
     "sliderPower": 0.4
   }
 }

@@ -53,7 +53,7 @@ public class AdjustableServo extends Logger<AdjustableServo> implements Configur
         this.adjustmentMode = adjustmentMode;
     }
 
-    @Adjustable(min = 0.0f, max = 0.3f, step = 0.001f)
+    @Adjustable(min = 0.0f, max = 1.0f, step = 0.001f)
     public double getLeft() {
         return left;
     }
@@ -62,7 +62,7 @@ public class AdjustableServo extends Logger<AdjustableServo> implements Configur
         if (adjustmentMode) setPosition(rangeMin);
     }
 
-    @Adjustable(min = 0.4f, max = 0.6f, step = 0.001f)
+    @Adjustable(min = 0.0f, max = 1.0f, step = 0.001f)
     public double getCenter() {
         return center;
     }
@@ -71,7 +71,7 @@ public class AdjustableServo extends Logger<AdjustableServo> implements Configur
         if (adjustmentMode) setPosition((rangeMin + rangeMax) / 2);
     }
 
-    @Adjustable(min = 0.7f, max = 1.0f, step = 0.001f)
+    @Adjustable(min = 0.0f, max = 1.0f, step = 0.001f)
     public double getRight() {
         return right;
     }

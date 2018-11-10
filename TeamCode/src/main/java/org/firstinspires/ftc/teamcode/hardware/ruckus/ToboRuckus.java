@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP;
 import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -161,52 +160,37 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
         em2.onButtonDown(new Events.Listener() {
             @Override
-            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+            public void buttonDown(EventManager source, Button button) {
                 if (button==Button.DPAD_LEFT) {
-                    if (intake.getSliderTarget()==intake.getSliderContracted() || intake.getSliderTarget()==intake.getSliderDump()) {
-                        // slider is currently contracted or is in dump position or is moving there
-                        intake.moveSlider(intake.getSliderSafe());
-                    } else if (intake.getSliderCurrent() >= intake.getSliderSafe()) {
+                    if (intake.getSliderCurrent() >= intake.getSliderDump()) {
                         intake.moveSlider(intake.getSliderExtended());
+                    } else {
+                        intake.moveSlider(intake.getSliderDump());
                     }
                 } else {
-                    if (intake.getSliderTarget() == intake.getSliderSafe()) {
+                    if (intake.getSliderCurrent() >= intake.getSliderDump()) {
                         intake.moveSlider(intake.getSliderDump());
-                    } else if (intake.getSliderTarget() == intake.getSliderDump()) {
+                    } else {
                         intake.moveSlider(intake.getSliderContracted());
-                    } else if (intake.getSliderCurrent() >= intake.getSliderSafe()) {
-                        intake.moveSlider(intake.getSliderSafe());
                     }
                 }
             }
         }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
         em2.onButtonUp(new Events.Listener() {
             @Override
-            public void buttonUp(EventManager source, Button button) throws InterruptedException {
-                if (intake.getSliderCurrent() >= intake.getSliderSafe()) intake.stopSlider();
+            public void buttonUp(EventManager source, Button button) {
+                if (intake.getSliderCurrent() >= intake.getSliderDump()) intake.stopSlider();
             }
         }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
         em2.onButtonDown(new Events.Listener() {
             @Override
-            public void buttonDown(EventManager source, Button button) throws InterruptedException {
-                if (button == Button.DPAD_UP) {
-                    if (intake.getBoxPosition() == MineralIntake.BoxPosition.GOLD_COLLECTION
-                            || intake.getBoxPosition() == MineralIntake.BoxPosition.SILVER_COLLECTION
-                            ) {
-                        intake.rotateBox(MineralIntake.BoxPosition.INITIAL);
-                    } else if (intake.getBoxPosition() == MineralIntake.BoxPosition.INITIAL) {
-                        intake.rotateBox(MineralIntake.BoxPosition.DUMP);
-                    }
+            public void buttonDown(EventManager source, Button button) {
+                if (intake.getSliderTarget()>=intake.getSliderDump()) {
+                    // if slider is extended, move the box but not the lid
+                    intake.moveBox(button == Button.DPAD_UP);
                 } else {
-                    if (intake.getBoxPosition() == MineralIntake.BoxPosition.GOLD_COLLECTION) {
-                        intake.rotateBox(MineralIntake.BoxPosition.SILVER_COLLECTION);
-                    } else if (intake.getBoxPosition() == MineralIntake.BoxPosition.SILVER_COLLECTION) {
-                        intake.rotateBox(MineralIntake.BoxPosition.GOLD_COLLECTION);
-                    } else if (intake.getBoxPosition() == MineralIntake.BoxPosition.INITIAL) {
-                        intake.rotateBox(MineralIntake.BoxPosition.GOLD_COLLECTION);
-                    } else if (intake.getBoxPosition() == MineralIntake.BoxPosition.DUMP) {
-                        intake.rotateBox(MineralIntake.BoxPosition.INITIAL);
-                    }
+                    // if slider is in the dump position, move the box and the lid
+                    intake.operateIntake(button == Button.DPAD_DOWN);
                 }
             }
         }, Button.DPAD_UP, Button.DPAD_DOWN);
