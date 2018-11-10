@@ -52,6 +52,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.reset();
         intake.reset();
         hanging.reset(auto);
+        if (auto) {
+            chassis.setupTelemetry(telemetry);
+        }
     }
 
     @MenuEntry(label = "TeleOp", group = "Competition")
@@ -337,7 +340,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
         chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
         chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
-        chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
+        chassis.rotateTo(0.25, -80); //Turn 90 degrees left
     }
 
     @MenuEntry(label = "Retract Latch", group = "Test Auto")

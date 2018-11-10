@@ -48,7 +48,6 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         resetStartTime();
 
 
-
         if (robot.hanging!=null) {
             robot.chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
             robot.hanging.latchUpInches(7);//Land
@@ -60,8 +59,18 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         sleep(200);
         robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
         sleep(200);
-        robot.chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
+        robot.chassis.rotateTo(0.25, -80); //Turn 90 degrees left
 
+        // robot.chassis.rotateTo(0.18, -90);
+        // sleep(200);
+        // robot.chassis.rotateTo(0.18, +180);
+        // sleep(200);
+        // robot.chassis.rotateTo(0.18, 90);
+        // sleep(200);
+        // robot.chassis.rotateTo(0.18, 0);
+        // sleep(200);
+//        robot.chassis.rotateTo(0.18, 45);
+        // sleep(10000);
         //at this place, use open cv to determine the mineral configuration
         int mode = 0;
         if (mode == 0) {
@@ -76,8 +85,8 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         robot.chassis.driveStraightAuto(0.35, 45, 0,Integer.MAX_VALUE);
         sleep(1000);
 
-        //robot.chassis.rotateTo(0.25,-40,telemetry);
-//        robot.chassis.rotateTo(0.18, 45,telemetry);
+        //robot.chassis.rotateTo(0.25,-40);
+//        robot.chassis.rotateTo(0.18, 45);
 //
 //        //from here, three different routine will converge into the depot
 ////        telemetry.addLine(String.format("detected distance to left: %.3f",robot.chassis.distanceToLeft()));
@@ -89,7 +98,7 @@ public class RuckusAutoGoldLand extends LinearOpMode {
 //        sleep(500);
 //
 //
-//        robot.chassis.rotateTo(0.18, 45,telemetry);
+//        robot.chassis.rotateTo(0.18, 45);
 //
 //        telemetry.addLine(String.format("detected distance to front: %.3f",robot.chassis.distanceToFront()));
 //        telemetry.update();
@@ -102,31 +111,31 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         //dump the marker here
         robot.hanging.markerDown();
         sleep(500);
-        robot.chassis.rotateTo(0.3,-5,telemetry);
+        robot.chassis.rotateTo(0.3,-5);
         sleep(200);
-        robot.chassis.rotateTo(0.3,5,telemetry);
+        robot.chassis.rotateTo(0.3,5);
         sleep(200);
-        robot.chassis.rotateTo(0.3,0,telemetry);
+        robot.chassis.rotateTo(0.3,0);
 
-//        robot.chassis.rotateTo(0.18, 46,telemetry);
+//        robot.chassis.rotateTo(0.18, 46);
 //
 //        sleep(500);
 //        robot.chassis.driveStraightAuto(0.40, -180,0,Integer.MAX_VALUE);
 //        sleep(200);
 //        robot.chassis.driveStraightAuto(0.20, 5,90,Integer.MAX_VALUE);
 //
-////        robot.chassis.rotateTo(0.18, 60,telemetry);
+////        robot.chassis.rotateTo(0.18, 60);
 //        robot.chassis.driveStraightAuto(0.70, -40,0,2000);
 
 //        robot.chassis.driveAndSteerAuto(0.7, 1500, 45, telemetry);
 ////        robot.chassis.rotateDegree(0.4,45);
 //        sleep(500);
-//        robot.chassis.rotateTo(0.5, 45,telemetry);
+//        robot.chassis.rotateTo(0.5, 45);
 //        sleep(500);
 //
 //        robot.chassis.driveAndSteerAuto(0.5, 1800, -90, telemetry);
 //        sleep(500);
-//        robot.chassis.rotateTo(0.5, 45,telemetry);
+//        robot.chassis.rotateTo(0.5, 45);
 //
 //        robot.chassis.driveAndSteerAuto(-0.5, 560 * 3, 0, telemetry);
 

@@ -63,6 +63,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private double headingDeviation;  // current heading deviation for DriveMode.STRAIGHT as reported by orientation sensor
     private double servoCorrection;   // latest correction applied to leading wheels' servos to correct heading deviation
 
+    private boolean useScalePower = true;//
 
     @Adjustable(min = 8.0, max = 18.0, step = 0.02)
     public double getTrack() {
@@ -425,58 +426,57 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             changeServoPositions(newServoPositions);
         }
 
-        frontLeft.motor.setPower(scalePower(power));
-        frontRight.motor.setPower(-1 * scalePower(power));
-        backLeft.motor.setPower(scalePower(power));
-        backRight.motor.setPower(-1 * scalePower(power));
+        frontLeft.motor.setPower(useScalePower ? scalePower(power) : power);
+        frontRight.motor.setPower(-1 * (useScalePower ? scalePower(power) : power));
+        backLeft.motor.setPower(useScalePower ? scalePower(power) : power);
+        backRight.motor.setPower(-1 * (useScalePower ? scalePower(power) : power));
     }
 
     public void rotateDegree(double power, double deltaD) throws InterruptedException {
         double iniHeading = orientationSensor.getHeading();
         double finalHeading = iniHeading + deltaD;
-        for (WheelAssembly wheel : wheels)
-            wheel.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rotate(Math.signum(deltaD) * power);
-        while (true) {
-            if (Math.abs(finalHeading - orientationSensor.getHeading()) < 1.0)
-                break;
-        }
-        for (WheelAssembly wheel : wheels)
-            wheel.motor.setPower(0);
+        finalHeading += finalHeading < -180 ? +360 : (finalHeading > 180 ? -360 : 0);
+//        rotateTo(power,finalHeading);
+//        for (WheelAssembly wheel : wheels)
+//            wheel.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//        rotate(Math.signum(deltaD) * power);
+//        while (true) {
+//            if (Math.abs(finalHeading - orientationSensor.getHeading()) < 1.0)
+//                break;
+//        }
+//        for (WheelAssembly wheel : wheels)
+//            wheel.motor.setPower(0);
     }
 
-    public void rotateTo(double power, double finalHeading, Telemetry tl) throws InterruptedException {
+    //final heading needs to be with in range(-180,180]
+    public void rotateTo(double power, double finalHeading) throws InterruptedException {
         double iniHeading = orientationSensor.getHeading();
         double deltaD = finalHeading - iniHeading;
-        if (Math.abs(deltaD) < 1.0)
+        //do not turn if the heading is close enough the target
+        if (Math.abs(deltaD) < 0.5)
             return;
+        //resolve the issue with +-180 mark
+        if (Math.abs(deltaD) > 180) {
+            finalHeading = finalHeading + (deltaD > 0 ? -360 : +360);
+            deltaD = 360 - Math.abs(deltaD);
+            deltaD = -deltaD;
+        }
+        //break on reaching the target
         for (WheelAssembly wheel : wheels)
             wheel.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-//        rotate(Math.signum(deltaD) * power);
+        //ensure the condition before calling rotate()
+        driveMode = DriveMode.STOP;
+        useScalePower = false;
         //***** routine to start the wheels ******//
-        driveMode = DriveMode.ROTATE;
-        for (WheelAssembly wheel : wheels) {
-            wheel.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        }
-        // angle between Y axis and line from the center of chassis,
-        //  which is assumed to be at (0, 0) to the center of the front right wheel
-        double angle = Math.atan2(track, wheelBase) / Math.PI * 180;
-        double[] newServoPositions = new double[4];
-        // front left and back right
-        newServoPositions[0] = newServoPositions[3] = angle;
-        // front right and back left
-        newServoPositions[1] = newServoPositions[2] = -1 * angle;
-        changeServoPositions(newServoPositions);
-        //start motors
-        frontLeft.motor.setPower(Math.signum(deltaD) * power);
-        frontRight.motor.setPower(-1 * Math.signum(deltaD) * power);
-        backLeft.motor.setPower(Math.signum(deltaD) * power);
-        backRight.motor.setPower(-1 * Math.signum(deltaD) * power);
+        rotate(Math.signum(deltaD) * power);
         //***** End routine to start the wheels ******//
+        //record heading for checking in while loop
+        double lastReading = orientationSensor.getHeading();
         while (true) {
-            tl.addLine(String.format("rotateTo/pwr: %.3f, currentHeading: %.1f)", power, orientationSensor.getHeading()));
-            tl.update();
+            double currentHeading = orientationSensor.getHeading();
+            //we cross the +-180 mark if and only if the product below is a very negative number
+            if (currentHeading * lastReading < -100)
+                finalHeading = finalHeading + (deltaD > 0 ? -360 : +360);
             //if within acceptable range, terminate
             if (Math.abs(finalHeading - orientationSensor.getHeading()) < 0.5)
                 break;
@@ -485,10 +485,12 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 break;
             if (deltaD < 0 && orientationSensor.getHeading() - finalHeading < 0)
                 break;
+            lastReading = currentHeading;
         }
         for (WheelAssembly wheel : wheels)
             wheel.motor.setPower(0);
         driveMode = DriveMode.STOP;
+        useScalePower = true;
     }
 
     /**
@@ -527,6 +529,12 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             @Override
             public Double value() {
                 return frontLeft.motor.getPower();
+            }
+        });
+        line.addData("imu", "%.1f", new Func<Double>() {
+            @Override
+            public Double value() {
+                return orientationSensor.getHeading();
             }
         });
         orientationSensor.setupTelemetry(line);

@@ -1,18 +1,18 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.hardware17;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.hardware.SwerveSystem;
+import org.firstinspires.ftc.teamcode.support.YieldHandler;
 
-import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CAR;
-import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.CRAB;
-import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.ORBIT;
-import static org.firstinspires.ftc.teamcode.hardware.SwerveSystem.CarMode.TURN;
+import static org.firstinspires.ftc.teamcode.hardware17.SwerveSystem.CarMode.CAR;
+import static org.firstinspires.ftc.teamcode.hardware17.SwerveSystem.CarMode.CRAB;
+import static org.firstinspires.ftc.teamcode.hardware17.SwerveSystem.CarMode.ORBIT;
+import static org.firstinspires.ftc.teamcode.hardware17.SwerveSystem.CarMode.TURN;
 
 @Disabled
-@TeleOp(name="TeleOp-2017", group="Relic")
-public class Teleop2017 extends SwerveUtilLOP {
+@TeleOp(name="TeleOp-2018", group="Ruckus")
+public class Teleop2018 extends SwerveUtilLOP implements YieldHandler {
 
     /* Declare OpMode members. */
     //SwerveDriveHardware robot           = new SwerveDriveHardware();
@@ -24,8 +24,8 @@ public class Teleop2017 extends SwerveUtilLOP {
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
          */
-        enable_hardware_for_teleop_2017();
-        // set_verbose();  // uncomment this line to debug
+        enable_hardware_for_teleop();
+        //set_verbose();  // uncomment this line to debug
 
         init_and_test();
 
@@ -378,5 +378,14 @@ public class Teleop2017 extends SwerveUtilLOP {
             // robot.waitForTick(40);
         }
         stop_tobot();
+    }
+
+    @Override
+    public void on_yield() {
+        robot.dumper.show_telemetry(telemetry);
+        robot.intake.show_telemetry(telemetry);
+        robot.relicReachSystem.show_telmetry(telemetry);
+        robot.swerve.show_telmetry(telemetry);
+        telemetry.update();
     }
 }

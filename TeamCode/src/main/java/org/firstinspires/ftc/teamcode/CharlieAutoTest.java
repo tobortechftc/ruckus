@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "Ruckus::Auto-Gold-1", group = "Ruckus")
-public class RuckusAutoGold1 extends LinearOpMode {
+@Autonomous(name = "Ruckus::Charlie Auto Test", group = "Ruckus")
+public class CharlieAutoTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -49,32 +49,30 @@ public class RuckusAutoGold1 extends LinearOpMode {
 
 
 
-//        if (robot.hanging!=null) {
-//            robot.chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-//            robot.hanging.latchUpInches(7);//Land
-//            sleep(2000);
-//        }
-//        robot.chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
-//        sleep(200);
-//        robot.chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
-//        sleep(200);
-//        robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
-//        sleep(200);
-//        robot.chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
 
+         robot.chassis.rotateTo(0.18, -90);
+         sleep(200);
+         robot.chassis.rotateTo(0.18, +180);
+         sleep(200);
+         robot.chassis.rotateTo(0.18, 90);
+         sleep(200);
+         robot.chassis.rotateTo(0.18, 0);
+         sleep(200);
+//        robot.chassis.rotateTo(0.18, 45);
+        // sleep(10000);
         //at this place, use open cv to determine the mineral configuration
-        int mode = 0;
-        if (mode == 0) {
-            robot.chassis.driveStraightAuto(0.35, 43, 0,Integer.MAX_VALUE);
-        } else if (mode == 1) {
-            robot.chassis.driveStraightAuto(0.35, 58, 46,Integer.MAX_VALUE);
-        } else {
-            robot.chassis.driveStraightAuto(0.35, 58, -46,Integer.MAX_VALUE);
-        }
-
-        sleep(500);
-        robot.chassis.driveStraightAuto(0.35, 55, 0,Integer.MAX_VALUE);
-        sleep(1000);
+//        int mode = 0;
+//        if (mode == 0) {
+//            robot.chassis.driveStraightAuto(0.35, 43, 0,Integer.MAX_VALUE);
+//        } else if (mode == 1) {
+//            robot.chassis.driveStraightAuto(0.35, 58, 46,Integer.MAX_VALUE);
+//        } else {
+//            robot.chassis.driveStraightAuto(0.35, 58, -46,Integer.MAX_VALUE);
+//        }
+//
+//        sleep(500);
+//        robot.chassis.driveStraightAuto(0.35, 45, 0,Integer.MAX_VALUE);
+//        sleep(1000);
 
         //robot.chassis.rotateTo(0.25,-40);
 //        robot.chassis.rotateTo(0.18, 45);
@@ -100,13 +98,13 @@ public class RuckusAutoGold1 extends LinearOpMode {
 //        sleep(500);
 
         //dump the marker here
-        robot.hanging.markerDown();
-        sleep(500);
-        robot.chassis.rotateTo(0.3,-5);
-        sleep(200);
-        robot.chassis.rotateTo(0.3,5);
-        sleep(200);
-        robot.chassis.rotateTo(0.3,0);
+//        robot.hanging.markerDown();
+//        sleep(500);
+//        robot.chassis.rotateTo(0.3,-5);
+//        sleep(200);
+//        robot.chassis.rotateTo(0.3,5);
+//        sleep(200);
+//        robot.chassis.rotateTo(0.3,0);
 
 //        robot.chassis.rotateTo(0.18, 46);
 //
