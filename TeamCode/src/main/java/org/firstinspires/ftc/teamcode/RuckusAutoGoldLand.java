@@ -47,67 +47,19 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
+        // Step-1: check random sample position
+        ToboRuckus.MineralDetection.SampleLocation sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
 
-        if (robot.hanging!=null) {
-            robot.chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-            robot.hanging.latchUpInches(7);//Land
-            sleep(2000);
-        }
-        robot.chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
-        sleep(200);
-        robot.chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
-        sleep(200);
-        robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
-        sleep(200);
-        robot.chassis.rotateTo(0.25, -80); //Turn 90 degrees left
+        // Step-2: landing mission
+        robot.landAndDetach();
 
-        // robot.chassis.rotateTo(0.18, -90);
-        // sleep(200);
-        // robot.chassis.rotateTo(0.18, +180);
-        // sleep(200);
-        // robot.chassis.rotateTo(0.18, 90);
-        // sleep(200);
-        // robot.chassis.rotateTo(0.18, 0);
-        // sleep(200);
-//        robot.chassis.rotateTo(0.18, 45);
-        // sleep(10000);
-        //at this place, use open cv to determine the mineral configuration
-        int mode = 0;
-        if (mode == 0) {
-            robot.chassis.driveStraightAuto(0.35, 43, 0,Integer.MAX_VALUE);
-        } else if (mode == 1) {
-            robot.chassis.driveStraightAuto(0.35, 58, 46,Integer.MAX_VALUE);
-        } else {
-            robot.chassis.driveStraightAuto(0.35, 58, -46,Integer.MAX_VALUE);
-        }
+        // Ste-3: sample mission
+        robot.goGetSampleGold(sam_loc);
 
+        // Step-4: from sample mission to dumping marker
         sleep(500);
         robot.chassis.driveStraightAuto(0.35, 45, 0,Integer.MAX_VALUE);
         sleep(1000);
-
-        //robot.chassis.rotateTo(0.25,-40);
-//        robot.chassis.rotateTo(0.18, 45);
-//
-//        //from here, three different routine will converge into the depot
-////        telemetry.addLine(String.format("detected distance to left: %.3f",robot.chassis.distanceToLeft()));
-////        telemetry.update();
-//        sleep(500);
-//        robot.chassis.driveStraightAuto(0.30, robot.chassis.distanceToLeft() - 10.0,-90,Integer.MAX_VALUE);
-////        telemetry.addLine(String.format("adjusted distance to left: %.3f",robot.chassis.distanceToLeft()));
-////        telemetry.update();
-//        sleep(500);
-//
-//
-//        robot.chassis.rotateTo(0.18, 45);
-//
-//        telemetry.addLine(String.format("detected distance to front: %.3f",robot.chassis.distanceToFront()));
-//        telemetry.update();
-//        sleep(500);
-//        robot.chassis.driveStraightAuto(0.30, robot.chassis.distanceToFront() - 30.0,0,Integer.MAX_VALUE);
-//        telemetry.addLine(String.format("adjusted distance to front: %.3f",robot.chassis.distanceToFront()));
-//        telemetry.update();
-//        sleep(500);
-
         //dump the marker here
         robot.hanging.markerDown();
         sleep(500);
@@ -116,6 +68,8 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         robot.chassis.rotateTo(0.3,5);
         sleep(200);
         robot.chassis.rotateTo(0.3,0);
+
+        // Step-5: parking on the crater rim
 
 //        robot.chassis.rotateTo(0.18, 46);
 //

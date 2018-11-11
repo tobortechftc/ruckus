@@ -348,11 +348,31 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
     }
 
+    @MenuEntry(label = "Test Sample", group = "Test Auto")
+    public void goGetSampleGold(ToboRuckus.MineralDetection.SampleLocation sam_loc ) throws InterruptedException{
+        switch(sam_loc) {
+            case CENTER: // center
+                chassis.driveStraightAuto(0.35, 43, 0, Integer.MAX_VALUE);
+                break;
+            case RIGHT:
+                chassis.driveStraightAuto(0.35, 58, 46, Integer.MAX_VALUE);
+                break;
+            case LEFT:
+                chassis.driveStraightAuto(0.35, 58, -46, Integer.MAX_VALUE);
+                break;
+            default: // go straight like center
+                chassis.driveStraightAuto(0.35, 43, 0, Integer.MAX_VALUE);
+        }
+    }
+
     @MenuEntry(label = "Test Land", group = "Test Auto")
-    public void landAndDetach(EventManager em) throws InterruptedException{
+    public void landAndDetach() throws InterruptedException{
         chassis.resetOrientation();
-        chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-        hanging.latchUpInches(7); //Land
+        if (hanging!=null) {
+            chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+            hanging.latchUpInches(7);
+            Thread.sleep(500);
+        }
         chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
         chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
         chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
