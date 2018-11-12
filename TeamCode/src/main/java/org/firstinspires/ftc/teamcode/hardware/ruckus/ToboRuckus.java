@@ -77,6 +77,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void reset(boolean auto) {
         chassis.reset();
         intake.reset();
+        mineralDelivery.reset();
         hanging.reset(auto);
         if (auto) {
             chassis.setupTelemetry(telemetry);
@@ -165,13 +166,17 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (button==Button.DPAD_LEFT) {
-                    if (intake.getSliderCurrent() >= intake.getSliderDump()) {
+                    if (source.isPressed(Button.BACK)) {
+                        intake.adjustSlider(true);
+                    } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
                         intake.moveSlider(intake.getSliderExtended());
                     } else {
                         intake.moveSlider(intake.getSliderDump());
                     }
                 } else {
-                    if (intake.getSliderCurrent() >= intake.getSliderDump()) {
+                    if (source.isPressed(Button.BACK)) {
+                        intake.adjustSlider(false);
+                    } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
                         intake.moveSlider(intake.getSliderDump());
                     } else {
                         intake.moveSlider(intake.getSliderContracted());
@@ -188,7 +193,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (intake.getSliderTarget()>=intake.getSliderDump()) {
+                if (source.isPressed(Button.BACK)) {
+                    // manually open / close the gate
+                    intake.moveGate(button == Button.DPAD_UP);
+                } else if (intake.getSliderTarget()>=intake.getSliderDump()) {
                     // if slider is extended, move the box but not the lid
                     intake.moveBox(button == Button.DPAD_UP);
                 } else {
@@ -201,7 +209,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         // Events for gamepad2
         em2.onTrigger(new Events.Listener() {
             @Override
-            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
+            public void triggerMoved(EventManager source, Events.Side side, float current, float change) {
                 // do not rotate if the robot is currently moving
                 if (side == Events.Side.LEFT) { // lift down
                     if (current > 0.2) {
@@ -224,7 +232,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }, Events.Side.LEFT, Events.Side.RIGHT);
         em2.onButtonDown(new Events.Listener() {
             @Override
-            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+            public void buttonDown(EventManager source, Button button) {
                 if (button == Button.LEFT_BUMPER) { // lift up
                     //mineralDelivery.liftUp();
                 } else if (button == Button.RIGHT_BUMPER) { // latch up
@@ -236,7 +244,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (button == Button.B) {
                     if (source.isPressed(Button.BACK)) {
                         hanging.markerAuto();
-                    } else if (source.isPressed(Button.START) == false) {
+                    } else if (!source.isPressed(Button.START)) {
                         hanging.hookAuto();
                     }
                 }
@@ -257,7 +265,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
         em2.onButtonUp(new Events.Listener() {
             @Override
-            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+            public void buttonUp(EventManager source, Button button) {
                 if (button == Button.LEFT_BUMPER) { // lift stop
                     //mineralDelivery.liftStop();
                 } else if (button == Button.RIGHT_BUMPER) { // latch stop
@@ -269,9 +277,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
-                                   float currentY, float changeY) throws InterruptedException {
+                                   float currentY, float changeY) {
                 if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) > 0.2) {
-                    mineralDelivery.liftUp();
+                    mineralDelivery.liftUp(source.isPressed(Button.BACK));
                 } else if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) < -0.2) {
                     mineralDelivery.liftDown(source.isPressed(Button.BACK));
                 } else {
@@ -282,7 +290,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
-                                   float currentY, float changeY) throws InterruptedException {
+                                   float currentY, float changeY) {
                 if (source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY) > 0.2) {
                     mineralDelivery.armUpInc();
                 } else if (source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY) < -0.2) {

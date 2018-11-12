@@ -27,7 +27,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private DcMotor lift;
     private Servo dumperArm;
     private Servo dumperGate;
-    private double gateClosePos = 0.01;
+    private double gateClosePos = 0.001;
     private double gateOpenPos = .8;
     private double armDownPos = 0.05;
     private double armSafePos = 0.11;
@@ -53,6 +53,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void reset() {
         lift.setPower(0);
         gateClose();
+        armDown();
     }
 
     public void configure(Configuration configuration) {
@@ -64,9 +65,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         dumperGate = configuration.getHardwareMap().servo.get("sv_hp_gate");
-        gateOpen();
         dumperArm = configuration.getHardwareMap().servo.get("sv_hp_dump");
-        armDown();
 
         // register delivery as configurable component
         configuration.register(this);
@@ -87,9 +86,9 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
             gateOpen();
         }
     }
-    public void liftUp() {
+    public void liftUp(boolean force) {
         int cur_pos = lift.getCurrentPosition();
-        if (cur_pos>MAX_LIFT_POS) {
+        if (cur_pos>MAX_LIFT_POS && force==false) {
             lift.setPower(0);
         } else {
             lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

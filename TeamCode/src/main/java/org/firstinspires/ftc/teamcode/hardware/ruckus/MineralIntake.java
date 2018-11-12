@@ -344,6 +344,11 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         };
     }
 
+    public void adjustSlider(boolean extend) {
+        this.sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.sliderMotor.setPower(this.sliderPower * (extend ? 1 : -1));
+    }
+
     public void stopSlider() {
         this.sliderMotor.setPower(0);
     }
