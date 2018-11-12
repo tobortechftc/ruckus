@@ -32,7 +32,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private Servo marker;
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
-    private double hook_up = 0.55;
+    private double hook_up = 0.42;
     private double hook_down = 0.05;
     private double latch_power = .95;
     private boolean hookIsOpened = false;

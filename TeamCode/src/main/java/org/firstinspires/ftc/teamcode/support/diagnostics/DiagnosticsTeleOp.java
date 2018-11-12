@@ -60,7 +60,7 @@ public abstract class DiagnosticsTeleOp extends LinearOpMode {
 
         try {
             // configure robot and reset all hardware
-            robot.configure(configuration, telemetry);
+            robot.configure(configuration, telemetry, true); // enable TFOD
             if (configuration.apply()) {
                 if (configuration.getLastModified()!=null) {
                     telemetry.addData("Phone adjustments", new SimpleDateFormat("MMM d, HH:mm").format(configuration.getLastModified()));

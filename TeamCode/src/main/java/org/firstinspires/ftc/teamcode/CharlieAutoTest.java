@@ -32,7 +32,7 @@ public class CharlieAutoTest extends LinearOpMode {
 
         try {
             // configure robot and reset all hardware
-            robot.configure(configuration, telemetry);
+            robot.configure(configuration, telemetry, true);
             configuration.apply();
             robot.reset(true);
 

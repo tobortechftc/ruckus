@@ -30,7 +30,7 @@ public class RuckusTeleOp extends LinearOpMode {
 
         try {
             // configure robot and reset all hardware
-            robot.configure(configuration, telemetry);
+            robot.configure(configuration, telemetry, false);
             configuration.apply();
             robot.reset(false);
 

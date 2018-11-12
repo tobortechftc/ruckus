@@ -52,13 +52,15 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @Override
-    public void configure(Configuration configuration, Telemetry telemetry) {
+    public void configure(Configuration configuration, Telemetry telemetry, boolean auto) {
         this.telemetry = telemetry;
 
 //        cameraSystem = new CameraSystem(null);
 //        cameraSystem.init(configuration.getHardwareMap());
-        cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
-        cameraMineralDetector.configure(configuration);
+        if (auto) {
+            cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
+            cameraMineralDetector.configure(configuration);
+        }
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
         chassis.configure(configuration);
         intake = new MineralIntake().configureLogging("Intake", logLevel);

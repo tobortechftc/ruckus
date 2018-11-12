@@ -23,7 +23,7 @@ public interface Robot {
      * @see Configuration
      * @see Telemetry
      */
-    void configure(Configuration configuration, Telemetry telemetry);
+    void configure(Configuration configuration, Telemetry telemetry, boolean auto);
 
     /**
      * Reset robot. All applicable hardware devices should be reset to their initial state.
