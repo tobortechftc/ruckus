@@ -376,11 +376,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @MenuEntry(label = "Test Land", group = "Test Auto")
-    public void landAndDetach() throws InterruptedException{
+    public void landAndDetach(EventManager em) throws InterruptedException{
         chassis.resetOrientation();
         if (hanging!=null) {
             chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-            hanging.latchUpInches(7);
+            hanging.latchUpInches(7.3);
             Thread.sleep(500);
         }
         chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
@@ -391,7 +391,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     @MenuEntry(label = "Retract Latch", group = "Test Auto")
     public void retractLatch(EventManager em) throws InterruptedException{
-        hanging.latchDownInches(7);
+        hanging.latchDownInches(8.5);
     }
 
     public void initTeleOp() {

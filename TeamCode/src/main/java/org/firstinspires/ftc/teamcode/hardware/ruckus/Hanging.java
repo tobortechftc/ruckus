@@ -38,9 +38,9 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private boolean hookIsOpened = false;
     private final double MARKER_UP = 0.4;
     private final double MARKER_DOWN = 0.9;
-    private final int MAX_LATCH_POS = 8900;
-    private final int MIN_LATCH_POS = 50;
-    private final int LATCH_COUNT_PER_INCH = 1305;
+    private final int MAX_LATCH_POS = 15050; //Max distance is 8.5 inches
+    private final int MIN_LATCH_POS = 20;
+    private final int LATCH_COUNT_PER_INCH = 1774;
     private boolean markerIsDown = false;
     private ElapsedTime runtime = new ElapsedTime();
     @Override
