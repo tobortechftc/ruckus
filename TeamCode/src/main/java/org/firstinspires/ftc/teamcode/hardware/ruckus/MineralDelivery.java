@@ -27,16 +27,17 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private DcMotor lift;
     private Servo dumperArm;
     private Servo dumperGate;
-    private double gateClosePos = 0.001;
-    private double gateOpenPos = .8;
-    private double armDownPos = 0.05;
+    private double gateClosePos = 0.4;
+    private double gateOpenPos = 0.99;
+    private double armInitPos = 0.05;
+    private double armDownPos = 0.09;
     private double armSafePos = 0.11;
     private double armDumpPos = 0.85; //actual dump position
     private double armUpPos = 0.95; //max arm position
     private double liftPower = -.5;
     private boolean gateIsOpened = false;
-    private final int MAX_LIFT_POS = 5300;
-    private final int AUTO_LIFT_POS = 4100;
+    private final int MAX_LIFT_POS = 3980;
+    private final int AUTO_LIFT_POS = 3500;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
@@ -53,7 +54,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void reset() {
         lift.setPower(0);
         gateClose();
-        armDown();
+        armInit();
     }
 
     public void configure(Configuration configuration) {
@@ -137,6 +138,9 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     public Progress armUp() {
         return moveArm(armUpPos);
+    }
+    public Progress armInit() {
+        return moveArm(armInitPos);
     }
     public Progress armDown() {
         return moveArm(armDownPos);

@@ -48,7 +48,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // slider encoder positions
     private int sliderContracted = 0; // contracted
     private int sliderExtended = 1400; // fully extended
-    private int sliderDump = 200; // position to dump minerals into delivery box
+    private int sliderDump = 400; // position to dump minerals into delivery box
+    private int sliderInitOut = 400; // position for initial TeleOp out
     private double sliderPower = 0.2; // TBD
 
     @Override
@@ -142,6 +143,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     public int getSliderDump() {
         return sliderDump;
     }
+    public int getSliderInitOut() {
+        return sliderInitOut;
+    }
     public void setSliderDump(int sliderDump) {
         this.sliderDump = sliderDump;
         if (adjustmentMode) {
@@ -184,7 +188,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     public void reset() {
         boxLiftServo.setPosition(LIFT_DOWN);
-        boxGateServo.setPosition(GATE_CLOSED);
+        boxGateServo.setPosition(GATE_OPEN); // open so the dumper box can be inside 18"
         resetMotor(sweeperMotor);
         resetMotor(sliderMotor);
         debug("Reset mineral intake, lift: %.2f, gate: %.1f, sweeper: %s / %d, slider: %s / %d",

@@ -392,6 +392,20 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         hanging.latchDownInches(7);
     }
 
+    public void initTeleOp() {
+        // slider out at dump pos
+        intake.moveSlider(intake.getSliderInitOut());
+
+        // box gate close
+        intake.moveGate(false);
+
+        // dumper gate open
+        mineralDelivery.gateOpen();
+
+        // dumper at down position
+        mineralDelivery.armDown();
+    }
+
     /**
      * Returns angle (-180 to 180 degrees) between positive Y axis
      * and a line drawn from center of coordinates to (x, y).
