@@ -45,6 +45,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private double minPower = 0.15;
     // maximum power that should be applied to the wheel motors
     private double maxPower = 0.5;
+    private double maxRange = 127; // max range sensor detectable
 
     private WheelAssembly frontLeft;
     private WheelAssembly frontRight;
@@ -151,19 +152,48 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public double distanceToFront() {
-        return frontRangeSensor.getDistance(DistanceUnit.CM);
+        double dist = frontRangeSensor.getDistance(DistanceUnit.CM);
+        int count=0;
+        while (dist>maxRange && (++count)<5) {
+            dist = frontRangeSensor.getDistance(DistanceUnit.CM);
+        }
+        if (dist>maxRange)
+            dist = maxRange;
+        return dist;
     }
 
     public double distanceToBack() {
-        return backRangeSensor.getDistance(DistanceUnit.CM);
+        double dist = backRangeSensor.getDistance(DistanceUnit.CM);
+        int count=0;
+        while (dist>maxRange && (++count)<5) {
+            dist = backRangeSensor.getDistance(DistanceUnit.CM);
+        }
+        if (dist>maxRange)
+            dist = maxRange;
+        return dist;
     }
 
-    public double distanceToLeft() {
-        return leftRangeSensor.getDistance(DistanceUnit.CM);
+    public double distanceToLeft()
+    {
+        double dist = leftRangeSensor.getDistance(DistanceUnit.CM);
+        int count=0;
+        while (dist>maxRange && (++count)<5) {
+            dist = leftRangeSensor.getDistance(DistanceUnit.CM);
+        }
+        if (dist>maxRange)
+            dist = maxRange;
+        return dist;
     }
 
     public double distanceToRight() {
-        return rightRangeSensor.getDistance(DistanceUnit.CM);
+        double dist = rightRangeSensor.getDistance(DistanceUnit.CM);
+        int count=0;
+        while (dist>maxRange && (++count)<5) {
+            dist = rightRangeSensor.getDistance(DistanceUnit.CM);
+        }
+        if (dist>maxRange)
+            dist = maxRange;
+        return dist;
     }
 
     public void reset() {
