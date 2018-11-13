@@ -580,7 +580,12 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             }
         });
         orientationSensor.setupTelemetry(line);
-
+        line.addData("rangeRight", "%.1f", new Func<Double>() {
+            @Override
+            public Double value() {
+                return distanceToRight();
+            }
+        });
         telemetry.addLine().addData("M", new Func<String>() {
             @Override
             public String value() {
