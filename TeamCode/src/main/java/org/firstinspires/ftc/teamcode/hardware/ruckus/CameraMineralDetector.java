@@ -111,49 +111,49 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
                                 silverXCoord = (int) recognition.getLeft();
                             }
                         }
-                        if (goldXCoord < silverXCoord) {
-                            logger.verbose("SampleLocation: Right");
-                            return ToboRuckus.MineralDetection.SampleLocation.RIGHT;
-                        } else if (goldXCoord > silverXCoord) {
+                        if (goldXCoord != -1 && goldXCoord < silverXCoord) {
+                            logger.verbose("SampleLocation: Left");
+                            return ToboRuckus.MineralDetection.SampleLocation.LEFT;
+                        } else if (goldXCoord != -1 && goldXCoord > silverXCoord) {
                             logger.verbose("SampleLocation: Center");
                             return ToboRuckus.MineralDetection.SampleLocation.CENTER;
                         } else if (goldXCoord == -1 && silverXCoord != -1) {
-                            logger.verbose("SampleLocation: Left");
-                            return ToboRuckus.MineralDetection.SampleLocation.LEFT;
+                            logger.verbose("SampleLocation: Right");
+                            return ToboRuckus.MineralDetection.SampleLocation.RIGHT;
                         } else {
                             logger.verbose("SampleLocation: Unknown");
                             return ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
                         }
                     }
-//                        int goldMineralX = -1;
-//                        int silverMineral1X = -1;
-//                        int silverMineral2X = -1;
-//                        for (Recognition recognition : updatedRecognitions) {
-//                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-//                                goldMineralX = (int) recognition.getLeft();
-//                            } else if (silverMineral1X == -1) {
-//                                silverMineral1X = (int) recognition.getLeft();
-//                            } else {
-//                                silverMineral2X = (int) recognition.getLeft();
-//                            }
-//                        }
-//                        if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
-//                            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
-//                                logger.verbose("Sample Location: Left");
-//                                return ToboRuckus.MineralDetection.SampleLocation.LEFT;
-////                                    telemetry.addData("Gold Mineral Position", "Left");
-//                            } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
-//                                logger.verbose("Sample Location: Right");
-//                                return ToboRuckus.MineralDetection.SampleLocation.RIGHT;
-////                                    telemetry.addData("Gold Mineral Position", "Right");
-//                            } else {
-//                                logger.verbose("Sample Location: Center");
-//                                return ToboRuckus.MineralDetection.SampleLocation.CENTER;
-////                                    telemetry.addData("Gold Mineral Position", "Center");
-//                            }
-//                        }
+                    if (updatedRecognitions.size() == 3) {
+                        int goldXCoord = -1;
+                        int silverXCoord1 = -1;
+                        int silverXCoord2 = -1;
+                        for (Recognition recognition : updatedRecognitions) {
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                goldXCoord = (int) recognition.getLeft();
+                            } else if (silverXCoord1 == -1) {
+                                silverXCoord1 = (int) recognition.getLeft();
+                            } else {
+                                silverXCoord2 = (int) recognition.getLeft();
+                            }
+                        }
+                        if (goldXCoord != -1 && silverXCoord1 != -1 && silverXCoord2 != -1) {
+                            if (goldXCoord < silverXCoord1 && goldXCoord < silverXCoord2) {
+                                logger.verbose("SampleLocation: Left");
+                                return ToboRuckus.MineralDetection.SampleLocation.LEFT;
+                            } else if (goldXCoord > silverXCoord1 && goldXCoord > silverXCoord2) {
+                                logger.verbose("SampleLocation: Right");
+                                return ToboRuckus.MineralDetection.SampleLocation.RIGHT;
+                            } else {
+                                logger.verbose("SampleLocation: Center");
+                                return ToboRuckus.MineralDetection.SampleLocation.CENTER;
+                            }
+                        } else {
+                            return ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
+                        }
+                    }
                 }
-//                        telemetry.update();
             }
         }
         if (tfod != null) {
@@ -166,12 +166,12 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
     }
 }
 
-    /**
-     * Set up telemetry lines for chassis metrics
-     * Shows current motor power, orientation sensors,
-     * drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
-     * and servo position for each wheel
-     */
+/**
+ * Set up telemetry lines for chassis metrics
+ * Shows current motor power, orientation sensors,
+ * drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
+ * and servo position for each wheel
+ */
 //    public void setupTelemetry(Telemetry telemetry) {
 //        Telemetry.Line line = telemetry.addLine();
 //        if (updatedRecognitions.size() > 0)
