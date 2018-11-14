@@ -415,14 +415,18 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.resetOrientation();
         if (hanging!=null) {
             chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-            hanging.latchUpInches(7.3);
+            hanging.latchUpInches(8);
             Thread.sleep(500);
         }
         chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
         chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
         chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
-        chassis.rotateTo(0.25, -80); //Turn 90 degrees left
+
+        chassis.rotateTo(0.3, -80); //Turn 90 degrees left
         chassis.rotateTo(0.18, -90);
+
+        chassis.driveStraightAuto(0.25, 2, 90, 3000); //Strafe right ~1 in.
+        chassis.driveStraightAuto(0.25, -4, 0, 3000); //Drive back ~2 in.
     }
 
     @MenuEntry(label = "Retract Latch", group = "Test Auto")
