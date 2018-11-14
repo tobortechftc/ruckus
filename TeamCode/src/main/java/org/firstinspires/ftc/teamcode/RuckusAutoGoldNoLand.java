@@ -55,54 +55,15 @@ public class RuckusAutoGoldNoLand extends LinearOpMode {
         // Step-3: sample mission
         robot.goGetSampleGold(sam_loc);
 
-        // Step-4: from sample mission to dumping marker
+        //Step-4: align with walls
+        robot.alignWithWallsGoldSide();
+
+        // Step-5: from sample mission to dumping marker
         robot.hanging.markerDown();
         sleep(500);
-        robot.chassis.rotateTo(0.3,-5);
-        sleep(200);
-        robot.chassis.rotateTo(0.3,5);
-        sleep(200);
-        robot.chassis.rotateTo(0.3,0);
 
         // Step-5: parking on the crater rim
 
-//        robot.chassis.rotateTo(0.18, 46);
-//
-//        sleep(500);
-//        robot.chassis.driveStraightAuto(0.40, -180,0,Integer.MAX_VALUE);
-//        sleep(200);
-//        robot.chassis.driveStraightAuto(0.20, 5,90,Integer.MAX_VALUE);
-//
-////        robot.chassis.rotateTo(0.18, 60);
-//        robot.chassis.driveStraightAuto(0.70, -40,0,2000);
-
-//        robot.chassis.driveAndSteerAuto(0.7, 1500, 45, telemetry);
-////        robot.chassis.rotateDegree(0.4,45);
-//        sleep(500);
-//        robot.chassis.rotateTo(0.5, 45);
-//        sleep(500);
-//
-//        robot.chassis.driveAndSteerAuto(0.5, 1800, -90, telemetry);
-//        sleep(500);
-//        robot.chassis.rotateTo(0.5, 45);
-//
-//        robot.chassis.driveAndSteerAuto(-0.5, 560 * 3, 0, telemetry);
-
-//        robot.AutoRoutineTest();
-        // run until driver presses STOP or runtime exceeds 30 seconds
-        if (opModeIsActive() && getRuntime() < 30) {
-            try {
-                // TODO: invoke something like robot.autonomousProgram()
-                    telemetry.addLine(String.format("distance Left:%.3f; distance front:%.3f",robot.chassis.distanceToLeft(),robot.chassis.distanceToFront()));
-                    telemetry.update();
-//                robot.chassis.driveAndSteerAuto(0.5,560*3,-45);
-
-            } catch (Exception E) {
-                telemetry.addData("Error", E.getMessage());
-                handleException(E);
-                Thread.sleep(5000);
-            }
-        }
     }
 
     protected void handleException(Throwable T) {

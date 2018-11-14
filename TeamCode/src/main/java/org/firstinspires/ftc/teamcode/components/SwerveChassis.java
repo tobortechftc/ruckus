@@ -151,10 +151,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         configuration.register(this);
     }
 
-    public double distanceToFront() {
+    public double distanceToFront() throws InterruptedException {
         double dist = frontRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
+            Thread.sleep(40);
             dist = frontRangeSensor.getDistance(DistanceUnit.CM);
         }
         if (dist>maxRange)
@@ -162,10 +163,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
-    public double distanceToBack() {
+    public double distanceToBack() throws InterruptedException {
         double dist = backRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
+            Thread.sleep(40);
             dist = backRangeSensor.getDistance(DistanceUnit.CM);
         }
         if (dist>maxRange)
@@ -173,11 +175,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
-    public double distanceToLeft()
-    {
+    public double distanceToLeft() throws InterruptedException {
         double dist = leftRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
+            Thread.sleep(40);
             dist = leftRangeSensor.getDistance(DistanceUnit.CM);
         }
         if (dist>maxRange)
@@ -185,10 +187,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
-    public double distanceToRight() {
+    public double distanceToRight() throws InterruptedException {
         double dist = rightRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
+            Thread.sleep(40);
             dist = rightRangeSensor.getDistance(DistanceUnit.CM);
         }
         if (dist>maxRange)
@@ -517,8 +520,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         while (true) {
             double currentHeading = orientationSensor.getHeading();
             //we cross the +-180 mark if and only if the product below is a very negative number
-            if (currentHeading * lastReading < -100)
+            if (currentHeading * lastReading < -100) {
                 finalHeading = finalHeading + (deltaD > 0 ? -360 : +360);
+                if (finalHeading>360) finalHeading-=360;
+                else if (finalHeading<-360) finalHeading+=360;
+            }
             //if within acceptable range, terminate
             if (Math.abs(finalHeading - orientationSensor.getHeading()) < 0.5)
                 break;
@@ -583,7 +589,13 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         line.addData("rangeRight", "%.1f", new Func<Double>() {
             @Override
             public Double value() {
-                return distanceToRight();
+                try {
+                    return distanceToRight();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }finally {
+                    return 0.0;
+                }
             }
         });
         telemetry.addLine().addData("M", new Func<String>() {

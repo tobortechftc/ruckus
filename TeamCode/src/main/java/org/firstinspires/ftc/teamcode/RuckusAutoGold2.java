@@ -64,6 +64,7 @@ public class RuckusAutoGold2 extends LinearOpMode {
 //        robot.chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
 
         //at this place, use open cv to determine the mineral configuration
+
         int mode = -1;
         if (mode == 0) {
             robot.chassis.driveStraightAuto(0.35, 43, 0,Integer.MAX_VALUE);
@@ -78,8 +79,7 @@ public class RuckusAutoGold2 extends LinearOpMode {
         sleep(500);
         robot.chassis.driveStraightAuto(0.35, 30, 0,Integer.MAX_VALUE);
         sleep(500);
-        robot.intake.rotateSweeper(MineralIntake.SweeperMode.HORIZONTAL_STOP);
-
+        robot.intake.stopSweeper();
 
         robot.chassis.rotateDegree(0.3, -135);
         robot.chassis.rotateTo(0.18, -135);
@@ -89,13 +89,11 @@ public class RuckusAutoGold2 extends LinearOpMode {
         sleep(1000);
 
         //align with right wall
-        telemetry.addLine(String.format("detected distance to right: %.3f",robot.chassis.distanceToRight()));
+        double detectedRightDistance=robot.chassis.distanceToRight();
+        telemetry.addLine(String.format("detected distance to right: %.3f",detectedRightDistance));
         telemetry.update();
         sleep(1000);
-        double testDistace=robot.chassis.distanceToRight() - 10.0;
-        if(testDistace>40)
-            testDistace=40;
-        robot.chassis.driveStraightAuto(0.30, testDistace,+90,Integer.MAX_VALUE);
+        robot.chassis.driveStraightAuto(0.30, detectedRightDistance-15,+90,Integer.MAX_VALUE);
         telemetry.addLine(String.format("adjusted distance to right: %.3f",robot.chassis.distanceToRight()));
         telemetry.update();
 
@@ -113,7 +111,7 @@ public class RuckusAutoGold2 extends LinearOpMode {
 
 
         //dump the marker here
-        robot.hanging.markerAuto();
+        robot.hanging.markerDown();
         sleep(500);
 
         telemetry.addLine("MARKER DROP!!!!!");

@@ -246,8 +246,6 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (button == Button.B) {
                     if (source.isPressed(Button.BACK)) {
                         hanging.markerAuto();
-                    } else if (!source.isPressed(Button.START)) {
-                        hanging.hookAuto();
                     }
                 }
                 if (button == Button.X) {
@@ -373,6 +371,43 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             default: // go straight like center
                 chassis.driveStraightAuto(0.35, 43, 0, Integer.MAX_VALUE);
         }
+        intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+        Thread.sleep(100);
+        chassis.driveStraightAuto(0.35, 10, 0,Integer.MAX_VALUE);
+        Thread.sleep(500);
+        intake.stopSweeper();
+    }
+
+    @MenuEntry(label = "Test Sample", group = "Test Auto")
+    public void alignWithWallsGoldSide() throws InterruptedException{
+        //drive to default start position for gold side
+        chassis.driveStraightAuto(0.35, 20, 0,Integer.MAX_VALUE);
+        Thread.sleep(500);
+        //rotate robot parallel to the walls
+//        telemetry.addLine("imu heading:%");
+        chassis.rotateDegree(0.3, -135);
+        chassis.rotateTo(0.18, 135);
+
+        //from here, three different routine will converge into the depot
+        Thread.sleep(100);
+
+        //align with right wall
+        double detectedRightDistance=chassis.distanceToRight();
+        chassis.driveStraightAuto(0.30, detectedRightDistance-15,+90,Integer.MAX_VALUE);
+//        telemetry.addLine(String.format("adjusted distance to right: %.3f",chassis.distanceToRight()));
+//        telemetry.update();
+
+        //force heading correction
+        Thread.sleep(500);
+        chassis.rotateTo(0.18, 135);
+
+        //align with back wall
+//        telemetry.addLine(String.format("detected distance to back: %.3f",chassis.distanceToBack()));
+//        telemetry.update();
+        Thread.sleep(500);
+        chassis.driveStraightAuto(0.30, 30.0 - chassis.distanceToBack(),0,Integer.MAX_VALUE);
+//        telemetry.addLine(String.format("adjusted distance to back: %.3f",chassis.distanceToBack()));
+//        telemetry.update();
     }
 
     @MenuEntry(label = "Test Land", group = "Test Auto")
@@ -387,6 +422,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
         chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
         chassis.rotateTo(0.25, -80); //Turn 90 degrees left
+        chassis.rotateTo(0.18, -90);
     }
 
     @MenuEntry(label = "Retract Latch", group = "Test Auto")

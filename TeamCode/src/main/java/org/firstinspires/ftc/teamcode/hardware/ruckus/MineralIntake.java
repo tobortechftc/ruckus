@@ -357,6 +357,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         this.sliderMotor.setPower(0);
     }
 
+    public void stopSweeper() {
+        this.sweeperMotor.setPower(0);
+    }
+
     public int getSliderCurrent() {
         return this.sliderMotor.isBusy() ? this.sliderMotor.getCurrentPosition() : this.sliderMotor.getTargetPosition();
     }

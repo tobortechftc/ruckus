@@ -28,16 +28,12 @@ import java.util.Arrays;
 public class Hanging extends Logger<Hanging> implements Configurable {
 
     private DcMotor latch;
-    private Servo hook;
     private Servo marker;
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
-    private double hook_up = 0.42;
-    private double hook_down = 0.05;
     private double latch_power = .95;
-    private boolean hookIsOpened = false;
-    private final double MARKER_UP = 0.4;
-    private final double MARKER_DOWN = 0.9;
+    private final double MARKER_UP = 0.42;
+    private final double MARKER_DOWN = 0.05;
     private final int MAX_LATCH_POS = 15050; //Max distance is 8.5 inches
     private final int MIN_LATCH_POS = 20;
     private final int LATCH_COUNT_PER_INCH = 1774;
@@ -56,7 +52,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
     public void reset(boolean Auto) {
         latch.setPower(0);
-        hookClose();
         markerUp();
         if (Auto && (latch!=null)) {
             latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -72,8 +67,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        hook = configuration.getHardwareMap().servo.get("sv_hook");
-        hookClose();
         marker = configuration.getHardwareMap().servo.get("sv_marker");
         markerUp();
 
@@ -81,21 +74,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         configuration.register(this);
     }
 
-    public void hookClose(){
-        hook.setPosition(hook_up);
-        hookIsOpened=false;
-    }
-    public void hookOpen(){
-        hook.setPosition(hook_down);
-        hookIsOpened=true;
-    }
-    public void hookAuto() {
-        if (hookIsOpened) {
-            hookClose();
-        } else {
-            hookOpen();
-        }
-    }
     public void markerUp(){
         marker.setPosition(MARKER_UP);
         markerIsDown = false;
@@ -187,14 +165,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
                public Integer value() {
                    return latch.getCurrentPosition();
                }});
-
-        if(hook!=null){
-            line.addData("Hook", "pos=%.2f", new Func<Double>() {
-                @Override
-                public Double value() {
-                    return hook.getPosition();
-                }});
-        }
 
         if(marker!=null){
             line.addData("Marker", "pos=%.2f", new Func<Double>() {
