@@ -517,21 +517,24 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         //***** End routine to start the wheels ******//
         //record heading for checking in while loop
         double lastReading = orientationSensor.getHeading();
+        long iniTime=System.currentTimeMillis();
         while (true) {
             double currentHeading = orientationSensor.getHeading();
             //we cross the +-180 mark if and only if the product below is a very negative number
-            if (currentHeading * lastReading < -100) {
+            if ((currentHeading * lastReading < -100)||(Math.abs(currentHeading-lastReading)>180)) {
                 finalHeading = finalHeading + (deltaD > 0 ? -360 : +360);
-                if (finalHeading>360) finalHeading-=360;
-                else if (finalHeading<-360) finalHeading+=360;
+//                if (finalHeading>360) finalHeading-=360;
+//                else if (finalHeading<-360) finalHeading+=360;
             }
             //if within acceptable range, terminate
-            if (Math.abs(finalHeading - orientationSensor.getHeading()) < 0.5)
+            if (Math.abs(finalHeading - currentHeading) < 0.5)
                 break;
             //if overshoot, terminate
-            if (deltaD > 0 && orientationSensor.getHeading() - finalHeading > 0)
+            if (deltaD > 0 && currentHeading - finalHeading > 0)
                 break;
-            if (deltaD < 0 && orientationSensor.getHeading() - finalHeading < 0)
+            if (deltaD < 0 && currentHeading - finalHeading < 0)
+                break;
+            if(System.currentTimeMillis()-iniTime>3000)
                 break;
             lastReading = currentHeading;
         }
