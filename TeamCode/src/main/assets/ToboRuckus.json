@@ -28,13 +28,13 @@
   },
   "sv_sw_box": {
     "center": 0.5,
-    "left": 0.477,
-    "right": 0.563
+    "left": 0.4,
+    "right": 0.6
   },
   "sv_box_lift": {
-    "center": 0.4,
-    "left": 0.322,
-    "right": 0.521
+    "center": 0.5,
+    "left": 0.1,
+    "right": 0.8
   },
   "intake": {
     "sweeperInPower": 0.7,

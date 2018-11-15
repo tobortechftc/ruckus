@@ -434,9 +434,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         hanging.latchDownInches(8.5);
     }
 
-    public void initTeleOp() {
+    public void initTeleOp() throws InterruptedException {
         // slider out at dump pos
         intake.moveSlider(intake.getSliderInitOut());
+        Thread.sleep(500);
 
         // box gate close
         intake.moveGate(false);
