@@ -280,6 +280,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                                    float currentY, float changeY) {
                 if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) > 0.2) {
                     mineralDelivery.liftUp(source.isPressed(Button.BACK));
+                    mineralDelivery.gateClose(); // close dumper gate
+                    intake.moveGate(false); // close intake box
                 } else if (source.getStick(Events.Side.LEFT, Events.Axis.Y_ONLY) < -0.2) {
                     mineralDelivery.liftDown(source.isPressed(Button.BACK));
                 } else {

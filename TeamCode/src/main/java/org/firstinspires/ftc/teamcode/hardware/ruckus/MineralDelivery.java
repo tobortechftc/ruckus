@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -27,6 +29,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private DcMotor lift;
     private Servo dumperArm;
     private Servo dumperGate;
+    private DigitalChannel liftTouch;
     private double gateClosePos = 0.33;
     private double gateOpenPos = 0.7;
     private double armInitPos = 0.05;
@@ -67,7 +70,9 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         dumperGate = configuration.getHardwareMap().servo.get("sv_hp_gate");
         dumperArm = configuration.getHardwareMap().servo.get("sv_hp_dump");
-
+        liftTouch = configuration.getHardwareMap().get(DigitalChannel.class, "lift_touch");
+        // set the digital channel to input.
+        liftTouch.setMode(DigitalChannel.Mode.INPUT);
         // register delivery as configurable component
         configuration.register(this);
     }
@@ -89,7 +94,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     }
     public void liftUp(boolean force) {
         int cur_pos = lift.getCurrentPosition();
-        if (cur_pos>MAX_LIFT_POS && force==false) {
+        if ((cur_pos>MAX_LIFT_POS && force==false) || (liftTouch!=null && liftTouch.getState()==false)) {
             lift.setPower(0);
         } else {
             lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -232,6 +237,13 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
                 @Override
                 public Double value() {
                     return dumperArm.getPosition();
+                }});
+        }
+        if (liftTouch!=null) {
+            line.addData("Touch", "state=%s", new Func<String>() {
+                @Override
+                public String value() {
+                    return (liftTouch.getState()?"not-pressed":"pressed");
                 }});
         }
     }

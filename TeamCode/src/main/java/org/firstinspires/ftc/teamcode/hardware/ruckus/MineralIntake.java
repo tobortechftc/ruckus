@@ -49,7 +49,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int sliderContracted = 0; // contracted
     private int sliderExtended = 1400; // fully extended
     private int sliderDump = 400; // position to dump minerals into delivery box
-    private int sliderInitOut = 400; // position for initial TeleOp out
+    private int sliderInitOut = 450; // position for initial TeleOp out
     private double sliderPower = 0.2; // TBD
 
     @Override
