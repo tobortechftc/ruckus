@@ -124,6 +124,19 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Events.Axis.BOTH, Events.Side.RIGHT);
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+                double heading = button==Button.DPAD_LEFT ? -90 : 90;
+                chassis.driveAndSteer(powerAdjustment(source), heading, true);
+            }
+        }, Button.DPAD_RIGHT, Button.DPAD_LEFT);
+        em.onButtonUp(new Events.Listener() {
+            @Override
+            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+                chassis.driveAndSteer(0, 0, true);
+            }
+        }, Button.DPAD_RIGHT, Button.DPAD_LEFT);
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,

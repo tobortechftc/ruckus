@@ -395,6 +395,18 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             // only adjust servo positions if power is applied
             double[] newServoPositions = new double[4];
             if (allWheels) {
+                if (Math.abs(heading)==90) {
+                    // check whether all servos are already at 90 (or -90) degrees
+                    boolean samePosition = (frontLeft.servo.getPosition() == frontRight.servo.getPosition())
+                            && (frontLeft.servo.getPosition() == backLeft.servo.getPosition())
+                            && (frontLeft.servo.getPosition() == backRight.servo.getPosition())
+                            && (Math.abs(frontLeft.servo.getPosition()) == 90);
+                    // keep wheels pointed sideways and invert the power if needed
+                    if (samePosition) {
+                        power *= heading == frontLeft.servo.getPosition() ? 1 : -1;
+                        heading = frontLeft.servo.getPosition();
+                    }
+                }
                 Arrays.fill(newServoPositions, heading);
             } else if (power > 0) { // driving forward
                 // front left and right
