@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.events.EventManager;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
+import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
 @TeleOp(name="Ruckus-TeleOp", group="Ruckus")
 public class RuckusTeleOp extends LinearOpMode {
@@ -56,6 +57,7 @@ public class RuckusTeleOp extends LinearOpMode {
             try {
                 eventManager1.processEvents();
                 eventManager2.processEvents();
+                TaskManager.processTasks();
             } catch (Exception E) {
                 telemetry.addData("Error in event handler", E.getMessage());
                 handleException(E);
