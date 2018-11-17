@@ -61,7 +61,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
             cameraMineralDetector.configure(configuration);
         }
-        chassis = new SwerveChassis().configureLogging("Swerve", logLevel);
+        chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
         chassis.configure(configuration);
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
@@ -387,7 +387,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         Thread.sleep(500);
         //rotate robot parallel to the walls
 //        telemetry.addLine("imu heading:%");
-        chassis.rotateDegree(0.3, -135);
+        chassis.rotateTo(0.3, 135);
         chassis.rotateTo(0.18, 135);
 
         //from here, three different routine will converge into the depot
@@ -413,9 +413,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @MenuEntry(label = "Test Land", group = "Test Auto")
-    public void landAndDetach(EventManager em) throws InterruptedException{
+    public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException{
         chassis.resetOrientation();
-        if (hanging!=null) {
+        if ((hanging!=null)&&!skipLanding) {
             chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
             hanging.latchUpInches(8);
             Thread.sleep(500);
