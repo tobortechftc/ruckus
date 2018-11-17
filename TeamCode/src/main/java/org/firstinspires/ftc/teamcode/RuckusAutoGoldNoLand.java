@@ -51,7 +51,7 @@ public class RuckusAutoGoldNoLand extends LinearOpMode {
         ToboRuckus.MineralDetection.SampleLocation sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
 
         // skip step-2 - no landing
-
+        robot.landAndDetach(null,true);
         // Step-3: sample mission
         robot.goGetSampleGold(sam_loc);
 

@@ -493,6 +493,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         backRight.motor.setPower(-1 * (useScalePower ? scalePower(power) : power));
     }
 
+    @Deprecated
     public void rotateDegree(double power, double deltaD) throws InterruptedException {
         double iniHeading = orientationSensor.getHeading();
         double finalHeading = iniHeading + deltaD;
@@ -507,8 +508,10 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
     //final heading needs to be with in range(-180,180]
     public void rotateTo(double power, double finalHeading) throws InterruptedException {
+        debug("rotateT0(pwr: %.3f, finalHeading: %.1f)", power, finalHeading);
         double iniHeading = orientationSensor.getHeading();
         double deltaD = finalHeading - iniHeading;
+        debug("iniHeading: %.1f, deltaD: %.1f)", iniHeading, deltaD);
         //do not turn if the heading is close enough the target
         if (Math.abs(deltaD) < 0.5)
             return;
@@ -517,6 +520,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             finalHeading = finalHeading + (deltaD > 0 ? -360 : +360);
             deltaD = 360 - Math.abs(deltaD);
             deltaD = -deltaD;
+            debug("Adjusted finalHeading: %.1f, deltaD: %.1f)", finalHeading, deltaD);
         }
         //break on reaching the target
         for (WheelAssembly wheel : wheels)
@@ -533,11 +537,15 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         while (true) {
             double currentHeading = orientationSensor.getHeading();
             //we cross the +-180 mark if and only if the product below is a very negative number
-            if ((currentHeading * lastReading < -100)||(Math.abs(currentHeading-lastReading)>180)) {
-                finalHeading = finalHeading + (deltaD > 0 ? -360 : +360);
+            if ((currentHeading * lastReading < -100.0)||(Math.abs(currentHeading-lastReading)>180.0)) {
+                //deltaD>0 => cross the mark clockwise; deltaD<0 => cross the mark anticlockwise
+                finalHeading = finalHeading + (deltaD > 0 ? -360.0 : +360.0);
+                debug("Crossing180, finalHeading: %.1f, deltaD:%.1f)", finalHeading,deltaD);
+//                currentHeading = currentHeading+(deltaD > 0 ? +360 : -360);
 //                if (finalHeading>360) finalHeading-=360;
 //                else if (finalHeading<-360) finalHeading+=360;
             }
+            debug("currentHeading: %.1f, finalHeading: %.1f)", currentHeading,finalHeading);
             //if within acceptable range, terminate
             if (Math.abs(finalHeading - currentHeading) < 0.5)
                 break;

@@ -92,14 +92,19 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         // get readings from all sensors and calculate an average
         double[] readings = new double[sensors.size()];
         double avgReading = 0.0d;
-        int index = 0;
+        int index = 0; boolean positive=true;
         for (Map.Entry<String, BNO055IMU> entry: sensors.entrySet()) {
             double value = hardwareReading(entry.getValue());
+            if (index==0) {
+                if (value<0) positive=false;
+            }
             verbose("%s: %+.3f", entry.getKey(), value);
-            readings[index++] = value;
+            readings[index++] = Math.abs(value);
             avgReading += value;
         }
         avgReading /= readings.length;
+        if (!positive)
+            avgReading *= -1.0;
         verbose("avg: %+.3f", avgReading);
         if (!correctionEnabled) return avgReading;
 
