@@ -3,20 +3,18 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralIntake;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
- * Created by 28761 on 11/16/2018.
+ * Created by 28761 on 10/13/2018.
  */
-@Disabled
-@Autonomous(name = "Ruckus::Rotate test", group = "Ruckus")
-public class RotateTesting extends LinearOpMode {
+
+@Autonomous(name = "Ruckus::Auto-Silver-Land", group = "Ruckus")
+public class RuckusAutoSliverLand extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -34,7 +32,7 @@ public class RotateTesting extends LinearOpMode {
 
         try {
             // configure robot and reset all hardware
-            robot.configure(configuration, telemetry,true);
+            robot.configure(configuration, telemetry, true);
             configuration.apply();
             robot.reset(true);
 
@@ -49,39 +47,18 @@ public class RotateTesting extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
+        // Step-1: landing mission
+        robot.landAndDetach(null,false);
 
+        // Step-2: check random sample position
+        ToboRuckus.MineralDetection.SampleLocation sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
 
-//        if (robot.hanging!=null) {
-//            robot.chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-//            robot.hanging.latchUpInches(7);//Land
-//            sleep(2000);
-//        }
-//        robot.chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
-//        sleep(200);
-//        robot.chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
-//        sleep(200);
-//        robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
-//        sleep(200);
-//        robot.chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
+        // Ste-3: sample mission
+        robot.goGetSampleGold(sam_loc);
 
-        //at this place, use open cv to determine the mineral configuration
-        robot.chassis.rotateTo(0.3,-90);
-        robot.chassis.rotateDegree(0.3,-135);
-        robot.chassis.rotateTo(0.18, 135);
-        // run until driver presses STOP or runtime exceeds 30 seconds
-        if (opModeIsActive() && getRuntime() < 30) {
-            try {
-                // TODO: invoke something like robot.autonomousProgram()
-                telemetry.addLine(String.format("distance Left:%.3f; distance front:%.3f",robot.chassis.distanceToLeft(),robot.chassis.distanceToFront()));
-                telemetry.update();
-//                robot.chassis.driveAndSteerAuto(0.5,560*3,-45);
+        // step-4: park on the rim
+        robot.chassis.driveStraightAuto(0.15, 5, 0,Integer.MAX_VALUE);
 
-            } catch (Exception E) {
-                telemetry.addData("Error", E.getMessage());
-                handleException(E);
-                Thread.sleep(5000);
-            }
-        }
     }
 
     protected void handleException(Throwable T) {
@@ -94,4 +71,3 @@ public class RotateTesting extends LinearOpMode {
         telemetry.update();
     }
 }
-

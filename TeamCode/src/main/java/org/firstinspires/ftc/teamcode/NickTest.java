@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 10/13/2018.
  */
+@Disabled
 @Autonomous(name = "NickAutonomousTest", group = "Ruckus")
 public class NickTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
