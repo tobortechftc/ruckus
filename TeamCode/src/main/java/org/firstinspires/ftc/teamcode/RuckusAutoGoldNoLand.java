@@ -56,7 +56,7 @@ public class RuckusAutoGoldNoLand extends LinearOpMode {
         robot.goGetSampleGold(sam_loc);
 
         //Step-4: align with walls
-        robot.alignWithWallsGoldSide();
+        robot.alignWithWallsGoldSide(sam_loc);
 
         // Step-5: from sample mission to dumping marker
         robot.hanging.markerDown();

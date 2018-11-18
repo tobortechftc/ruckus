@@ -398,7 +398,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @MenuEntry(label = "Test Sample", group = "Test Auto")
-    public void alignWithWallsGoldSide() throws InterruptedException{
+    public void alignWithWallsGoldSide(ToboRuckus.MineralDetection.SampleLocation sam_loc ) throws InterruptedException{
         //drive to default start position for gold side
         chassis.driveStraightAuto(0.35, 20, 0,Integer.MAX_VALUE);
         Thread.sleep(500);
@@ -411,20 +411,54 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         Thread.sleep(100);
 
         //align with right wall
-        double detectedRightDistance=chassis.distanceToRight();
+
+        double detectedRightDistance = chassis.distanceToRight();
+        switch(sam_loc) {
+            case CENTER: // center
+                detectedRightDistance=Math.min(60,detectedRightDistance);
+                break;
+            case RIGHT:
+                detectedRightDistance=Math.min(100,detectedRightDistance);
+                break;
+            case LEFT:
+                detectedRightDistance=Math.min(20,detectedRightDistance);
+                break;
+            default: // go straight like center
+                detectedRightDistance=Math.min(60,detectedRightDistance);
+        }
         chassis.driveStraightAuto(0.30, detectedRightDistance-15,+90,Integer.MAX_VALUE);
+        detectedRightDistance = chassis.distanceToRight();
+        Thread.sleep(100);
+        chassis.driveStraightAuto(0.18, detectedRightDistance-15,+90,Integer.MAX_VALUE);
 //        telemetry.addLine(String.format("adjusted distance to right: %.3f",chassis.distanceToRight()));
 //        telemetry.update();
 
         //force heading correction
-        Thread.sleep(500);
-        chassis.rotateTo(0.18, 135);
+        Thread.sleep(100);
+        chassis.rotateTo(0.18, 138);
 
         //align with back wall
 //        telemetry.addLine(String.format("detected distance to back: %.3f",chassis.distanceToBack()));
 //        telemetry.update();
-        Thread.sleep(500);
-        chassis.driveStraightAuto(0.30, 30.0 - chassis.distanceToBack(),0,Integer.MAX_VALUE);
+        double detectedBackDistance = chassis.distanceToBack();
+        switch(sam_loc) {
+            case CENTER: // center
+                detectedBackDistance=Math.min(50,detectedBackDistance);
+                break;
+            case RIGHT:
+                detectedBackDistance=Math.min(20,detectedBackDistance);
+                break;
+            case LEFT:
+                detectedBackDistance=Math.min(80,detectedBackDistance);
+                break;
+            default: // go straight like center
+                detectedBackDistance=Math.min(50,detectedBackDistance);
+        }
+        
+        chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance,0,Integer.MAX_VALUE);
+        detectedBackDistance = chassis.distanceToBack();
+        Thread.sleep(100);
+        chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance,0,Integer.MAX_VALUE);
 //        telemetry.addLine(String.format("adjusted distance to back: %.3f",chassis.distanceToBack()));
 //        telemetry.update();
     }

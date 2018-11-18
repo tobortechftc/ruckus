@@ -152,11 +152,15 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         configuration.register(this);
     }
 
-    public double distanceToFront() throws InterruptedException {
+    public double distanceToFront() {
         double dist = frontRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
-            Thread.sleep(40);
+            try {
+                Thread.sleep(40);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             dist = frontRangeSensor.getDistance(DistanceUnit.CM);
         }
         if (dist>maxRange)
@@ -164,11 +168,15 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
-    public double distanceToBack() throws InterruptedException {
+    public double distanceToBack() {
         double dist = backRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
-            Thread.sleep(40);
+            try {
+                Thread.sleep(40);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             dist = backRangeSensor.getDistance(DistanceUnit.CM);
         }
         if (dist>maxRange)
@@ -176,11 +184,15 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
-    public double distanceToLeft() throws InterruptedException {
+    public double distanceToLeft() {
         double dist = leftRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
-            Thread.sleep(40);
+            try {
+                Thread.sleep(40);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             dist = leftRangeSensor.getDistance(DistanceUnit.CM);
         }
         if (dist>maxRange)
@@ -188,11 +200,15 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
-    public double distanceToRight() throws InterruptedException {
+    public double distanceToRight(){
         double dist = rightRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
-            Thread.sleep(40);
+            try {
+                Thread.sleep(40);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             dist = rightRangeSensor.getDistance(DistanceUnit.CM);
         }
         if (dist>maxRange)
@@ -612,16 +628,28 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             });
             orientationSensor.setupTelemetry(line);
         }
-        line.addData("rangeRight", "%.1f", new Func<Double>() {
+        line.addData("rangeR", "%.1f", new Func<Double>() {
             @Override
             public Double value() {
-                try {
                     return distanceToRight();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }finally {
-                    return 0.0;
-                }
+            }
+        });
+        line.addData("rangeL", "%.1f", new Func<Double>() {
+            @Override
+            public Double value() {
+                return distanceToLeft();
+            }
+        });
+        line.addData("rangeF", "%.1f", new Func<Double>() {
+            @Override
+            public Double value() {
+                return distanceToFront();
+            }
+        });
+        line.addData("rangeB", "%.1f", new Func<Double>() {
+            @Override
+            public Double value() {
+                return distanceToBack();
             }
         });
         telemetry.addLine().addData("M", new Func<String>() {
