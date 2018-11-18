@@ -188,7 +188,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     public void reset() {
         boxLiftServo.setPosition(LIFT_DOWN);
-        boxGateServo.setPosition(GATE_OPEN); // open so the dumper box can be inside 18"
+        boxGateServo.setPosition(GATE_CLOSED);
         resetMotor(sweeperMotor);
         resetMotor(sliderMotor);
         debug("Reset mineral intake, lift: %.2f, gate: %.1f, sweeper: %s / %d, slider: %s / %d",
