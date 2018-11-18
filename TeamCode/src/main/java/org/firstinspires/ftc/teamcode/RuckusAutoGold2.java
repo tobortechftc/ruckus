@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralIntake;
@@ -13,7 +14,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 11/9/2018.
  */
-
+@Disabled
 @Autonomous(name = "Ruckus::Auto-Gold-2(New)", group = "Ruckus")
 public class RuckusAutoGold2 extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
