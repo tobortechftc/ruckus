@@ -124,7 +124,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         //  that would react to track / wheel base / radius adjustments
     }
 
-    public void configure(Configuration configuration) {
+    public void configure(Configuration configuration, boolean auto) {
         // set up motors / sensors as wheel assemblies
         wheels[0] = frontLeft = new WheelAssembly(
                 configuration, "FrontLeft", DcMotor.Direction.FORWARD
@@ -139,9 +139,10 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 configuration, "BackRight", DcMotor.Direction.REVERSE
         );
 
-        orientationSensor = new CombinedOrientationSensor().configureLogging(logTag + "-sensor", logLevel);
-        orientationSensor.configure(configuration.getHardwareMap(), "imu", "imu2");
-
+        //if (auto) {
+            orientationSensor = new CombinedOrientationSensor().configureLogging(logTag + "-sensor", logLevel);
+            orientationSensor.configure(configuration.getHardwareMap(), "imu","imu2");
+        //}
         frontRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "front_range");
         backRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
         leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
@@ -247,7 +248,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             targetHeading = orientationSensor.getHeading();
         } else {
             // check and correct heading as needed
-            double sensorHeading = orientationSensor.getHeading();
+            double sensorHeading = (orientationSensor==null?0:orientationSensor.getHeading());
             headingDeviation = targetHeading - sensorHeading;
             debug("driveStraight(): target=%+.2f, sensor=%+.2f, adjustment=%+.2f)",
                     targetHeading, sensorHeading, headingDeviation);
@@ -602,13 +603,15 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 return frontLeft.motor.getPower();
             }
         });
-        line.addData("imu", "%.1f", new Func<Double>() {
-            @Override
-            public Double value() {
-                return orientationSensor.getHeading();
-            }
-        });
-        orientationSensor.setupTelemetry(line);
+        if (orientationSensor!=null) {
+            line.addData("imu", "%.1f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return orientationSensor.getHeading();
+                }
+            });
+            orientationSensor.setupTelemetry(line);
+        }
         line.addData("rangeRight", "%.1f", new Func<Double>() {
             @Override
             public Double value() {

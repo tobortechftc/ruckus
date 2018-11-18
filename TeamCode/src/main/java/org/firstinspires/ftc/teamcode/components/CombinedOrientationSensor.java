@@ -89,6 +89,8 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
     public double getHeading() {
         if (sensors.isEmpty()) return 0.0d;
 
+        return hardwareReading(sensors.get("imu2"));
+        /*
         // get readings from all sensors and calculate an average
         double[] readings = new double[sensors.size()];
         double avgReading = 0.0d;
@@ -96,6 +98,7 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         for (Map.Entry<String, BNO055IMU> entry: sensors.entrySet()) {
             double value = hardwareReading(entry.getValue());
             if (index==0) {
+                value *= -1.0; // first imu is reverted
                 if (value<0) positive=false;
             }
             verbose("%s: %+.3f", entry.getKey(), value);
@@ -106,7 +109,10 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         if (!positive)
             avgReading *= -1.0;
         verbose("avg: %+.3f", avgReading);
-        if (!correctionEnabled) return avgReading;
+        if (!correctionEnabled) {
+            lastReading = avgReading;
+            return avgReading;
+        }
 
         if (lastReading!=null) {
             // drop all readings whose deviation from last reading is above threshold
@@ -127,6 +133,7 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         // last reading is not available, set it to current average
         lastReading = avgReading;
         return lastReading;
+        */
     }
 
     public void setupTelemetry(Telemetry.Line line) {
@@ -135,18 +142,15 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         } else {
             for (Map.Entry<String, BNO055IMU> entry: sensors.entrySet()) {
                 final BNO055IMU imu = entry.getValue();
-                line.addData(entry.getKey(), "%+.2f", new Func<Double>() {
+                line.addData(entry.getKey(), "%.2f", new Func<Double>() {
                     @Override
                     public Double value() { return hardwareReading(imu); }
                 });
             }
-            line.addData("Avg", new Func<String>() {
+            line.addData("Heading", new Func<String>() {
                 @Override
                 public String value() {
-                    if (correctionEnabled && lastReading!=null) {
-                        return String.format("%+.2f", lastReading);
-                    }
-                    return "N/A";
+                    return String.format("%.2f", getHeading());
                 }
             });
         }

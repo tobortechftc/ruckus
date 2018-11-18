@@ -31,7 +31,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private Servo dumperGate;
     private DigitalChannel liftTouch;
     private double gateClosePos = 0.33;
-    private double gateOpenPos = 0.7;
+    private double gateOpenPos = 0.8;
     private double armInitPos = 0.05;
     private double armDownPos = 0.09;
     private double armSafePos = 0.11;

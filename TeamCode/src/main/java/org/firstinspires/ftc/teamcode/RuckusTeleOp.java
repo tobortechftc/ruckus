@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
 @TeleOp(name="Ruckus-TeleOp", group="Ruckus")
 public class RuckusTeleOp extends LinearOpMode {
-    protected static int LOG_LEVEL = Log.VERBOSE;
+    protected static int LOG_LEVEL = Log.ERROR;
 
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
@@ -27,6 +27,7 @@ public class RuckusTeleOp extends LinearOpMode {
         telemetry.update();
 
         ToboRuckus robot = new ToboRuckus();
+        robot.configureLogging(robot.getName(),LOG_LEVEL);
         configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
 
         try {

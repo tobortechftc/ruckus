@@ -62,7 +62,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             cameraMineralDetector.configure(configuration);
         }
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
-        chassis.configure(configuration);
+        chassis.configure(configuration, auto);
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
         hanging = new Hanging().configureLogging("Hanging", logLevel);
@@ -269,7 +269,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     }
                 }
                 if (button == Button.Y) {
-                    mineralDelivery.armDump();
+                    if (source.isPressed(Button.BACK)) {
+                        mineralDelivery.armUp();
+                    } else {
+                        mineralDelivery.armDump();
+                    }
                 } else if (button == Button.A) {
                     mineralDelivery.armDown();
                 }
@@ -328,7 +332,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         telemetry.addLine().addData("(LS)", "Drive").setRetained(true)
                 .addData("Hold [LB]/[RB]", "45 degree").setRetained(true);
         chassis.setupTelemetry(telemetry);
-        em.updateTelemetry(telemetry, 100);
+        em.updateTelemetry(telemetry, 1000);
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX, float currentY, float changeY) throws InterruptedException {
