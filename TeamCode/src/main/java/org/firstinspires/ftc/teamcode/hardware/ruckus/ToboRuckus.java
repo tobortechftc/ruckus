@@ -435,7 +435,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
         //force heading correction
         Thread.sleep(100);
-        chassis.rotateTo(0.18, 138);
+//        chassis.rotateTo(0.18, 138);
 
         //align with back wall
 //        telemetry.addLine(String.format("detected distance to back: %.3f",chassis.distanceToBack()));
@@ -454,7 +454,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             default: // go straight like center
                 detectedBackDistance=Math.min(50,detectedBackDistance);
         }
-        
+
         chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance,0,Integer.MAX_VALUE);
         detectedBackDistance = chassis.distanceToBack();
         Thread.sleep(100);
