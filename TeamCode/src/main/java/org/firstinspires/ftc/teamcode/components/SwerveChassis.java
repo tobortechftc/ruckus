@@ -139,20 +139,24 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 configuration, "BackRight", DcMotor.Direction.REVERSE
         );
 
-        //if (auto) {
+        if (auto) {
             orientationSensor = new CombinedOrientationSensor().configureLogging(logTag + "-sensor", logLevel);
-            orientationSensor.configure(configuration.getHardwareMap(), "imu","imu2");
-        //}
-        frontRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "front_range");
-        backRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
-        leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
-        rightRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "right_range");
+            orientationSensor.configure(configuration.getHardwareMap(), "imu", "imu2");
+
+            frontRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "front_range");
+            backRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
+            leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
+            rightRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "right_range");
+        }
 
         // register chassis as configurable component
         configuration.register(this);
     }
 
     public double distanceToFront() {
+        if (frontRangeSensor==null)
+            return 0;
+
         double dist = frontRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
@@ -169,6 +173,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public double distanceToBack() {
+        if (backRangeSensor==null)
+            return 0;
         double dist = backRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
@@ -185,6 +191,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public double distanceToLeft() {
+        if (leftRangeSensor==null)
+            return 0;
         double dist = leftRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
@@ -201,6 +209,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public double distanceToRight(){
+        if (rightRangeSensor==null)
+            return 0;
         double dist = rightRangeSensor.getDistance(DistanceUnit.CM);
         int count=0;
         while (dist>maxRange && (++count)<5) {
