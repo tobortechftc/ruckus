@@ -67,6 +67,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private double servoCorrection;   // latest correction applied to leading wheels' servos to correct heading deviation
 
     private boolean useScalePower = true;//
+    private boolean setImuTelemetry = false;//unless debugging, don't set telemetry for imu
+    private boolean setRangeSensorTelemetry = false;//unless debugging, don't set telemetry for range sensor
 
     @Adjustable(min = 8.0, max = 18.0, step = 0.02)
     public double getTrack() {
@@ -143,6 +145,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             orientationSensor = new CombinedOrientationSensor().configureLogging(logTag + "-sensor", logLevel);
             orientationSensor.configure(configuration.getHardwareMap(), "imu", "imu2");
 
+
             frontRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "front_range");
             backRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
             leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
@@ -156,10 +159,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     public double distanceToFront() {
         if (frontRangeSensor==null)
             return 0;
-
         double dist = frontRangeSensor.getDistance(DistanceUnit.CM);
-        int count=0;
-        while (dist>maxRange && (++count)<5) {
+        int count = 0;
+        while (dist > maxRange && (++count) < 5) {
             try {
                 Thread.sleep(40);
             } catch (InterruptedException e) {
@@ -167,7 +169,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             }
             dist = frontRangeSensor.getDistance(DistanceUnit.CM);
         }
-        if (dist>maxRange)
+        if (dist > maxRange)
             dist = maxRange;
         return dist;
     }
@@ -176,8 +178,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         if (backRangeSensor==null)
             return 0;
         double dist = backRangeSensor.getDistance(DistanceUnit.CM);
-        int count=0;
-        while (dist>maxRange && (++count)<5) {
+        int count = 0;
+        while (dist > maxRange && (++count) < 5) {
             try {
                 Thread.sleep(40);
             } catch (InterruptedException e) {
@@ -185,7 +187,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             }
             dist = backRangeSensor.getDistance(DistanceUnit.CM);
         }
-        if (dist>maxRange)
+        if (dist > maxRange)
             dist = maxRange;
         return dist;
     }
@@ -194,8 +196,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         if (leftRangeSensor==null)
             return 0;
         double dist = leftRangeSensor.getDistance(DistanceUnit.CM);
-        int count=0;
-        while (dist>maxRange && (++count)<5) {
+        int count = 0;
+        while (dist > maxRange && (++count) < 5) {
             try {
                 Thread.sleep(40);
             } catch (InterruptedException e) {
@@ -203,7 +205,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             }
             dist = leftRangeSensor.getDistance(DistanceUnit.CM);
         }
-        if (dist>maxRange)
+        if (dist > maxRange)
             dist = maxRange;
         return dist;
     }
@@ -212,8 +214,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         if (rightRangeSensor==null)
             return 0;
         double dist = rightRangeSensor.getDistance(DistanceUnit.CM);
-        int count=0;
-        while (dist>maxRange && (++count)<5) {
+        int count = 0;
+        while (dist > maxRange && (++count) < 5) {
             try {
                 Thread.sleep(40);
             } catch (InterruptedException e) {
@@ -221,7 +223,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             }
             dist = rightRangeSensor.getDistance(DistanceUnit.CM);
         }
-        if (dist>maxRange)
+        if (dist > maxRange)
             dist = maxRange;
         return dist;
     }
@@ -274,7 +276,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             targetHeading = orientationSensor.getHeading();
         } else {
             // check and correct heading as needed
-            double sensorHeading = (orientationSensor==null?0:orientationSensor.getHeading());
+            double sensorHeading = (orientationSensor == null ? 0 : orientationSensor.getHeading());
             headingDeviation = targetHeading - sensorHeading;
             debug("driveStraight(): target=%+.2f, sensor=%+.2f, adjustment=%+.2f)",
                     targetHeading, sensorHeading, headingDeviation);
@@ -422,6 +424,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             // only adjust servo positions if power is applied
             double[] newServoPositions = new double[4];
             if (allWheels) {
+            /*
                 if (Math.abs(heading)==90) {
                     // check whether all servos are already at 90 (or -90) degrees
                     boolean samePosition = (frontLeft.servo.getPosition() == frontRight.servo.getPosition())
@@ -433,7 +436,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                         power *= heading == frontLeft.servo.getPosition() ? 1 : -1;
                         heading = frontLeft.servo.getPosition();
                     }
-                }
+                } */
                 Arrays.fill(newServoPositions, heading);
             } else if (power > 0) { // driving forward
                 // front left and right
@@ -528,9 +531,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             finalHeading -= 360;
         else if (finalHeading < -180)
             finalHeading += 360;
-
         rotateTo(power, finalHeading);
-
     }
 
     //final heading needs to be with in range(-180,180]
@@ -560,19 +561,16 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         //***** End routine to start the wheels ******//
         //record heading for checking in while loop
         double lastReading = orientationSensor.getHeading();
-        long iniTime=System.currentTimeMillis();
+        long iniTime = System.currentTimeMillis();
         while (true) {
             double currentHeading = orientationSensor.getHeading();
             //we cross the +-180 mark if and only if the product below is a very negative number
-            if ((currentHeading * lastReading < -100.0)||(Math.abs(currentHeading-lastReading)>180.0)) {
+            if ((currentHeading * lastReading < -100.0) || (Math.abs(currentHeading - lastReading) > 180.0)) {
                 //deltaD>0 => cross the mark clockwise; deltaD<0 => cross the mark anticlockwise
                 finalHeading = finalHeading + (deltaD > 0 ? -360.0 : +360.0);
-                debug("Crossing180, finalHeading: %.1f, deltaD:%.1f)", finalHeading,deltaD);
-//                currentHeading = currentHeading+(deltaD > 0 ? +360 : -360);
-//                if (finalHeading>360) finalHeading-=360;
-//                else if (finalHeading<-360) finalHeading+=360;
+                debug("Crossing180, finalHeading: %.1f, deltaD:%.1f)", finalHeading, deltaD);
             }
-            debug("currentHeading: %.1f, finalHeading: %.1f)", currentHeading,finalHeading);
+            debug("currentHeading: %.1f, finalHeading: %.1f)", currentHeading, finalHeading);
             //if within acceptable range, terminate
             if (Math.abs(finalHeading - currentHeading) < 0.5)
                 break;
@@ -581,7 +579,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 break;
             if (deltaD < 0 && currentHeading - finalHeading < 0)
                 break;
-            if(System.currentTimeMillis()-iniTime>3000)
+            if (System.currentTimeMillis() - iniTime > 3000)
                 break;
             lastReading = currentHeading;
         }
@@ -629,7 +627,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 return frontLeft.motor.getPower();
             }
         });
-        if (orientationSensor!=null) {
+
+        //set up imu telemetry
+        if (orientationSensor != null && setImuTelemetry) {
             line.addData("imu", "%.1f", new Func<Double>() {
                 @Override
                 public Double value() {
@@ -638,30 +638,35 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             });
             orientationSensor.setupTelemetry(line);
         }
-        line.addData("rangeR", "%.1f", new Func<Double>() {
-            @Override
-            public Double value() {
+
+        //set up range sensor telemetry
+        if (setRangeSensorTelemetry) {
+            line.addData("rangeR", "%.1f", new Func<Double>() {
+                @Override
+                public Double value() {
                     return distanceToRight();
-            }
-        });
-        line.addData("rangeL", "%.1f", new Func<Double>() {
-            @Override
-            public Double value() {
-                return distanceToLeft();
-            }
-        });
-        line.addData("rangeF", "%.1f", new Func<Double>() {
-            @Override
-            public Double value() {
-                return distanceToFront();
-            }
-        });
-        line.addData("rangeB", "%.1f", new Func<Double>() {
-            @Override
-            public Double value() {
-                return distanceToBack();
-            }
-        });
+                }
+            });
+            line.addData("rangeL", "%.1f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return distanceToLeft();
+                }
+            });
+            line.addData("rangeF", "%.1f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return distanceToFront();
+                }
+            });
+            line.addData("rangeB", "%.1f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return distanceToBack();
+                }
+            });
+        }
+
         telemetry.addLine().addData("M", new Func<String>() {
             @Override
             public String value() {
