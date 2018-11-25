@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 10/13/2018.
  */
-@Disabled
 @Autonomous(name = "NickAutonomousTest", group = "Ruckus")
 public class NickTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
@@ -56,7 +55,6 @@ public class NickTest extends LinearOpMode {
                 sleep(500);
 
                 // Knock off mineral and go back
-                robot.intake.setSweeperInPower(.3);
                 if (targetMineral == 0) {
                     robot.chassis.driveStraightAuto(.2, 56.6, -49, timeout);
                     sleep(300);
@@ -72,16 +70,27 @@ public class NickTest extends LinearOpMode {
                     sleep(300);
                     robot.chassis.driveStraightAuto(.2, -37, 55, timeout);
                 }
-                robot.intake.setSweeperInPower(0);
                 sleep(300);
+
+                // drive and turn parallel to wall
                 robot.chassis.driveStraightAuto(.2, 100, -90, timeout);
                 sleep(300);
-                robot.chassis.rotateDegree(.2, 37);
-                robot.chassis.driveStraightAuto(.2, 23, -90, timeout);
-                sleep(300);
+                robot.chassis.rotateTo(.2, 0);
+                robot.chassis.rotateTo(.2, 35);
+                robot.chassis.rotateTo(.12, 45);
+                // drive 6cm away from wall
+                double driveDistance = robot.chassis.distanceToLeft() - 6;
+                robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
+
+                // drive to depot
                 robot.chassis.driveStraightAuto(.2, -100, 0, timeout);
                 sleep(300);
                 //robot.chassis.driveStraightAuto(.2, -170,0, timeout); disable this line until angle fixed
+
+
+
+
+
             } catch (Exception e) {
                 telemetry.addData("Error", e.getMessage());
                 handleException(e);
