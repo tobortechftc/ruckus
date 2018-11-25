@@ -640,30 +640,38 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
         //set up range sensor telemetry
         if (setRangeSensorTelemetry) {
-            line.addData("rangeR", "%.1f", new Func<Double>() {
-                @Override
-                public Double value() {
-                    return distanceToRight();
-                }
-            });
-            line.addData("rangeL", "%.1f", new Func<Double>() {
-                @Override
-                public Double value() {
-                    return distanceToLeft();
-                }
-            });
-            line.addData("rangeF", "%.1f", new Func<Double>() {
-                @Override
-                public Double value() {
-                    return distanceToFront();
-                }
-            });
-            line.addData("rangeB", "%.1f", new Func<Double>() {
-                @Override
-                public Double value() {
-                    return distanceToBack();
-                }
-            });
+            if (rightRangeSensor!=null) {
+                line.addData("rangeR", "%.1f", new Func<Double>() {
+                    @Override
+                    public Double value() {
+                        return rightRangeSensor.getDistance(DistanceUnit.CM);
+                    }
+                });
+            }
+            if (leftRangeSensor!=null) {
+                line.addData("rangeL", "%.1f", new Func<Double>() {
+                    @Override
+                    public Double value() {
+                        return leftRangeSensor.getDistance(DistanceUnit.CM);
+                    }
+                });
+            }
+            if (frontRangeSensor!=null) {
+                line.addData("rangeF", "%.1f", new Func<Double>() {
+                    @Override
+                    public Double value() {
+                        return frontRangeSensor.getDistance(DistanceUnit.CM);
+                    }
+                });
+            }
+            if (backRangeSensor!=null) {
+                line.addData("rangeB", "%.1f", new Func<Double>() {
+                    @Override
+                    public Double value() {
+                        return backRangeSensor.getDistance(DistanceUnit.CM);
+                    }
+                });
+            }
         }
 
         telemetry.addLine().addData("M", new Func<String>() {
