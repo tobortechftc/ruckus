@@ -37,10 +37,10 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double armSafePos = 0.11;
     private double armDumpPos = 0.85; //actual dump position
     private double armUpPos = 0.95; //max arm position
-    private double liftPower = -.5;
+    private double liftPower = .5;
     private boolean gateIsOpened = false;
     private final int MAX_LIFT_POS = 3980;
-    private final int AUTO_LIFT_POS = 3500;
+    private final int AUTO_LIFT_POS = 3600;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
@@ -177,12 +177,24 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         dumperArm.setPosition(cur_pos);
     }
 
-    public void operateDelivery() {
-        final String taskName = "delivery";
+    public void deliveryCombo(final MineralIntake sliderControl) {
+        final String taskName = "deliveryCombo";
         if (!TaskManager.isComplete(taskName)) return;
 
-        final boolean up = this.lift.getCurrentPosition() < AUTO_LIFT_POS / 2;
-        if (up) this.gateClose();
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                gateClose();
+                final int safePosition = (sliderControl.getSliderDump() + sliderControl.getSliderExtended()) / 2;
+                sliderControl.moveSlider(safePosition);
+                return new Progress() {
+                    @Override
+                    public boolean isDone() {
+                        return Math.abs(sliderControl.getSliderCurrent() - safePosition) < 5;
+                    }
+                };
+            }
+        }, taskName);
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
@@ -192,20 +204,31 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                return liftAuto(up);
+                return liftAuto(true);
             }
         }, taskName);
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                return up ? armDump() : armDown();
+                return armDump();
+            }
+        }, taskName);
+    }
+
+    public void returnCombo() {
+        final String taskName = "returnCombo";
+        if (!TaskManager.isComplete(taskName)) return;
+
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return armSafeLift();
             }
         }, taskName);
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                gateOpen();
-                return null;
+                return liftAuto(false);
             }
         }, taskName);
     }

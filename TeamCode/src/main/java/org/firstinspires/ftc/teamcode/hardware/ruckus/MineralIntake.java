@@ -143,9 +143,6 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     public int getSliderDump() {
         return sliderDump;
     }
-    public int getSliderInitOut() {
-        return sliderInitOut;
-    }
     public void setSliderDump(int sliderDump) {
         this.sliderDump = sliderDump;
         if (adjustmentMode) {
@@ -154,6 +151,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             this.sliderMotor.setPower(this.sliderPower);
         }
+    }
+
+    public int getSliderInitOut() {
+        return sliderInitOut;
     }
 
     @Adjustable(min = 0.0, max = 1.0, step = 0.01)
@@ -246,32 +247,29 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         return Math.abs(boxGateServo.getPosition() - GATE_OPEN) < 0.01;
     }
 
-    public void operateIntake(boolean collect) {
-        final String taskName = "intake";
+    public void mineralDumpCombo() {
+        final String taskName = "mineralDump";
         if (!TaskManager.isComplete(taskName)) return;
 
-        if (collect) {
-            moveGate(false);
-            TaskManager.add(new Task() {
-                @Override
-                public Progress start() {
-                    return moveBox(false);
-                }
-            }, taskName);
-        } else {
-            TaskManager.add(new Task() {
-                @Override
-                public Progress start() {
-                    return moveBox(true);
-                }
-            }, taskName);
-            TaskManager.add(new Task() {
-                @Override
-                public Progress start() {
-                    return moveGate(true);
-                }
-            }, taskName);
-        }
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                moveSlider(getSliderDump());
+                final Progress boxProgress = moveBox(true);
+                return new Progress() {
+                    @Override
+                    public boolean isDone() {
+                        return boxProgress.isDone() && Math.abs(getSliderCurrent() - getSliderDump()) < 5;
+                    }
+                };
+            }
+        }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return moveGate(true);
+            }
+        }, taskName);
     }
 
     /**

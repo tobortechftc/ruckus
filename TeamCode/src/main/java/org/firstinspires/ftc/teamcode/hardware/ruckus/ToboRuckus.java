@@ -177,6 +177,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             }
         }, Button.LEFT_BUMPER);
 
+        // DPAD LEFT / RIGHT operates slider. {Back] oerrides encoder limits
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
@@ -205,92 +206,42 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (intake.getSliderCurrent() >= intake.getSliderDump()) intake.stopSlider();
             }
         }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
+
+        // DPAD UP / DOWN operates intake box position
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (source.isPressed(Button.BACK)) {
-                    // manually open / close the gate
-                    intake.moveGate(button == Button.DPAD_UP);
-                } else if (intake.getSliderTarget()>=intake.getSliderDump()) {
-                    // if slider is extended, move the box but not the lid
-                    intake.moveBox(button == Button.DPAD_UP);
-                } else {
-                    // if slider is in the dump position, move the box and the lid
-                    intake.operateIntake(button == Button.DPAD_DOWN);
-                }
+                intake.moveBox(button == Button.DPAD_UP);
             }
         }, Button.DPAD_UP, Button.DPAD_DOWN);
 
-        // Events for gamepad2
-        em2.onTrigger(new Events.Listener() {
-            @Override
-            public void triggerMoved(EventManager source, Events.Side side, float current, float change) {
-                // do not rotate if the robot is currently moving
-                if (side == Events.Side.LEFT) { // lift down
-                    if (current > 0.2) {
-                        //mineralDelivery.liftDown();
-                    } else {
-                        //mineralDelivery.liftStop();
-                    }
-                }
-                if (side == Events.Side.RIGHT) { // latch down
-                    if (current > 0.2) {
-                        if (source.isPressed(Button.START))
-                            hanging.latchDownInches(1.0);
-                        else
-                            hanging.latchDown(source.isPressed(Button.BACK));
-                    } else {
-                        hanging.latchStop();
-                    }
-                }
-            }
-        }, Events.Side.LEFT, Events.Side.RIGHT);
+        // [B] opens / closes intake box gate
+        // [LB] + [B] is delivery return combo (close gate, arm down, arm lift down)
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (button == Button.LEFT_BUMPER) { // lift up
-                    //mineralDelivery.liftUp();
-                } else if (button == Button.RIGHT_BUMPER) { // latch up
-                    if (source.isPressed(Button.START))
-                        hanging.latchUpInches(1.0);
-                    else
-                        hanging.latchUp(source.isPressed(Button.BACK));
-                }
-                if (button == Button.B) {
-                    if (source.isPressed(Button.BACK)) {
-                        hanging.markerAuto();
-                    }
-                }
-                if (button == Button.X) {
-                    if (source.isPressed(Button.BACK)) {
-                        hanging.markerDown();
-                    } else {
-                        mineralDelivery.gateAuto();
-                    }
-                }
-                if (button == Button.Y) {
-                    if (source.isPressed(Button.BACK)) {
-                        mineralDelivery.armUp();
-                    } else {
-                        mineralDelivery.armDump();
-                    }
-                } else if (button == Button.A) {
-                    mineralDelivery.armDown();
+                if (source.isPressed(Button.LEFT_BUMPER)) {
+                    mineralDelivery.returnCombo();
+                } else {
+                    intake.moveGate(!intake.isGateOpen());
                 }
             }
-        }, Button.LEFT_BUMPER, Button.RIGHT_BUMPER, Button.B, Button.X, Button.Y, Button.A);
+        }, Button.B);
 
-        em2.onButtonUp(new Events.Listener() {
+        // [X] opens / closes delivery gate
+        // [LB] + [X] is delivery combo (move slider out, close gate, arm lift up, arm up)
+        em2.onButtonDown(new Events.Listener() {
             @Override
-            public void buttonUp(EventManager source, Button button) {
-                if (button == Button.LEFT_BUMPER) { // lift stop
-                    //mineralDelivery.liftStop();
-                } else if (button == Button.RIGHT_BUMPER) { // latch stop
-                    hanging.latchStop();
+            public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.LEFT_BUMPER)) {
+                    mineralDelivery.deliveryCombo(intake);
+                } else {
+                    mineralDelivery.gateAuto();
                 }
             }
-        }, Button.LEFT_BUMPER, Button.RIGHT_BUMPER);
+        }, Button.X);
 
+        // (LS) operates delivery lift. [Back] overrides encoder position limits
         em2.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -306,25 +257,51 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Events.Axis.Y_ONLY, Events.Side.LEFT);
+
+        // (RS) operates delivery arm. With [RT] pressed changes are gradual
+        // (RS) with [RB] pressed operates latch up / down. [Back] overrides encoder position limits
         em2.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) {
-                if (source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY) > 0.2) {
-                    mineralDelivery.armUpInc();
-                } else if (source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY) < -0.2) {
-                    mineralDelivery.armDownInc();
-                } else {
-                    mineralDelivery.armStop();
+                if (source.isPressed(Button.RIGHT_BUMPER)) {
+                    // operate latch
+                    if (currentY > 0.2) {
+                        hanging.latchUp(source.isPressed(Button.BACK));
+                    } else if (currentY < -0.2) {
+                        hanging.latchDown(source.isPressed(Button.BACK));
+                    } else {
+                        hanging.latchStop();
+                    }
+                    return;
+                }
+                if (source.getTrigger(Events.Side.RIGHT) > 0.2) {
+                    // operate delivery arm gradually
+                    if (currentY > 0.2) {
+                        mineralDelivery.armUpInc();
+                    } else if (currentY < -0.2) {
+                        mineralDelivery.armDownInc();
+                    } else {
+                        mineralDelivery.armStop();
+                    }
+                    return;
+                }
+                if (currentY > 0.9) {
+                    mineralDelivery.armDump();
+                } else if (currentY < -0.9) {
+                    mineralDelivery.armDown();
                 }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
+
+        // [LB] + [Y] for mineral dump combo (move slider to dump, intake box up, open box gate)
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                mineralDelivery.operateDelivery();
+                if (!source.isPressed(Button.LEFT_BUMPER)) return;
+                intake.mineralDumpCombo();
             }
-        }, Button.RIGHT_STICK);
+        }, Button.Y);
     }
 
     @MenuEntry(label = "Drive Straight", group = "Test Chassis")
