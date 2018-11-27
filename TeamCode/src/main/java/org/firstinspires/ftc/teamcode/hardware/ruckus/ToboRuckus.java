@@ -66,7 +66,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
         hanging = new Hanging().configureLogging("Hanging", logLevel);
-        hanging.configure(configuration);
+        hanging.configure(configuration, auto);
         mineralDelivery = new MineralDelivery().configureLogging("Delivery", logLevel);
         mineralDelivery.configure(configuration);
     }
@@ -222,7 +222,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             public void buttonDown(EventManager source, Button button) {
                 if (source.isPressed(Button.LEFT_BUMPER)) {
                     mineralDelivery.returnCombo();
-                } else {
+                    intake.moveGate(false); // auto close gate when arm down
+                } else if (!source.isPressed(Button.START)){
                     intake.moveGate(!intake.isGateOpen());
                 }
             }

@@ -47,10 +47,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     // slider encoder positions
     private int sliderContracted = 0; // contracted
-    private int sliderExtended = 1400; // fully extended
-    private int sliderDump = 400; // position to dump minerals into delivery box
+    private int sliderExtended = 1480; // fully extended
+    private int sliderDump = 300; // position to dump minerals into delivery box
     private int sliderInitOut = 450; // position for initial TeleOp out
-    private double sliderPower = 0.2; // TBD
+    private double sliderPower = 0.6; // TBD
 
     @Override
     public String getUniqueName() {

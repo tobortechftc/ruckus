@@ -40,8 +40,8 @@
     "sweeperInPower": 0.7,
     "sweeperOutPower": 0.7,
     "sweeperHalfRotation": 180.0,
-    "sliderDump": 220.0,
+    "sliderDump": 300.0,
     "sliderExtended": 1480.0,
-    "sliderPower": 0.4
+    "sliderPower": 0.6
   }
 }

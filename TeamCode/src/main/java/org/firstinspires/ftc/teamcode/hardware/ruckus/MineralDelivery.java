@@ -37,10 +37,10 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double armSafePos = 0.11;
     private double armDumpPos = 0.85; //actual dump position
     private double armUpPos = 0.95; //max arm position
-    private double liftPower = .5;
+    private double liftPower = .9;
     private boolean gateIsOpened = false;
     private final int MAX_LIFT_POS = 3980;
-    private final int AUTO_LIFT_POS = 3600;
+    private final int AUTO_LIFT_POS = 3700;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
@@ -115,7 +115,18 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         lift.setPower(0);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setTargetPosition(up ? AUTO_LIFT_POS : 0);
-        lift.setPower(liftPower * (up ? 1 : -1));
+        if (up==true && liftTouch!=null && liftTouch.getState()==false) {
+            // hardware limit hit
+            lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            lift.setPower(0);
+            return new Progress() {
+                @Override
+                public boolean isDone() {
+                    return true;
+                }};
+        } else {
+            lift.setPower(liftPower);
+        }
         return new Progress() {
             @Override
             public boolean isDone() {
@@ -131,8 +142,8 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private Progress moveArm(double position) {
         double adjustment = Math.abs(position - dumperArm.getPosition());
         dumperArm.setPosition(position);
-        // 2ms per degree of rotation
-        final long doneBy = System.currentTimeMillis() + Math.round(adjustment * 360);
+        // 3.3ms per degree of rotation
+        final long doneBy = System.currentTimeMillis() + Math.round(adjustment * 600);
         return new Progress() {
             @Override
             public boolean isDone() {
@@ -185,7 +196,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
             @Override
             public Progress start() {
                 gateClose();
-                final int safePosition = (sliderControl.getSliderDump() + sliderControl.getSliderExtended()) / 2;
+                final int safePosition = (sliderControl.getSliderInitOut() + sliderControl.getSliderExtended()) / 2;
                 sliderControl.moveSlider(safePosition);
                 return new Progress() {
                     @Override
