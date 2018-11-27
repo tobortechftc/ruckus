@@ -45,24 +45,32 @@ public class RuckusAutoGoldNoLand extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        resetStartTime();
-
+        if (opModeIsActive()) {
+            resetStartTime();
+        }
         // Step-1: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
-
+        ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        if (opModeIsActive()) {
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
+        }
         // skip step-2 - no landing
-        robot.landAndDetach(null,true);
+        if (opModeIsActive()) {
+            robot.landAndDetach(null, true);
+        }
         // Step-3: sample mission
-        robot.goGetSampleGold(sam_loc);
-
+        if (opModeIsActive()) {
+            robot.goGetSampleGold(sam_loc);
+        }
         //Step-4: align with walls
-        robot.alignWithWallsGoldSide(sam_loc);
-
+        if (opModeIsActive()) {
+            robot.alignWithWallsGoldSide(sam_loc);
+        }
         // Step-5: from sample mission to dumping marker
-        robot.hanging.markerDown();
-        sleep(500);
-
-        // Step-5: parking on the crater rim
+        if (opModeIsActive()) {
+            robot.hanging.markerDown();
+            sleep(500);
+        }
+        // Step-6: parking on the crater rim
 
     }
 

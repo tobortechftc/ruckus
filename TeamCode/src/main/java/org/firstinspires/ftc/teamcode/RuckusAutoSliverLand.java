@@ -45,20 +45,27 @@ public class RuckusAutoSliverLand extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        resetStartTime();
-
+        if (opModeIsActive()) {
+            resetStartTime();
+        }
         // Step-1: landing mission
-        robot.landAndDetach(null,false);
-
+        if (opModeIsActive()) {
+            robot.landAndDetach(null, false);
+        }
         // Step-2: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
+        ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        if (opModeIsActive()) {
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
+        }
 
         // Ste-3: sample mission
-        robot.goGetSampleGold(sam_loc);
-
+        if (opModeIsActive()) {
+            robot.goGetSampleGold(sam_loc);
+        }
         // step-4: park on the rim
-        robot.chassis.driveStraightAuto(0.15, 5, 0,Integer.MAX_VALUE);
-
+        if (opModeIsActive()) {
+            robot.chassis.driveStraightAuto(0.15, 5, 0, Integer.MAX_VALUE);
+        }
     }
 
     protected void handleException(Throwable T) {

@@ -45,11 +45,15 @@ public class RuckusAutoGoldLand extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        resetStartTime();
+        if (opModeIsActive()) {
+            resetStartTime();
+        }
 
         // Step-1: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
-
+        ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        if (opModeIsActive()) {
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
+        }
         // Step-2: landing mission
         if (opModeIsActive()) {
             robot.landAndDetach(null, false);
