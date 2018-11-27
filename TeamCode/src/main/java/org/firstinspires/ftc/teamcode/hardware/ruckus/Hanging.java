@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -29,6 +30,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
     private DcMotor latch;
     private Servo marker;
+    private DigitalChannel prox = null;
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
     private double latch_power = .95;
@@ -52,14 +54,20 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
     public void reset(boolean Auto) {
         latch.setPower(0);
-        markerUp();
+        if (marker!=null)
+           markerUp();
         if (Auto && (latch!=null)) {
             latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (prox!=null) {
+            prox.setMode(DigitalChannel.Mode.OUTPUT);
+            prox.setState(true);
+            prox.setMode(DigitalChannel.Mode.INPUT);
+        }
     }
 
-    public void configure(Configuration configuration) {
+    public void configure(Configuration configuration, boolean auto) {
         // set up motors / sensors as wheel assemblies
         latch = configuration.getHardwareMap().dcMotor.get("latch");
         latch.setPower(0);
@@ -67,9 +75,12 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        marker = configuration.getHardwareMap().servo.get("sv_marker");
-        markerUp();
-
+        if (auto) {
+            marker = configuration.getHardwareMap().servo.get("sv_marker");
+            markerUp();
+            prox = configuration.getHardwareMap().get(DigitalChannel.class, "prox");
+            prox.setMode(DigitalChannel.Mode.INPUT);
+        }
         // register hanging as configurable component
         configuration.register(this);
     }
@@ -151,6 +162,11 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         latch.setPower(0);
     }
+
+    public boolean proxWithin15cm() {
+        return prox.getState()==false;
+    }
+
     /**
      * Set up telemetry lines for chassis metrics
      * Shows current motor power, orientation sensors,
@@ -171,6 +187,13 @@ public class Hanging extends Logger<Hanging> implements Configurable {
                 @Override
                 public Double value() {
                     return marker.getPosition();
+                }});
+        }
+        if (prox!=null) {
+            line.addData("prox", "<15cm=%s", new Func<String>() {
+                @Override
+                public String value() {
+                    return (prox.getState()?"No":"Yes");
                 }});
         }
     }
