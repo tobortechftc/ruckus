@@ -208,8 +208,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         double target = up ? LIFT_UP : LIFT_DOWN;
         double adjustment = Math.abs(boxLiftServo.getPosition() - target);
         debug("moveBox(): target=%.2f, adjustment=%.2f", target, adjustment);
-        // entire move from up to down takes 3 seconds
-        final long doneBy = System.currentTimeMillis() + Math.round(3000 * adjustment);
+        // entire move from up to down takes 2 seconds
+        final long doneBy = System.currentTimeMillis() + Math.round(2000 * adjustment);
         boxLiftServo.setPosition(target);
         return new Progress() {
             @Override
@@ -259,7 +259,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                 return new Progress() {
                     @Override
                     public boolean isDone() {
-                        return boxProgress.isDone() && Math.abs(getSliderCurrent() - getSliderDump()) < 5;
+                        return boxProgress.isDone() && Math.abs(getSliderCurrent() - getSliderDump()) < 15;
                     }
                 };
             }

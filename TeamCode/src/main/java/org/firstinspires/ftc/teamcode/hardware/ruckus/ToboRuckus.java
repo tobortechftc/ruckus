@@ -275,6 +275,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         hanging.latchStop();
                     }
                     return;
+                } else {
+                    hanging.latchStop();
                 }
                 if (source.getTrigger(Events.Side.RIGHT) > 0.2) {
                     // operate delivery arm gradually
@@ -300,6 +302,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (!source.isPressed(Button.LEFT_BUMPER)) return;
+                mineralDelivery.armDown();
                 intake.mineralDumpCombo();
             }
         }, Button.Y);
