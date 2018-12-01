@@ -98,7 +98,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.startTime();
 
-        int minDistanceFromTop = 360;
+        int minDistanceFromTop = 350;
 
         ToboRuckus.MineralDetection.SampleLocation sampleLocation = ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
         while (elapsedTime.seconds() < 2) {
@@ -131,14 +131,12 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
                             }
                         }
                         if (goldXCoord != -1 && goldXCoord < silverXCoord) {
-                            logger.verbose("SampleLocation: Left");
-                            return ToboRuckus.MineralDetection.SampleLocation.LEFT;
+                            sampleLocation = ToboRuckus.MineralDetection.SampleLocation.LEFT;
                         } else if (goldXCoord != -1 && goldXCoord > silverXCoord) {
-                            logger.verbose("SampleLocation: Center");
-                            return ToboRuckus.MineralDetection.SampleLocation.CENTER;
-                        } else if (goldXCoord == -1 && silverXCoord != -1) {
+                            sampleLocation = ToboRuckus.MineralDetection.SampleLocation.CENTER;
+                        } else if (goldXCoord == -1/* && silverXCoord != -1*/) {
                             logger.verbose("SampleLocation: Right");
-                            return ToboRuckus.MineralDetection.SampleLocation.RIGHT;
+                            sampleLocation = ToboRuckus.MineralDetection.SampleLocation.RIGHT;
                         }
                     }
 //                    if (updatedRecognitions.size() == 3) {
@@ -177,8 +175,19 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
             tfod.shutdown();
             logger.verbose("Tfod shutdown", tfod);
         }
-        logger.verbose("Sample Location: Unknown");
-        return ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
+        switch (sampleLocation) {
+            case LEFT:
+                logger.verbose("SampleLocation: Left");
+            case RIGHT:
+                logger.verbose("SampleLocation: Right");
+            case CENTER:
+                logger.verbose("SampleLocation: Center");
+            case UNKNOWN:
+                logger.verbose("Sample Location: Unknown");
+            default:
+                logger.verbose("Sample Location: Unknown");
+        }
+        return sampleLocation;
     }
 }
 

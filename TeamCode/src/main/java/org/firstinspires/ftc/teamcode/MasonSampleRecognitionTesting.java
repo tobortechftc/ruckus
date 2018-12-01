@@ -46,9 +46,8 @@ public class MasonSampleRecognitionTesting extends LinearOpMode {
         // run until driver presses STOP or runtime exceeds 30 seconds
         if (opModeIsActive() && getRuntime() < 30) {
             try {
-                telemetry.addData("Gold Position = ", robot.cameraMineralDetector.getGoldPositionTF());
+                telemetry.addData("Gold Position = ", robot.cameraMineralDetector.getGoldPositionTF()).setRetained(true);
                 telemetry.update();
-                Thread.sleep(5000);
 
             } catch (Exception E) {
                 telemetry.addData("Error", E.getMessage());
