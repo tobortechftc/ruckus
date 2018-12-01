@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
-@Disabled
 @Autonomous(name = "Ruckus :: Sample Recognition Testing", group = "Ruckus")
 public class MasonSampleRecognitionTesting extends LinearOpMode {
     protected static int LOG_LEVEL = Log.INFO;
@@ -49,6 +48,7 @@ public class MasonSampleRecognitionTesting extends LinearOpMode {
             try {
                 telemetry.addData("Gold Position = ", robot.cameraMineralDetector.getGoldPositionTF());
                 telemetry.update();
+                Thread.sleep(5000);
 
             } catch (Exception E) {
                 telemetry.addData("Error", E.getMessage());

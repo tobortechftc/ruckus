@@ -5,6 +5,8 @@ import android.util.Log;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
@@ -72,11 +74,14 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
 
         logger.verbose("CameraMineralDetector status: %s", tfod);
 
+        tfodParameters.minimumConfidence = 0.3;
+
+        com.vuforia.CameraDevice.getInstance().setFlashTorchMode(true);
+//        com.vuforia.CameraDevice.getInstance().setField("iso", "800");
 
         // register CameraMineralDetector as a configurable component
         configuration.register(this);
     }
-
 
     public ToboRuckus.MineralDetection.SampleLocation getGoldPositionTF() {
         // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
@@ -93,22 +98,36 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.startTime();
 
-        while (elapsedTime.seconds() < 3) {
+        int minDistanceFromTop = 360;
+
+        ToboRuckus.MineralDetection.SampleLocation sampleLocation = ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
+        while (elapsedTime.seconds() < 2) {
             if (tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
+//                try {
+//                    Thread.sleep(2000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                 if (updatedRecognitions != null) {
 //                        telemetry.addData("# Object Detected", updatedRecognitions.size());
-                    if (updatedRecognitions.size() == 2) {
+                    if (updatedRecognitions.size() >= 2) {
                         int goldXCoord = -1;
                         int silverXCoord = -1;
                         for (Recognition recognition :
                                 updatedRecognitions) {
-                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                            logger.verbose("Starting recognitions");
+                            logger.verbose("Recognitions: ", updatedRecognitions);
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL) && recognition.getTop() > minDistanceFromTop) {
                                 goldXCoord = (int) recognition.getLeft();
-                            } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                logger.verbose("Gold X = ", goldXCoord);
+                                logger.verbose("Gold Y = ", recognition.getBottom());
+                            } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) && recognition.getTop() > minDistanceFromTop) {
                                 silverXCoord = (int) recognition.getLeft();
+                                logger.verbose("Silver X = ", silverXCoord);
+                                logger.verbose("Silver Y = ", recognition.getBottom());
                             }
                         }
                         if (goldXCoord != -1 && goldXCoord < silverXCoord) {
@@ -120,39 +139,36 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
                         } else if (goldXCoord == -1 && silverXCoord != -1) {
                             logger.verbose("SampleLocation: Right");
                             return ToboRuckus.MineralDetection.SampleLocation.RIGHT;
-                        } else {
-                            logger.verbose("SampleLocation: Unknown");
-                            return ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
                         }
                     }
-                    if (updatedRecognitions.size() == 3) {
-                        int goldXCoord = -1;
-                        int silverXCoord1 = -1;
-                        int silverXCoord2 = -1;
-                        for (Recognition recognition : updatedRecognitions) {
-                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldXCoord = (int) recognition.getLeft();
-                            } else if (silverXCoord1 == -1) {
-                                silverXCoord1 = (int) recognition.getLeft();
-                            } else {
-                                silverXCoord2 = (int) recognition.getLeft();
-                            }
-                        }
-                        if (goldXCoord != -1 && silverXCoord1 != -1 && silverXCoord2 != -1) {
-                            if (goldXCoord < silverXCoord1 && goldXCoord < silverXCoord2) {
-                                logger.verbose("SampleLocation: Left");
-                                return ToboRuckus.MineralDetection.SampleLocation.LEFT;
-                            } else if (goldXCoord > silverXCoord1 && goldXCoord > silverXCoord2) {
-                                logger.verbose("SampleLocation: Right");
-                                return ToboRuckus.MineralDetection.SampleLocation.RIGHT;
-                            } else {
-                                logger.verbose("SampleLocation: Center");
-                                return ToboRuckus.MineralDetection.SampleLocation.CENTER;
-                            }
-                        } else {
-                            return ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
-                        }
-                    }
+//                    if (updatedRecognitions.size() == 3) {
+//                        int goldXCoord = -1;
+//                        int silverXCoord1 = -1;
+//                        int silverXCoord2 = -1;
+//                        for (Recognition recognition : updatedRecognitions) {
+//                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+//                                goldXCoord = (int) recognition.getLeft();
+//                            } else if (silverXCoord1 == -1 || recognition.getTop() > silverXCoord1) {
+//                                silverXCoord1 = (int) recognition.getLeft();
+//                            } else {
+//                                silverXCoord2 = (int) recognition.getLeft();
+//                            }
+//                        }
+//                        if (goldXCoord != -1 && silverXCoord1 != -1 && silverXCoord2 != -1) {
+//                            if (goldXCoord < silverXCoord1 && goldXCoord < silverXCoord2) {
+//                                logger.verbose("SampleLocation: Left");
+//                                return ToboRuckus.MineralDetection.SampleLocation.LEFT;
+//                            } else if (goldXCoord > silverXCoord1 && goldXCoord > silverXCoord2) {
+//                                logger.verbose("SampleLocation: Right");
+//                                return ToboRuckus.MineralDetection.SampleLocation.RIGHT;
+//                            } else {
+//                                logger.verbose("SampleLocation: Center");
+//                                return ToboRuckus.MineralDetection.SampleLocation.CENTER;
+//                            }
+//                        } else {
+//                            return ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
+//                        }
+//                    }
                 }
             }
         }
@@ -174,11 +190,11 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
  */
 //    public void setupTelemetry(Telemetry telemetry) {
 //        Telemetry.Line line = telemetry.addLine();
-//        if (updatedRecognitions.size() > 0)
+//        if ()
 //            line.addData("CameraMineralDetector", "Recog. Count= %d", new Func<Integer>() {
 //                @Override
 //                public Integer value() {
-//                    return updatedRecognitions.size();
+//
 //                }
 //            });
 //    }
