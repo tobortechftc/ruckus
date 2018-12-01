@@ -144,6 +144,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         if (auto) {
             orientationSensor = new CombinedOrientationSensor().configureLogging(logTag + "-sensor", logLevel);
             orientationSensor.configure(configuration.getHardwareMap(), "imu", "imu2");
+<<<<<<< Updated upstream
 
 
             frontRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "front_range");
@@ -151,6 +152,13 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
             rightRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "right_range");
         }
+=======
+        }
+        frontRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "front_range");
+        backRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
+        leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
+        rightRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "right_range");
+>>>>>>> Stashed changes
 
         // register chassis as configurable component
         configuration.register(this);
@@ -211,8 +219,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public double distanceToRight() {
+<<<<<<< Updated upstream
         if (rightRangeSensor == null)
             return 0;
+=======
+>>>>>>> Stashed changes
         double dist = rightRangeSensor.getDistance(DistanceUnit.CM);
         int count = 0;
         while (dist > maxRange && (++count) < 5) {
@@ -514,7 +525,12 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             // only adjust servo positions if power is applied
             double[] newServoPositions = new double[4];
             if (allWheels) {
+<<<<<<< Updated upstream
                 if (Math.abs(heading) == 90) {
+=======
+            /*
+                if (Math.abs(heading)==90) {
+>>>>>>> Stashed changes
                     // check whether all servos are already at 90 (or -90) degrees
                     boolean samePosition = (frontLeft.servo.getPosition() == frontRight.servo.getPosition())
                             && (frontLeft.servo.getPosition() == backLeft.servo.getPosition())
@@ -525,7 +541,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                         power *= heading == frontLeft.servo.getPosition() ? 1 : -1;
                         heading = frontLeft.servo.getPosition();
                     }
-                }
+                } */
                 Arrays.fill(newServoPositions, heading);
             } else if (power > 0) { // driving forward
                 // front left and right
@@ -730,6 +746,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
         //set up range sensor telemetry
         if (setRangeSensorTelemetry) {
+<<<<<<< Updated upstream
             if (rightRangeSensor != null) {
                 line.addData("rangeR", "%.1f", new Func<Double>() {
                     @Override
@@ -762,6 +779,32 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                     }
                 });
             }
+=======
+            line.addData("rangeR", "%.1f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return distanceToRight();
+                }
+            });
+            line.addData("rangeL", "%.1f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return distanceToLeft();
+                }
+            });
+            line.addData("rangeF", "%.1f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return distanceToFront();
+                }
+            });
+            line.addData("rangeB", "%.1f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return distanceToBack();
+                }
+            });
+>>>>>>> Stashed changes
         }
 
         telemetry.addLine().addData("M", new Func<String>() {
