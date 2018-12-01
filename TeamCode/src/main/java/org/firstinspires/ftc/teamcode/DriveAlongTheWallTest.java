@@ -1,20 +1,26 @@
 package org.firstinspires.ftc.teamcode;
 
+/**
+ * Created by 28761 on 11/25/2018.
+ */
+
+
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralIntake;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
- * Created by 28761 on 10/13/2018.
+ * Created by 28761 on 11/9/2018.
  */
-
-@Autonomous(name = "Ruckus::Auto-Gold-Land", group = "Ruckus")
-public class RuckusAutoGoldLand extends LinearOpMode {
+@Autonomous(name = "Drive wall test", group = "Ruckus")
+public class DriveAlongTheWallTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -45,38 +51,12 @@ public class RuckusAutoGoldLand extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        if (opModeIsActive()) {
-            resetStartTime();
-        }
+        resetStartTime();
 
-        // Step-1: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
-        if (opModeIsActive()) {
-            sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
-        }
-        // Step-2: landing mission
-        if (opModeIsActive()) {
-            robot.landAndDetach(null, false);
-        }
-        // Ste-3: sample mission
-        if (opModeIsActive()) {
-            robot.goGetSampleGold(sam_loc);
-        }
-        //Step-4: align with walls
-        if (opModeIsActive()) {
-            robot.alignWithWallsGoldSide(sam_loc);
-        }
-        // Step-5: from sample mission to dumping marker
-        if (opModeIsActive()) {
-            robot.hanging.markerDown();
-            sleep(500);
-        }
-        // Step-5: parking on the crater rim
-        if (opModeIsActive()) {
-            robot.chassis.driveStraightAuto(0.3, 20, 0, 3000);
-            robot.goParkingGold();
-//            robot.intake.moveSlider(robot.intake.getSliderInitOut());
-        }
+        //************The Test*************
+        robot.goParkingGold();
+        //*********************************
+
 //        robot.AutoRoutineTest();
         // run until driver presses STOP or runtime exceeds 30 seconds
         if (opModeIsActive() && getRuntime() < 30) {
@@ -104,3 +84,4 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         telemetry.update();
     }
 }
+

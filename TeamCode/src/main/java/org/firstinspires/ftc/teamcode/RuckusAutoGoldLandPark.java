@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  */
 
 @Autonomous(name = "Ruckus::Auto-Gold-Land", group = "Ruckus")
-public class RuckusAutoGoldLand extends LinearOpMode {
+public class RuckusAutoGoldLandPark extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -75,7 +75,7 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         if (opModeIsActive()) {
             robot.chassis.driveStraightAuto(0.3, 20, 0, 3000);
             robot.goParkingGold();
-//            robot.intake.moveSlider(robot.intake.getSliderInitOut());
+            robot.intake.moveSlider(robot.intake.getSliderInitOut());
         }
 //        robot.AutoRoutineTest();
         // run until driver presses STOP or runtime exceeds 30 seconds

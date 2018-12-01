@@ -157,13 +157,13 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public double distanceToFront() {
-        if (frontRangeSensor==null)
+        if (frontRangeSensor == null)
             return 0;
         double dist = frontRangeSensor.getDistance(DistanceUnit.CM);
         int count = 0;
         while (dist > maxRange && (++count) < 5) {
             try {
-                Thread.sleep(40);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -175,13 +175,13 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public double distanceToBack() {
-        if (backRangeSensor==null)
+        if (backRangeSensor == null)
             return 0;
         double dist = backRangeSensor.getDistance(DistanceUnit.CM);
         int count = 0;
         while (dist > maxRange && (++count) < 5) {
             try {
-                Thread.sleep(40);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -193,13 +193,13 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public double distanceToLeft() {
-        if (leftRangeSensor==null)
+        if (leftRangeSensor == null)
             return 0;
         double dist = leftRangeSensor.getDistance(DistanceUnit.CM);
         int count = 0;
         while (dist > maxRange && (++count) < 5) {
             try {
-                Thread.sleep(40);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -210,14 +210,14 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
-    public double distanceToRight(){
-        if (rightRangeSensor==null)
+    public double distanceToRight() {
+        if (rightRangeSensor == null)
             return 0;
         double dist = rightRangeSensor.getDistance(DistanceUnit.CM);
         int count = 0;
         while (dist > maxRange && (++count) < 5) {
             try {
-                Thread.sleep(40);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -397,6 +397,96 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         driveMode = DriveMode.STOP;
     }
 
+    public void driveAlongTheWall(double power, double cm, double cmToWall, int timeout) throws InterruptedException {
+        debug("driveAlongTheWall(pwr: %.3f, cmToWall: %.1f)", power, cmToWall);
+        if (power < 0 || power > 1) {
+            throw new IllegalArgumentException("Power must be between 0 and 1");
+        }
+        if (cmToWall < 5 || cmToWall > 30) {
+            throw new IllegalArgumentException("cmToWall must be between 0 and 30");
+        }
+
+        double distance = TICKS_PER_CM * cm;
+
+        if (power == 0) {
+            driveMode = DriveMode.STOP;
+            targetHeading = 0;
+            headingDeviation = 0;
+            servoCorrection = 0;
+            for (WheelAssembly wheel : wheels) wheel.motor.setPower(0);
+            orientationSensor.enableCorrections(false);
+            return;
+        }
+
+        if (distance < 0) {
+            power = -power;
+            distance = -distance;
+        }
+
+        //motor settings
+        driveMode = DriveMode.STRAIGHT;
+        int[] startingCount = new int[4];
+        for (int i = 0; i < 4; i++) {
+            wheels[i].motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            wheels[i].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            startingCount[i] = wheels[i].motor.getCurrentPosition();
+        }
+
+        //servo settings
+        double[] newServoPositions = new double[4];
+        Arrays.fill(newServoPositions, 0);
+        changeServoPositions(newServoPositions);
+
+        //start powering wheels
+        for (WheelAssembly wheel : wheels) wheel.motor.setPower(power);
+
+        //record time
+        long iniTime = System.currentTimeMillis();
+
+        //waiting loop
+        double lastDistToWall = distanceToRight();
+        double lastDeviation = 0.0;
+        while (true) {
+            // check and correct heading as needed
+            double disToWall = distanceToRight();
+            double deviation = disToWall - cmToWall;
+            debug("detected dis to wall: %.3f", disToWall);
+            debug("deviation: %.3f", deviation);
+            if (Math.abs(deviation) > 1) {
+                if (power < 0) {
+                    backLeft.servo.setPosition(deviation / 2.0);
+                    backRight.servo.setPosition(deviation / 2.0);
+                } else {
+                    frontLeft.servo.setPosition(deviation / 2.0);
+                    frontRight.servo.setPosition(deviation / 2.0);
+                }
+            } else {
+                servoCorrection = 0;
+                if (power < 0) {
+                    backLeft.servo.setPosition(frontLeft.servo.getPosition());
+                    backRight.servo.setPosition(frontRight.servo.getPosition());
+                } else {
+                    frontLeft.servo.setPosition(backLeft.servo.getPosition());
+                    frontRight.servo.setPosition(backRight.servo.getPosition());
+                }
+            }
+            lastDeviation = deviation;
+            lastDistToWall = disToWall;
+            //determine if target distance is reached
+            int maxTraveled = Integer.MIN_VALUE;
+            for (int i = 0; i < 4; i++) {
+                maxTraveled = Math.abs(Math.max(maxTraveled, wheels[i].motor.getCurrentPosition() - startingCount[i]));
+            }
+            if (distance - maxTraveled < 10)
+                break;
+            //determine if time limit is reached
+            if (System.currentTimeMillis() - iniTime > timeout)
+                break;
+        }
+        for (WheelAssembly wheel : wheels) wheel.motor.setPower(0);
+        driveMode = DriveMode.STOP;
+    }
+
     /**
      * Drive using currently specified power and heading values
      *
@@ -424,7 +514,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             // only adjust servo positions if power is applied
             double[] newServoPositions = new double[4];
             if (allWheels) {
-                if (Math.abs(heading)==90) {
+                if (Math.abs(heading) == 90) {
                     // check whether all servos are already at 90 (or -90) degrees
                     boolean samePosition = (frontLeft.servo.getPosition() == frontRight.servo.getPosition())
                             && (frontLeft.servo.getPosition() == backLeft.servo.getPosition())
@@ -640,7 +730,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
         //set up range sensor telemetry
         if (setRangeSensorTelemetry) {
-            if (rightRangeSensor!=null) {
+            if (rightRangeSensor != null) {
                 line.addData("rangeR", "%.1f", new Func<Double>() {
                     @Override
                     public Double value() {
@@ -648,7 +738,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                     }
                 });
             }
-            if (leftRangeSensor!=null) {
+            if (leftRangeSensor != null) {
                 line.addData("rangeL", "%.1f", new Func<Double>() {
                     @Override
                     public Double value() {
@@ -656,7 +746,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                     }
                 });
             }
-            if (frontRangeSensor!=null) {
+            if (frontRangeSensor != null) {
                 line.addData("rangeF", "%.1f", new Func<Double>() {
                     @Override
                     public Double value() {
@@ -664,7 +754,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                     }
                 });
             }
-            if (backRangeSensor!=null) {
+            if (backRangeSensor != null) {
                 line.addData("rangeB", "%.1f", new Func<Double>() {
                     @Override
                     public Double value() {
