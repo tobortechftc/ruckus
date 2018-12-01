@@ -48,16 +48,16 @@ public class RuckusAutoSliverLand extends LinearOpMode {
         if (opModeIsActive()) {
             resetStartTime();
         }
-        // Step-1: landing mission
-        if (opModeIsActive()) {
-            robot.landAndDetach(null, false);
-        }
+
         // Step-2: check random sample position
         ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
         if (opModeIsActive()) {
             sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
         }
-
+        // Step-1: landing mission
+        if (opModeIsActive()) {
+            robot.landAndDetach(null, false);
+        }
         // Ste-3: sample mission
         if (opModeIsActive()) {
             robot.goGetSampleGold(sam_loc);

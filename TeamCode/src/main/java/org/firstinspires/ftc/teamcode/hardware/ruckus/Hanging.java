@@ -1,21 +1,18 @@
 package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.components.AdjustableServo;
-import org.firstinspires.ftc.teamcode.components.CombinedOrientationSensor;
 import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
-
-import java.util.Arrays;
+import org.firstinspires.ftc.teamcode.support.tasks.Progress;
+import org.firstinspires.ftc.teamcode.support.tasks.Task;
+import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
 /**
  * Swerve chassis consists of 4 wheels with a Servo and DcMotor attached to each.
@@ -37,6 +34,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private final double MARKER_UP = 0.42;
     private final double MARKER_DOWN = 0.05;
     private final int MAX_LATCH_POS = 15050; //Max distance is 8.5 inches
+    private final int LATCH_ENDGAME_POS = 10178; // position for end game to latch
     private final int MIN_LATCH_POS = 20;
     private final int LATCH_COUNT_PER_INCH = 1774;
     private boolean markerIsDown = false;
@@ -119,6 +117,38 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             latch.setPower(-latch_power);
         }
     }
+
+    public Progress latchAuto(){ // encoder going to end game
+        latch.setPower(0);
+        latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        latch.setTargetPosition(LATCH_ENDGAME_POS);
+        int cur_pos = latch.getCurrentPosition();
+        if (Math.abs(cur_pos-LATCH_ENDGAME_POS)<20) {
+            latch.setPower(0);
+            latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        } else {
+            latch.setPower(latch_power);
+        }
+        return new Progress() {
+            @Override
+            public boolean isDone() {
+                return !latch.isBusy() || (Math.abs(latch.getCurrentPosition()-LATCH_ENDGAME_POS)<20);
+            }
+        };
+    }
+
+    public void latchDownEndGame() {
+        final String taskName = "latchDownEndGame";
+        if (!TaskManager.isComplete(taskName)) return;
+
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return latchAuto();
+            }
+        }, taskName);
+    }
+
     public void latchStop(){
         if (!latch.isBusy())
             latch.setPower(0);

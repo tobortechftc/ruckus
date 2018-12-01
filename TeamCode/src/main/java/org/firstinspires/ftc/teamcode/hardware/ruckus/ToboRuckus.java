@@ -78,7 +78,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     @Override
     public void reset(boolean auto) {
         chassis.reset();
-        intake.reset();
+        intake.reset(auto);
         mineralDelivery.reset();
         hanging.reset(auto);
         if (auto) {
@@ -157,23 +157,30 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
                 // 0.2 is a dead zone threshold for the trigger
-                if (current > 0.2) {
+                /* if (current > 0.2) {
                     intake.rotateSweeper(MineralIntake.SweeperMode.PUSH_OUT);
                 } else if (current == 0) {
                     intake.rotateSweeper(MineralIntake.SweeperMode.HORIZONTAL_STOP);
+                }*/
+                if (current > 0.2) {
+                    intake.sweeperOut();
+                } else if (current == 0){
+                    intake.stopSweeper();
                 }
             }
         }, Events.Side.LEFT);
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
-                intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+                // intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+                intake.sweeperIn();
             }
         }, Button.LEFT_BUMPER);
         em.onButtonUp(new Events.Listener() {
             @Override
             public void buttonUp(EventManager source, Button button) throws InterruptedException {
-                intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
+                //intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
+                intake.stopSweeper();
             }
         }, Button.LEFT_BUMPER);
 
@@ -214,6 +221,15 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 intake.moveBox(button == Button.DPAD_UP);
             }
         }, Button.DPAD_UP, Button.DPAD_DOWN);
+
+        em2.onButtonUp(new Events.Listener() {
+            @Override
+            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+                if (source.isPressed(Button.RIGHT_BUMPER)) {
+                    hanging.latchAuto();
+                }
+            }
+        }, Button.LEFT_BUMPER);
 
         // [B] opens / closes intake box gate
         // [LB] + [B] is delivery return combo (close gate, arm down, arm lift down)
@@ -271,11 +287,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         hanging.latchUp(source.isPressed(Button.BACK));
                     } else if (currentY < -0.2) {
                         hanging.latchDown(source.isPressed(Button.BACK));
-                    } else {
+                    } else if (!hanging.latchIsBusy()){
                         hanging.latchStop();
                     }
                     return;
-                } else {
+                } else if (!hanging.latchIsBusy()) {
                     hanging.latchStop();
                 }
                 if (source.getTrigger(Events.Side.RIGHT) > 0.2) {

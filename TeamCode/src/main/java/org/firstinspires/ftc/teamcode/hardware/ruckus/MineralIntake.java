@@ -187,11 +187,13 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         configuration.register(this);
     }
 
-    public void reset() {
+    public void reset(boolean auto) {
         boxLiftServo.setPosition(LIFT_DOWN);
         boxGateServo.setPosition(GATE_CLOSED);
         resetMotor(sweeperMotor);
-        resetMotor(sliderMotor);
+        if (auto) {
+            resetMotor(sliderMotor);
+        }
         debug("Reset mineral intake, lift: %.2f, gate: %.1f, sweeper: %s / %d, slider: %s / %d",
                 boxLiftServo.getPosition(), boxGateServo.getPosition(),
                 sweeperMotor.getMode(), sweeperMotor.getCurrentPosition(),
@@ -322,6 +324,14 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         this.sweeperMotor.setPower(0);
     }
 
+    public void sweeperIn() {
+        this.sweeperMotor.setPower(sweeperInPower);
+    }
+
+    public void sweeperOut() {
+        this.sweeperMotor.setPower(-1*sweeperOutPower);
+    }
+
     /**
      * Moves the slider to given position
      * @param position to move slider to
@@ -403,5 +413,6 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         motor.setTargetPosition(0);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
