@@ -150,6 +150,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             rightRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "right_range");
         }
 
+
         // register chassis as configurable component
         configuration.register(this);
     }
@@ -512,6 +513,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             // only adjust servo positions if power is applied
             double[] newServoPositions = new double[4];
             if (allWheels) {
+            /*
                 if (Math.abs(heading)==90) {
                     // check whether all servos are already at 90 (or -90) degrees
                     boolean samePosition = (frontLeft.servo.getPosition() == frontRight.servo.getPosition())
@@ -523,7 +525,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                         power *= heading == frontLeft.servo.getPosition() ? 1 : -1;
                         heading = frontLeft.servo.getPosition();
                     }
-                }
+                } */
                 Arrays.fill(newServoPositions, heading);
             } else if (power > 0) { // driving forward
                 // front left and right
@@ -760,6 +762,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                     }
                 });
             }
+
         }
 
         telemetry.addLine().addData("M", new Func<String>() {

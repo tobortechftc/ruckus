@@ -75,7 +75,8 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
         if (opModeIsActive()) {
             robot.chassis.driveStraightAuto(0.3, 20, 0, 3000);
             robot.goParkingGold();
-            robot.intake.moveSlider(robot.intake.getSliderInitOut());
+            robot.intake.boxLiftUp();
+            robot.intake.setSliderAutoPark();
         }
 //        robot.AutoRoutineTest();
         // run until driver presses STOP or runtime exceeds 30 seconds

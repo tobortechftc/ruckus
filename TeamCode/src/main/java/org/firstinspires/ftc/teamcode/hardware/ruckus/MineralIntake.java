@@ -50,6 +50,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int sliderExtended = 1480; // fully extended
     private int sliderDump = 300; // position to dump minerals into delivery box
     private int sliderInitOut = 450; // position for initial TeleOp out
+    private int sliderAutoPark = 650; // position for Auto Out parking;
     private double sliderPower = 0.6; // TBD
 
     @Override
@@ -79,7 +80,12 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             );
         }
     }
-
+    public void boxLiftUp() {
+        this.boxLiftServo.setPosition(LIFT_UP);
+    }
+    public void boxLiftDown() {
+        this.boxLiftServo.setPosition(LIFT_DOWN);
+    }
     @Adjustable(min = 0.0, max = 1.0, step = 0.01)
     public double getSweeperInPower() {
         return sweeperInPower;
@@ -155,6 +161,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     public int getSliderInitOut() {
         return sliderInitOut;
+    }
+    public void setSliderAutoPark() {
+        moveSlider(sliderAutoPark);
     }
 
     @Adjustable(min = 0.0, max = 1.0, step = 0.01)
