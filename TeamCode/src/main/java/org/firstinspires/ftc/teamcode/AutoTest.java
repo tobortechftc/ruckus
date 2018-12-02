@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
@@ -12,9 +13,9 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 10/13/2018.
  */
-
-@Autonomous(name = "Ruckus::Auto-Gold-No-Land", group = "Ruckus")
-public class RuckusAutoGoldNoLand extends LinearOpMode {
+@Disabled
+@Autonomous(name = "Auto Test", group = "Ruckus")
+public class AutoTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -45,32 +46,18 @@ public class RuckusAutoGoldNoLand extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        if (opModeIsActive()) {
-            resetStartTime();
-        }
-        // Step-1: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
-        if (opModeIsActive()) {
-            sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
-        }
-        // skip step-2 - no landing
-        if (opModeIsActive()) {
-            robot.landAndDetach(null, true);
-        }
-        // Step-3: sample mission
-        if (opModeIsActive()) {
-            robot.goGetSampleGold(sam_loc);
-        }
-        //Step-4: align with walls
-        if (opModeIsActive()) {
-            robot.alignWithWallsGoldSide(sam_loc);
-        }
-        // Step-5: from sample mission to dumping marker
-        if (opModeIsActive()) {
-            robot.hanging.markerDown();
-            sleep(500);
-        }
-        // Step-6: parking on the crater rim
+        resetStartTime();
+
+        robot.extendInakeForParking();
+
+//         robot.chassis.rotateTo(0.18, -90);
+//         sleep(200);
+//         robot.chassis.rotateTo(0.18, +180);
+//         sleep(200);
+//         robot.chassis.rotateTo(0.18, 90);
+//         sleep(200);
+//         robot.chassis.rotateTo(0.18, 0);
+//         sleep(200);
 
     }
 

@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "Ruckus::Auto-Silver-Land", group = "Ruckus")
-public class RuckusAutoSliverLand extends LinearOpMode {
+@Autonomous(name = "Ruckus::Auto-Gold-No-Land-Park", group = "Ruckus")
+public class RuckusAutoGoldNoLandPark extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -49,23 +49,35 @@ public class RuckusAutoSliverLand extends LinearOpMode {
             resetStartTime();
         }
 
-        // Step-2: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        // Step-1: check random sample position
+        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
         if (opModeIsActive()) {
             sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
         }
-        // Step-1: landing mission
+
+        // Step-2: landing mission
         if (opModeIsActive()) {
-            robot.landAndDetach(null, false);
+            robot.landAndDetach(null, true);
         }
         // Ste-3: sample mission
         if (opModeIsActive()) {
             robot.goGetSampleGold(sam_loc);
         }
-        // step-4: park on the rim
+        //Step-4: align with walls
         if (opModeIsActive()) {
-            robot.chassis.driveStraightAuto(0.15, 5, 0, Integer.MAX_VALUE);
+            robot.alignWithWallsGoldSide(sam_loc);
         }
+        // Step-5: from sample mission to dumping marker
+        if (opModeIsActive()) {
+            robot.hanging.markerDown();
+            robot.chassis.driveStraightAuto(0.3, 20, 10, 3000);
+            sleep(500);
+        }
+        // Step-6: parking on the crater rim
+        if (opModeIsActive()) {
+            robot.goParkingGold();
+        }
+
     }
 
     protected void handleException(Throwable T) {

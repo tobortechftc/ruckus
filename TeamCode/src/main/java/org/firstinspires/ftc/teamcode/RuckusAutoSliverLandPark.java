@@ -13,8 +13,8 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "Ruckus::Auto-Gold-Land-Park", group = "Ruckus")
-public class RuckusAutoGoldLandPark extends LinearOpMode {
+@Autonomous(name = "Ruckus::Auto-Silver-Land-Park", group = "Ruckus")
+public class RuckusAutoSliverLandPark extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -49,13 +49,12 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
             resetStartTime();
         }
 
-        // Step-1: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        // Step-2: check random sample position
+        ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
         if (opModeIsActive()) {
             sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
         }
-
-        // Step-2: landing mission
+        // Step-1: landing mission
         if (opModeIsActive()) {
             robot.landAndDetach(null, false);
         }
@@ -63,37 +62,11 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
         if (opModeIsActive()) {
             robot.goGetSampleGold(sam_loc);
         }
-        //Step-4: align with walls
+        // step-4: park on the rim
         if (opModeIsActive()) {
-            robot.alignWithWallsGoldSide(sam_loc);
-        }
-        // Step-5: from sample mission to dumping marker
-        if (opModeIsActive()) {
-            robot.hanging.markerDown();
-            robot.chassis.driveStraightAuto(0.3, 20, 10, 3000);
-            sleep(500);
-        }
-        // Step-6: parking on the crater rim
-        if (opModeIsActive()) {
+            robot.chassis.driveStraightAuto(0.15, 5, 0, Integer.MAX_VALUE);
             robot.goParkingGold();
         }
-
-        /*
-//        robot.AutoRoutineTest();
-        // run until driver presses STOP or runtime exceeds 30 seconds
-        if (opModeIsActive() && getRuntime() < 30) {
-            try {
-                // TODO: invoke something like robot.autonomousProgram()
-                telemetry.addLine(String.format("distance Left:%.3f; distance front:%.3f", robot.chassis.distanceToLeft(), robot.chassis.distanceToFront()));
-                telemetry.update();
-//                robot.chassis.driveAndSteerAuto(0.5,560*3,-45);
-
-            } catch (Exception E) {
-                telemetry.addData("Error", E.getMessage());
-                handleException(E);
-                Thread.sleep(5000);
-            }
-        } */
     }
 
     protected void handleException(Throwable T) {

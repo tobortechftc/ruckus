@@ -396,6 +396,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     public void goParkingGold() throws InterruptedException {
         chassis.driveAlongTheWall(0.4,140,5,4000);
+        extendInakeForParking();
+    }
+
+    public void extendInakeForParking() {
         intake.boxLiftUp();
         intake.setSliderAutoPark();
     }

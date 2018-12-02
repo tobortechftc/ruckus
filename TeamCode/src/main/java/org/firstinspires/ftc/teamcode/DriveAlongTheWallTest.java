@@ -19,6 +19,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 11/9/2018.
  */
+@Disabled
 @Autonomous(name = "Drive wall test", group = "Ruckus")
 public class DriveAlongTheWallTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
