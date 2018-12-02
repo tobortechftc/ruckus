@@ -33,7 +33,7 @@
   },
   "sv_box_lift": {
     "center": 0.5,
-    "left": 0.1,
+    "left": 0.15,
     "right": 0.8
   },
   "intake": {

@@ -197,7 +197,11 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     }
 
     public void reset(boolean auto) {
-        boxLiftServo.setPosition(LIFT_DOWN);
+        if (auto) {
+            boxLiftServo.setPosition(LIFT_DOWN);
+        } else {
+            boxLiftServo.setPosition(LIFT_UP);
+        }
         boxGateServo.setPosition(GATE_CLOSED);
         resetMotor(sweeperMotor);
         if (auto) {
