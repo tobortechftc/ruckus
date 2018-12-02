@@ -70,7 +70,7 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
         // Step-5: from sample mission to dumping marker
         if (opModeIsActive()) {
             robot.hanging.markerDown();
-            robot.chassis.driveStraightAuto(0.3, 20, 0, 3000);
+            robot.chassis.driveStraightAuto(0.3, 20, 10, 3000);
             sleep(500);
         }
         // Step-5: parking on the crater rim
