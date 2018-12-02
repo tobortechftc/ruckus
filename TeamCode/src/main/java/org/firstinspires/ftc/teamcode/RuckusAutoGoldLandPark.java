@@ -54,6 +54,7 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
         if (opModeIsActive()) {
             sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
         }
+
         // Step-2: landing mission
         if (opModeIsActive()) {
             robot.landAndDetach(null, false);
