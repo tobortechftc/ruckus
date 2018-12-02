@@ -69,14 +69,12 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
         // Step-5: from sample mission to dumping marker
         if (opModeIsActive()) {
             robot.hanging.markerDown();
+            robot.chassis.driveStraightAuto(0.3, 20, 0, 3000);
             sleep(500);
         }
         // Step-5: parking on the crater rim
         if (opModeIsActive()) {
-            robot.chassis.driveStraightAuto(0.3, 20, 0, 3000);
             robot.goParkingGold();
-            robot.intake.boxLiftUp();
-            robot.intake.setSliderAutoPark();
         }
 //        robot.AutoRoutineTest();
         // run until driver presses STOP or runtime exceeds 30 seconds

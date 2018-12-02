@@ -61,7 +61,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
             cameraMineralDetector.configure(configuration);
         }
-        chassis = new SwerveChassis().configureLogging("Swerve", Log.DEBUG); // Log.DEBUG
+        chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
         chassis.configure(configuration, auto);
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
@@ -396,6 +396,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     public void goParkingGold() throws InterruptedException {
         chassis.driveAlongTheWall(0.4,135,5,4000);
+        intake.boxLiftUp();
+        intake.setSliderAutoPark();
     }
 
     @MenuEntry(label = "Test Sample", group = "Test Auto")
