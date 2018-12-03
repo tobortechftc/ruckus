@@ -389,9 +389,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }
 //        intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
         intake.sweeperOut();
-        Thread.sleep(100);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
         chassis.driveStraightAuto(0.35, 10, 0,Integer.MAX_VALUE);
-        Thread.sleep(100);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
         intake.stopSweeper();
     }
 
@@ -409,14 +411,16 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void alignWithWallsGoldSide(ToboRuckus.MineralDetection.SampleLocation sam_loc ) throws InterruptedException{
         //drive to default start position for gold side
         chassis.driveStraightAuto(0.35, 20, 0,Integer.MAX_VALUE);
-        Thread.sleep(100);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
         //rotate robot parallel to the walls
 //        telemetry.addLine("imu heading:%");
         chassis.rotateTo(0.3, 135);
         chassis.rotateTo(0.18, 135);
 
         //from here, three different routine will converge into the depot
-        Thread.sleep(100);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
 
         //align with right wall
 
@@ -436,13 +440,15 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }
         chassis.driveStraightAuto(0.30, detectedRightDistance-15,+90,3000);
         detectedRightDistance = chassis.distanceToRight();
-        Thread.sleep(100);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
         chassis.driveStraightAuto(0.18, detectedRightDistance-15,+90,3000);
 //        telemetry.addLine(String.format("adjusted distance to right: %.3f",chassis.distanceToRight()));
 //        telemetry.update();
 
         //force heading correction
-        Thread.sleep(100);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
 //        chassis.rotateTo(0.18, 138);
 
         //align with back wall
@@ -465,7 +471,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
         chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance,0,3000);
         detectedBackDistance = chassis.distanceToBack();
-        Thread.sleep(100);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
         chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance,0,3000);
 //        telemetry.addLine(String.format("adjusted distance to back: %.3f",chassis.distanceToBack()));
 //        telemetry.update();
@@ -473,18 +480,20 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     @MenuEntry(label = "Test Land", group = "Test Auto")
     public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException{
-        chassis.resetOrientation();
+        // chassis.resetOrientation();
         if ((hanging!=null)&&!skipLanding) {
             chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
             hanging.latchUpInches(8);
-            Thread.sleep(500);
+            if (!Thread.currentThread().isInterrupted())
+               Thread.sleep(500);
         }
         chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
         chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
         chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
 
         chassis.rotateTo(0.3, -80); //Turn 90 degrees left
-        Thread.sleep(200);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(200);
         chassis.rotateTo(0.18, -90);
 
         //for testing
@@ -501,7 +510,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void initTeleOp() throws InterruptedException {
         // slider out at dump pos
         intake.moveSlider(intake.getSliderInitOut());
-        Thread.sleep(500);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(500);
 
         // box gate close
         intake.moveGate(false);

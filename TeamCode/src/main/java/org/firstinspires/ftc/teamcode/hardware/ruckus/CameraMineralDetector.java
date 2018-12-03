@@ -101,7 +101,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         int minDistanceFromTop = 350;
 
         ToboRuckus.MineralDetection.SampleLocation sampleLocation = ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
-        while (elapsedTime.seconds() < 2) {
+        while ((elapsedTime.seconds() < 2) && (sampleLocation== ToboRuckus.MineralDetection.SampleLocation.UNKNOWN)) {
             if (tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
