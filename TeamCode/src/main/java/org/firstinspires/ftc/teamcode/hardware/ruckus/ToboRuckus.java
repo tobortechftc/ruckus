@@ -124,19 +124,82 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Events.Axis.BOTH, Events.Side.RIGHT);
+//        em.onButtonDown(new Events.Listener() {
+//            @Override
+//            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+//                double heading = button==Button.DPAD_LEFT ? -90 : 90;
+//                chassis.driveAndSteer(powerAdjustment(source), heading, true);
+//            }
+//        }, Button.DPAD_RIGHT, Button.DPAD_LEFT);
+//        em.onButtonUp(new Events.Listener() {
+//            @Override
+//            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+//                chassis.driveAndSteer(0, 0, true);
+//            }
+//        }, Button.DPAD_RIGHT, Button.DPAD_LEFT);
+
+        // Same as em2: DPAD LEFT / RIGHT operates slider. {Back] oerrides encoder limits
         em.onButtonDown(new Events.Listener() {
             @Override
-            public void buttonDown(EventManager source, Button button) throws InterruptedException {
-                double heading = button==Button.DPAD_LEFT ? -90 : 90;
-                chassis.driveAndSteer(powerAdjustment(source), heading, true);
+            public void buttonDown(EventManager source, Button button) {
+                if (button==Button.DPAD_LEFT) {
+                    if (source.isPressed(Button.BACK)) {
+                        intake.adjustSlider(true);
+                    } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
+                        intake.moveSlider(intake.getSliderExtended());
+                    } else {
+                        intake.moveSlider(intake.getSliderDump());
+                    }
+                } else {
+                    if (source.isPressed(Button.BACK)) {
+                        intake.adjustSlider(false);
+                    } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
+                        intake.moveSlider(intake.getSliderDump());
+                    } else {
+                        intake.moveSlider(intake.getSliderContracted());
+                    }
+                }
             }
-        }, Button.DPAD_RIGHT, Button.DPAD_LEFT);
+        }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
         em.onButtonUp(new Events.Listener() {
             @Override
-            public void buttonUp(EventManager source, Button button) throws InterruptedException {
-                chassis.driveAndSteer(0, 0, true);
+            public void buttonUp(EventManager source, Button button) {
+                if (intake.getSliderCurrent() >= intake.getSliderDump()) intake.stopSlider();
             }
-        }, Button.DPAD_RIGHT, Button.DPAD_LEFT);
+        }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
+
+        // DPAD UP / DOWN operates intake box position
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                intake.moveBox(button == Button.DPAD_UP);
+            }
+        }, Button.DPAD_UP, Button.DPAD_DOWN);
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.LEFT_BUMPER)) {
+                    mineralDelivery.returnCombo();
+                    intake.moveGate(false); // auto close gate when arm down
+                } else if (!source.isPressed(Button.START)){
+                    intake.moveGate(!intake.isGateOpen());
+                }
+            }
+        }, Button.B);
+
+        // [X] opens / closes delivery gate
+        // [LB] + [X] is delivery combo (move slider out, close gate, arm lift up, arm up)
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.LEFT_BUMPER)) {
+                    mineralDelivery.deliveryCombo(intake);
+                } else {
+                    mineralDelivery.gateAuto();
+                }
+            }
+        }, Button.X);
+
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -173,7 +236,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 // intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+                intake.boxLiftDown();
                 intake.sweeperIn();
+                intake.moveGate(false); // auto close the gate when sweeping
             }
         }, Button.LEFT_BUMPER);
         em.onButtonUp(new Events.Listener() {
@@ -319,6 +384,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             public void buttonDown(EventManager source, Button button) {
                 if (!source.isPressed(Button.LEFT_BUMPER)) return;
                 mineralDelivery.armDown();
+                mineralDelivery.gateOpen();
                 intake.mineralDumpCombo();
             }
         }, Button.Y);
