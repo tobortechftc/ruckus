@@ -120,11 +120,11 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
                                 updatedRecognitions) {
                             logger.verbose("Starting recognitions");
                             logger.verbose("Recognitions: ", updatedRecognitions);
-                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) { // && recognition.getTop() > minDistanceFromTop) {
                                 goldXCoord = (int) recognition.getLeft();
                                 logger.verbose("Gold X = ", goldXCoord);
                                 logger.verbose("Gold Y = ", recognition.getBottom());
-                            } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                            } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)){ // && recognition.getTop() > minDistanceFromTop) {
                                 silverXCoord = (int) recognition.getLeft();
                                 logger.verbose("Silver X = ", silverXCoord);
                                 logger.verbose("Silver Y = ", recognition.getBottom());

@@ -387,7 +387,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             default: // go straight like center
                 chassis.driveStraightAuto(0.35, 43, 5, Integer.MAX_VALUE);
         }
-        intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+//        intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+        intake.sweeperOut();
         Thread.sleep(100);
         chassis.driveStraightAuto(0.35, 10, 0,Integer.MAX_VALUE);
         Thread.sleep(100);
@@ -395,7 +396,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     public void goParkingGold() throws InterruptedException {
-        chassis.driveAlongTheWall(0.4,140,5,4000);
+        chassis.driveAlongTheWall(0.4,145,5,4000);
         extendInakeForParking();
     }
 

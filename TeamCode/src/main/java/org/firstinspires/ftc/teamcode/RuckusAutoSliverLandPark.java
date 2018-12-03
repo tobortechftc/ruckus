@@ -65,7 +65,8 @@ public class RuckusAutoSliverLandPark extends LinearOpMode {
         // step-4: park on the rim
         if (opModeIsActive()) {
             robot.chassis.driveStraightAuto(0.15, 5, 0, Integer.MAX_VALUE);
-            robot.goParkingGold();
+//            robot.goParkingGold();
+            robot.extendInakeForParking();
         }
     }
 

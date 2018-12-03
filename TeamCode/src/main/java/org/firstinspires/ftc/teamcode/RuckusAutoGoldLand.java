@@ -74,7 +74,7 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         // Step-5: parking on the crater rim
         if (opModeIsActive()) {
             robot.chassis.driveStraightAuto(0.3, 20, 0, 3000);
-            robot.goParkingGold();
+//            robot.goParkingGold();
 //            robot.intake.moveSlider(robot.intake.getSliderInitOut());
         }
 //        robot.AutoRoutineTest();

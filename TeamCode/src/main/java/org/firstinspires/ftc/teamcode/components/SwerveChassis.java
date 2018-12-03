@@ -306,6 +306,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
     //using the indicated absolute power to drive a certain distance at a certain heading
     public void driveStraightAuto(double power, double cm, double heading, int timeout) throws InterruptedException {
+        // if (Thread.currentThread().isInterrupted()) return;
         debug("driveStraight(pwr: %.3f, head: %.1f)", power, heading);
         if (power < 0 || power > 1) {
             throw new IllegalArgumentException("Power must be between 0 and 1");
