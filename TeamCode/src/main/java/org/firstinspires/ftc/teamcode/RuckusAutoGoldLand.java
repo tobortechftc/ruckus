@@ -69,7 +69,8 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         // Step-5: from sample mission to dumping marker
         if (opModeIsActive()) {
             robot.hanging.markerDown();
-            sleep(500);
+            if (!Thread.currentThread().isInterrupted())
+                sleep(500);
         }
         // Step-5: parking on the crater rim
         if (opModeIsActive()) {

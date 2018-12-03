@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 10/13/2018.
  */
-@Disabled
 @Autonomous(name = "Auto Test", group = "Ruckus")
 public class AutoTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
@@ -48,8 +47,18 @@ public class AutoTest extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
-        robot.extendInakeForParking();
+//        robot.extendInakeForParking();
 
+        ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        if (opModeIsActive()) {
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
+        }
+        telemetry.addData("1. Camera detect gold at", "%s (time=%.2f)", sam_loc.name(), getRuntime());
+        telemetry.update();
+        robot.chassis.resetOrientation();
+        telemetry.addData("2. Reset IMUs", "%s (time=%.2f)", sam_loc.name(), getRuntime());
+        telemetry.update();
+        sleep(5000);
 //         robot.chassis.rotateTo(0.18, -90);
 //         sleep(200);
 //         robot.chassis.rotateTo(0.18, +180);

@@ -306,7 +306,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
     //using the indicated absolute power to drive a certain distance at a certain heading
     public void driveStraightAuto(double power, double cm, double heading, int timeout) throws InterruptedException {
-        // if (Thread.currentThread().isInterrupted()) return;
+        if (Thread.currentThread().isInterrupted()) return;
         debug("driveStraight(pwr: %.3f, head: %.1f)", power, heading);
         if (power < 0 || power > 1) {
             throw new IllegalArgumentException("Power must be between 0 and 1");
@@ -391,6 +391,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 break;
             //determine if time limit is reached
             if (System.currentTimeMillis() - iniTime > timeout)
+                break;
+            if (Thread.currentThread().isInterrupted())
                 break;
         }
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(0);
@@ -481,6 +483,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 break;
             //determine if time limit is reached
             if (System.currentTimeMillis() - iniTime > timeout)
+                break;
+            if (Thread.currentThread().isInterrupted())
                 break;
         }
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(0);
@@ -670,6 +674,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 break;
             if (System.currentTimeMillis() - iniTime > 3000)
                 break;
+            if (Thread.currentThread().isInterrupted())
+                break;
             lastReading = currentHeading;
         }
         for (WheelAssembly wheel : wheels)
@@ -699,7 +705,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             maxServoAdjustment = Math.max(maxServoAdjustment, servoAdjustment);
             wheels[index].servo.setPosition(newPositions[index]);
         }
-        Thread.sleep((int) Math.round(2 * maxServoAdjustment));
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep((int) Math.round(2 * maxServoAdjustment));
     }
 
     /**
