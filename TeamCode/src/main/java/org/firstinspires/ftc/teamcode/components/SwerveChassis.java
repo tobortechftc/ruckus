@@ -627,8 +627,13 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         rotateTo(power, finalHeading);
     }
 
+    public void rotateTo(double power,double finalHeading) throws InterruptedException {
+        rawRotateTo(power, finalHeading);
+        Thread.sleep(200);
+        rawRotateTo(0.18, finalHeading);
+    }
     //final heading needs to be with in range(-180,180]
-    public void rotateTo(double power, double finalHeading) throws InterruptedException {
+    private void rawRotateTo(double power, double finalHeading) throws InterruptedException {
         debug("rotateT0(pwr: %.3f, finalHeading: %.1f)", power, finalHeading);
         double iniHeading = orientationSensor.getHeading();
         double deltaD = finalHeading - iniHeading;

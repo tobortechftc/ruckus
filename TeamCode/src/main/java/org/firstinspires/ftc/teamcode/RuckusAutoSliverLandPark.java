@@ -60,7 +60,7 @@ public class RuckusAutoSliverLandPark extends LinearOpMode {
         }
         // Ste-3: sample mission
         if (opModeIsActive()) {
-            robot.goGetSampleGold(sam_loc);
+            robot.retrieveSample(sam_loc);
         }
         // step-4: park on the rim
         if (opModeIsActive()) {

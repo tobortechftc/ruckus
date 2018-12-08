@@ -449,7 +449,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @MenuEntry(label = "Test Sample", group = "Test Auto")
-    public void goGetSampleGold(ToboRuckus.MineralDetection.SampleLocation sam_loc ) throws InterruptedException{
+    public void retrieveSample(ToboRuckus.MineralDetection.SampleLocation sam_loc ) throws InterruptedException{
         switch(sam_loc) {
             case CENTER: // center
                 chassis.driveStraightAuto(0.35, 43, 5, Integer.MAX_VALUE);
@@ -463,8 +463,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             default: // go straight like center
                 chassis.driveStraightAuto(0.35, 43, 5, Integer.MAX_VALUE);
         }
-//        intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
-        intake.sweeperOut();
+        intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+//        intake.sweeperOut();
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
         chassis.driveStraightAuto(0.35, 10, 0,Integer.MAX_VALUE);
@@ -492,7 +492,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         //rotate robot parallel to the walls
 //        telemetry.addLine("imu heading:%");
         chassis.rotateTo(0.3, 135);
-        chassis.rotateTo(0.18, 135);
+//        chassis.rotateTo(0.18, 135);
 
         //from here, three different routine will converge into the depot
         if (!Thread.currentThread().isInterrupted())
@@ -567,9 +567,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
         chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
 
-        chassis.rotateTo(0.3, -80); //Turn 90 degrees left
-        if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(200);
+//        chassis.rotateTo(0.3, -80); //Turn 90 degrees left
+//        if (!Thread.currentThread().isInterrupted())
+//            Thread.sleep(200);
         chassis.rotateTo(0.18, -90);
 
         //for testing

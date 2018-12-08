@@ -60,7 +60,7 @@ public class RuckusAutoGoldLand extends LinearOpMode {
         }
         // Ste-3: sample mission
         if (opModeIsActive()) {
-            robot.goGetSampleGold(sam_loc);
+            robot.retrieveSample(sam_loc);
         }
         //Step-4: align with walls
         if (opModeIsActive()) {
