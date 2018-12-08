@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralIntake;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
@@ -19,7 +20,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 11/9/2018.
  */
-@Disabled
+
 @Autonomous(name = "Drive wall test", group = "Ruckus")
 public class DriveAlongTheWallTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
@@ -55,7 +56,8 @@ public class DriveAlongTheWallTest extends LinearOpMode {
         resetStartTime();
 
         //************The Test*************
-        robot.goParkingGold();
+//        robot.goParkingGold();
+        robot.chassis.driveAlongTheWall(0.2, 350, 10, SwerveChassis.Side.LEFT, 8000);
         //*********************************
 
 //        robot.AutoRoutineTest();

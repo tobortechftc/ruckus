@@ -399,7 +399,16 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         driveMode = DriveMode.STOP;
     }
 
-    public void driveAlongTheWall(double power, double cm, double cmToWall, int timeout) throws InterruptedException {
+    public enum Side {
+        LEFT, RIGHT;
+    }
+
+    /**
+     * @param power should always be positive
+     * @param cm    distance to drive(forward positive, backward negative) in cm
+     * @param side  which wall to drive along
+     */
+    public void driveAlongTheWall(double power, double cm, double cmToWall, Side side, int timeout) throws InterruptedException {
         debug("driveAlongTheWall(pwr: %.3f, cmToWall: %.1f)", power, cmToWall);
         if (power < 0 || power > 1) {
             throw new IllegalArgumentException("Power must be between 0 and 1");
@@ -420,6 +429,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             return;
         }
 
+        //drive back
         if (distance < 0) {
             power = -power;
             distance = -distance;
@@ -446,25 +456,25 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         long iniTime = System.currentTimeMillis();
 
         //waiting loop
-        double lastDistToWall = distanceToRight();
-        double lastDeviation = 0.0;
+        double multiplier = side == Side.RIGHT ? +1.0 : -1.0;
         while (true) {
             // check and correct heading as needed
-            double disToWall = distanceToRight();
+            double disToWall = side == Side.RIGHT ? distanceToRight() : distanceToLeft();
             double deviation = disToWall - cmToWall;
             debug("detected dis to wall: %.3f", disToWall);
             debug("deviation: %.3f", deviation);
             if (Math.abs(deviation) > 1) {
-                if (power < 0) {
-                    backLeft.servo.setPosition(deviation / 2.0);
-                    backRight.servo.setPosition(deviation / 2.0);
+                //if there's deviation
+                if (cm < 0) {
+                    backLeft.servo.setPosition(-multiplier * deviation / 2.0);
+                    backRight.servo.setPosition(-multiplier * deviation / 2.0);
                 } else {
-                    frontLeft.servo.setPosition(deviation / 2.0);
-                    frontRight.servo.setPosition(deviation / 2.0);
+                    frontLeft.servo.setPosition(multiplier * deviation / 2.0);
+                    frontRight.servo.setPosition(multiplier * deviation / 2.0);
                 }
             } else {
                 servoCorrection = 0;
-                if (power < 0) {
+                if (cm < 0) {
                     backLeft.servo.setPosition(frontLeft.servo.getPosition());
                     backRight.servo.setPosition(frontRight.servo.getPosition());
                 } else {
@@ -472,21 +482,22 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                     frontRight.servo.setPosition(backRight.servo.getPosition());
                 }
             }
-            lastDeviation = deviation;
-            lastDistToWall = disToWall;
             //determine if target distance is reached
             int maxTraveled = Integer.MIN_VALUE;
             for (int i = 0; i < 4; i++) {
                 maxTraveled = Math.abs(Math.max(maxTraveled, wheels[i].motor.getCurrentPosition() - startingCount[i]));
             }
+            //reached target goal
             if (distance - maxTraveled < 10)
                 break;
             //determine if time limit is reached
             if (System.currentTimeMillis() - iniTime > timeout)
                 break;
+            //stop at stop button bring pushed
             if (Thread.currentThread().isInterrupted())
                 break;
         }
+        //stop everything
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(0);
         driveMode = DriveMode.STOP;
     }
@@ -518,7 +529,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             // only adjust servo positions if power is applied
             double[] newServoPositions = new double[4];
             if (allWheels) {
-                if (Math.abs(heading)==90) {
+                if (Math.abs(heading) == 90) {
                     // check whether all servos are already at 90 (or -90) degrees
                     boolean samePosition = (frontLeft.servo.getPosition() == frontRight.servo.getPosition())
                             && (frontLeft.servo.getPosition() == backLeft.servo.getPosition())
@@ -627,11 +638,12 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         rotateTo(power, finalHeading);
     }
 
-    public void rotateTo(double power,double finalHeading) throws InterruptedException {
+    public void rotateTo(double power, double finalHeading) throws InterruptedException {
         rawRotateTo(power, finalHeading);
         Thread.sleep(200);
         rawRotateTo(0.18, finalHeading);
     }
+
     //final heading needs to be with in range(-180,180]
     private void rawRotateTo(double power, double finalHeading) throws InterruptedException {
         debug("rotateT0(pwr: %.3f, finalHeading: %.1f)", power, finalHeading);
