@@ -48,10 +48,12 @@ public class RuckusTeleOp extends LinearOpMode {
             handleException(E);
         }
 
+        robot.initTeleOp();
+        robot.hanging.latchDownEndGame();
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        robot.initTeleOp();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {

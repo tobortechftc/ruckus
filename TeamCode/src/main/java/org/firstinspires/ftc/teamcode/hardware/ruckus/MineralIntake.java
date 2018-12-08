@@ -40,14 +40,14 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private AdjustableServo boxGateServo;
     private boolean adjustmentMode = false;
 
-    private double sweeperInPower = 0.7;
+    private double sweeperInPower = 0.99;
     private double sweeperOutPower = 0.7;
     // encoder value for sweeper rotating half circle
     private int sweeperHalfRotation = 180;
 
     // slider encoder positions
     private int sliderContracted = 0; // contracted
-    private int sliderExtended = 1480; // fully extended
+    private int sliderExtended = 1520; // fully extended
     private int sliderDump = 300; // position to dump minerals into delivery box
     private int sliderInitOut = 450; // position for initial TeleOp out
     private int sliderAutoPark = 650; // position for Auto Out parking;
@@ -224,7 +224,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         double adjustment = Math.abs(boxLiftServo.getPosition() - target);
         debug("moveBox(): target=%.2f, adjustment=%.2f", target, adjustment);
         // entire move from up to down takes 2 seconds
-        final long doneBy = System.currentTimeMillis() + Math.round(2000 * adjustment);
+        final long doneBy = System.currentTimeMillis() + Math.round(600 * adjustment);
         boxLiftServo.setPosition(target);
         return new Progress() {
             @Override
@@ -269,12 +269,12 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                moveSlider(getSliderDump());
+                moveSliderFast(getSliderDump());
                 final Progress boxProgress = moveBox(true);
                 return new Progress() {
                     @Override
                     public boolean isDone() {
-                        return boxProgress.isDone() && Math.abs(getSliderCurrent() - getSliderDump()) < 15;
+                        return boxProgress.isDone() && Math.abs(getSliderCurrent() - getSliderDump()) < 30;
                     }
                 };
             }
@@ -361,6 +361,24 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         this.sliderMotor.setTargetPosition(position);
         this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.sliderMotor.setPower(this.sliderPower);
+        return new Progress() {
+            @Override
+            public boolean isDone() {
+                return sliderMotor.isBusy();
+            }
+        };
+    }
+    public Progress moveSliderFast(int position) {
+        if (position < this.sliderContracted) {
+            throw new IllegalArgumentException("Slider position cannot be less than [sliderContracted]");
+        }
+        if (position > this.sliderExtended) {
+            throw new IllegalArgumentException("Slider position cannot be greater than [sliderExtended]");
+        }
+
+        this.sliderMotor.setTargetPosition(position);
+        this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.sliderMotor.setPower(0.9);
         return new Progress() {
             @Override
             public boolean isDone() {

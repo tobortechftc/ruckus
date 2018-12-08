@@ -37,7 +37,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double armSafePos = 0.11;
     private double armDumpPos = 0.85; //actual dump position
     private double armUpPos = 0.95; //max arm position
-    private double liftPower = .9;
+    private double liftPower = .99;
     private boolean gateIsOpened = false;
     private final int MAX_LIFT_POS = 4100;
     private final int AUTO_LIFT_POS = 4000;

@@ -107,6 +107,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (source.getStick(Events.Side.LEFT, Events.Axis.BOTH) == 0) {
                     // right stick with idle left stick operates robot in "crab" mode
                     double power = Math.abs(source.getStick(Events.Side.RIGHT, Events.Axis.BOTH));
+                    power *= power; // square power to stick
                     double heading = toDegrees(currentX, currentY);
                     // invert headings less than -90 / more than 90
                     if (Math.abs(heading) > 90) {
@@ -206,7 +207,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                                    float currentY, float changeY) throws InterruptedException {
                 if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) == 0) {
                     // left stick with idle right stick rotates robot in place
-                    chassis.rotate(currentX * powerAdjustment(source));
+                    chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source));
                 } else {
                     // right stick with left stick operates robot in "car" mode
                     double heading = currentX * 90;
@@ -379,6 +380,15 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
 
         // [LB] + [Y] for mineral dump combo (move slider to dump, intake box up, open box gate)
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (!source.isPressed(Button.LEFT_BUMPER)) return;
+                mineralDelivery.armDown();
+                mineralDelivery.gateOpen();
+                intake.mineralDumpCombo();
+            }
+        }, Button.Y);
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
