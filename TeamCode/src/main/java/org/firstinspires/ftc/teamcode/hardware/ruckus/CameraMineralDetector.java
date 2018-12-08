@@ -74,9 +74,9 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
 
         logger.verbose("CameraMineralDetector status: %s", tfod);
 
-        tfodParameters.minimumConfidence = 0.3;
+        tfodParameters.minimumConfidence = 0.2;
 
-        com.vuforia.CameraDevice.getInstance().setFlashTorchMode(true);
+        com.vuforia.CameraDevice.getInstance().setFlashTorchMode(false);
 //        com.vuforia.CameraDevice.getInstance().setField("iso", "800");
 
         // register CameraMineralDetector as a configurable component
@@ -98,47 +98,77 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.startTime();
 
-        int minDistanceFromTop = 350;
+        int minDistanceFromTop = 300;
 
         ToboRuckus.MineralDetection.SampleLocation sampleLocation = ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
-        while ((elapsedTime.seconds() < 2) && (sampleLocation== ToboRuckus.MineralDetection.SampleLocation.UNKNOWN)) {
+        int goldXCoord = -1;
+        int silverXCoord = -1;
+        while (elapsedTime.seconds() < 2 && goldXCoord == -1 && silverXCoord == -1) {
             if (tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
-//                try {
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                 if (updatedRecognitions != null) {
-//                        telemetry.addData("# Object Detected", updatedRecognitions.size());
                     if (updatedRecognitions.size() >= 2) {
-                        int goldXCoord = -1;
-                        int silverXCoord = -1;
+                        logger.verbose("Starting recognitions");
+                        logger.verbose("Recognitions: %d", (int) updatedRecognitions.size());
+                        int validRecognitions = 0;
                         for (Recognition recognition :
                                 updatedRecognitions) {
-                            logger.verbose("Starting recognitions");
-                            logger.verbose("Recognitions: ", updatedRecognitions);
-                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) { // && recognition.getTop() > minDistanceFromTop) {
+                            if (recognition.getTop() > minDistanceFromTop) {
+                                validRecognitions++;
+                            }
+                        }
+                        logger.verbose("Valid recognitions: %d", validRecognitions);
+                        if (validRecognitions >= 2) {
+                            for (Recognition recognition :
+                                    updatedRecognitions) {
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                                    goldXCoord = (int) recognition.getLeft();
+                                    logger.verbose("Gold X = %d", (int) goldXCoord);
+                                    logger.verbose("Gold Y = %d", (int) recognition.getBottom());
+                                } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                                    silverXCoord = (int) recognition.getLeft();
+                                    logger.verbose("Silver X = %d", (int) silverXCoord);
+                                    logger.verbose("Silver Y = %d", (int) recognition.getBottom());
+                                }
+                                if (goldXCoord != -1 && goldXCoord < silverXCoord) {
+                                    logger.verbose("SampleLocation: Left");
+                                    sampleLocation = ToboRuckus.MineralDetection.SampleLocation.LEFT;
+                                } else if (goldXCoord != -1 && goldXCoord > silverXCoord) {
+                                    logger.verbose("SampleLocation: Center");
+                                    sampleLocation = ToboRuckus.MineralDetection.SampleLocation.CENTER;
+                                } else if (goldXCoord == -1 && silverXCoord != -1) {
+                                    logger.verbose("SampleLocation: Right");
+                                    sampleLocation = ToboRuckus.MineralDetection.SampleLocation.RIGHT;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                            /*logger.verbose("Recognitions: %d", (int)updatedRecognitions.size());
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL) && recognition.getTop() > minDistanceFromTop) {
                                 goldXCoord = (int) recognition.getLeft();
-                                logger.verbose("Gold X = ", goldXCoord);
-                                logger.verbose("Gold Y = ", recognition.getBottom());
-                            } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)){ // && recognition.getTop() > minDistanceFromTop) {
+                                logger.verbose("Gold X = %d", (int)goldXCoord);
+                                logger.verbose("Gold Y = %d", (int)recognition.getBottom());
+                            } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) && recognition.getTop() > minDistanceFromTop) {
                                 silverXCoord = (int) recognition.getLeft();
-                                logger.verbose("Silver X = ", silverXCoord);
-                                logger.verbose("Silver Y = ", recognition.getBottom());
+                                logger.verbose("Silver X = %d", (int)silverXCoord);
+                                logger.verbose("Silver Y = %d", (int)recognition.getBottom());
                             }
                         }
                         if (goldXCoord != -1 && goldXCoord < silverXCoord) {
+                            logger.verbose("SampleLocation: Left");
                             sampleLocation = ToboRuckus.MineralDetection.SampleLocation.LEFT;
                         } else if (goldXCoord != -1 && goldXCoord > silverXCoord) {
+                            logger.verbose("SampleLocation: Center");
                             sampleLocation = ToboRuckus.MineralDetection.SampleLocation.CENTER;
-                        } else if (goldXCoord == -1/* && silverXCoord != -1*/) {
+                        } else if (goldXCoord == -1 && silverXCoord != -1) {
                             logger.verbose("SampleLocation: Right");
                             sampleLocation = ToboRuckus.MineralDetection.SampleLocation.RIGHT;
                         }
-                    }
+                    }*/
 //                    if (updatedRecognitions.size() == 3) {
 //                        int goldXCoord = -1;
 //                        int silverXCoord1 = -1;
@@ -167,7 +197,6 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
 //                            return ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
 //                        }
 //                    }
-                }
             }
         }
         if (tfod != null) {
@@ -175,6 +204,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
             tfod.shutdown();
             logger.verbose("Tfod shutdown", tfod);
         }
+
         switch (sampleLocation) {
             case LEFT:
                 logger.verbose("SampleLocation: Left");
