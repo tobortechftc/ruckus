@@ -143,7 +143,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (button==Button.DPAD_LEFT) {
+                if (button == Button.DPAD_LEFT) {
                     if (source.isPressed(Button.BACK)) {
                         intake.adjustSlider(true);
                     } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
@@ -182,7 +182,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (source.isPressed(Button.LEFT_BUMPER)) {
                     mineralDelivery.returnCombo();
                     intake.moveGate(false); // auto close gate when arm down
-                } else if (!source.isPressed(Button.START)){
+                } else if (!source.isPressed(Button.START)) {
                     intake.moveGate(!intake.isGateOpen());
                 }
             }
@@ -228,7 +228,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }*/
                 if (current > 0.2) {
                     intake.sweeperOut();
-                } else if (current == 0){
+                } else if (current == 0) {
                     intake.stopSweeper();
                 }
             }
@@ -254,7 +254,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (button==Button.DPAD_LEFT) {
+                if (button == Button.DPAD_LEFT) {
                     if (source.isPressed(Button.BACK)) {
                         intake.adjustSlider(true);
                     } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
@@ -305,7 +305,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (source.isPressed(Button.LEFT_BUMPER)) {
                     mineralDelivery.returnCombo();
                     intake.moveGate(false); // auto close gate when arm down
-                } else if (!source.isPressed(Button.START)){
+                } else if (!source.isPressed(Button.START)) {
                     intake.moveGate(!intake.isGateOpen());
                 }
             }
@@ -353,7 +353,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         hanging.latchUp(source.isPressed(Button.BACK));
                     } else if (currentY < -0.2) {
                         hanging.latchDown(source.isPressed(Button.BACK));
-                    } else if (!hanging.latchIsBusy()){
+                    } else if (!hanging.latchIsBusy()) {
                         hanging.latchStop();
                     }
                     return;
@@ -449,32 +449,38 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @MenuEntry(label = "Test Sample", group = "Test Auto")
-    public void retrieveSample(ToboRuckus.MineralDetection.SampleLocation sam_loc ) throws InterruptedException{
-        switch(sam_loc) {
+    public void retrieveSample(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
+        switch (sam_loc) {
             case CENTER: // center
-                chassis.driveStraightAuto(0.35, 43, 5, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 43, 9, Integer.MAX_VALUE);
                 break;
             case RIGHT:
                 chassis.driveStraightAuto(0.35, 58, 53, Integer.MAX_VALUE);
                 break;
             case LEFT:
-                chassis.driveStraightAuto(0.35, 55, -40, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 55, -37, Integer.MAX_VALUE);
                 break;
             default: // go straight like center
-                chassis.driveStraightAuto(0.35, 43, 5, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 43, 9, Integer.MAX_VALUE);
         }
         intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
 //        intake.sweeperOut();
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
-        chassis.driveStraightAuto(0.35, 10, 0,Integer.MAX_VALUE);
+        chassis.driveStraightAuto(0.35, 10, 0, Integer.MAX_VALUE);
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
+        intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
         intake.stopSweeper();
     }
 
-    public void goParkingGold() throws InterruptedException {
-        chassis.driveAlongTheWall(0.4,145,5,SwerveChassis.Side.RIGHT,4000);
+    public enum Side {
+        GOLD, SILVER;
+    }
+
+    public void goParking(Side side) throws InterruptedException {
+        chassis.driveAlongTheWall(0.4, 145, 5, side == Side.GOLD ? SwerveChassis.Wall.RIGHT : SwerveChassis.Wall.RIGHT, 4000);
+        chassis.driveStraightAuto(0.5, 40, side == Side.GOLD ? +10 : -10, 2000);
         extendInakeForParking();
     }
 
@@ -484,9 +490,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @MenuEntry(label = "Test Sample", group = "Test Auto")
-    public void alignWithWallsGoldSide(ToboRuckus.MineralDetection.SampleLocation sam_loc ) throws InterruptedException{
+    public void alignWithWallsGoldSide(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
         //drive to default start position for gold side
-        chassis.driveStraightAuto(0.35, 20, 0,Integer.MAX_VALUE);
+        chassis.driveStraightAuto(0.35, 20, 0, Integer.MAX_VALUE);
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
         //rotate robot parallel to the walls
@@ -501,24 +507,24 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         //align with right wall
 
         double detectedRightDistance = chassis.distanceToRight();
-        switch(sam_loc) {
+        switch (sam_loc) {
             case CENTER: // center
-                detectedRightDistance=Math.min(60,detectedRightDistance);
+                detectedRightDistance = Math.min(60, detectedRightDistance);
                 break;
             case RIGHT:
-                detectedRightDistance=Math.min(100,detectedRightDistance);
+                detectedRightDistance = Math.min(100, detectedRightDistance);
                 break;
             case LEFT:
-                detectedRightDistance=Math.min(20,detectedRightDistance);
+                detectedRightDistance = Math.min(20, detectedRightDistance);
                 break;
             default: // go straight like center
-                detectedRightDistance=Math.min(60,detectedRightDistance);
+                detectedRightDistance = Math.min(60, detectedRightDistance);
         }
-        chassis.driveStraightAuto(0.30, detectedRightDistance-15,+90,3000);
+        chassis.driveStraightAuto(0.30, detectedRightDistance - 15, +90, 2000);
         detectedRightDistance = chassis.distanceToRight();
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
-        chassis.driveStraightAuto(0.18, detectedRightDistance-15,+90,3000);
+        chassis.driveStraightAuto(0.18, detectedRightDistance - 15, +90, 2000);
 //        telemetry.addLine(String.format("adjusted distance to right: %.3f",chassis.distanceToRight()));
 //        telemetry.update();
 
@@ -531,37 +537,37 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 //        telemetry.addLine(String.format("detected distance to back: %.3f",chassis.distanceToBack()));
 //        telemetry.update();
         double detectedBackDistance = chassis.distanceToBack();
-        switch(sam_loc) {
+        switch (sam_loc) {
             case CENTER: // center
-                detectedBackDistance=Math.min(50,detectedBackDistance);
+                detectedBackDistance = Math.min(50, detectedBackDistance);
                 break;
             case RIGHT:
-                detectedBackDistance=Math.min(20,detectedBackDistance);
+                detectedBackDistance = Math.min(20, detectedBackDistance);
                 break;
             case LEFT:
-                detectedBackDistance=Math.min(80,detectedBackDistance);
+                detectedBackDistance = Math.min(80, detectedBackDistance);
                 break;
             default: // go straight like center
-                detectedBackDistance=Math.min(50,detectedBackDistance);
+                detectedBackDistance = Math.min(50, detectedBackDistance);
         }
 
-        chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance,0,3000);
+        chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance, 0, 3000);
         detectedBackDistance = chassis.distanceToBack();
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
-        chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance,0,3000);
+        chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance, 0, 3000);
 //        telemetry.addLine(String.format("adjusted distance to back: %.3f",chassis.distanceToBack()));
 //        telemetry.update();
     }
 
     @MenuEntry(label = "Test Land", group = "Test Auto")
-    public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException{
+    public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException {
         // chassis.resetOrientation();
-        if ((hanging!=null)&&!skipLanding) {
+        if ((hanging != null) && !skipLanding) {
             chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
             hanging.latchUpInches(8);
             if (!Thread.currentThread().isInterrupted())
-               Thread.sleep(500);
+                Thread.sleep(500);
         }
         chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
         chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
@@ -579,7 +585,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     @MenuEntry(label = "Retract Latch", group = "Test Auto")
-    public void retractLatch(EventManager em) throws InterruptedException{
+    public void retractLatch(EventManager em) throws InterruptedException {
         hanging.latchDownInches(8.5);
     }
 
@@ -690,6 +696,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
         /**
          * Determines location of gold sample using OpenCV
+         *
          * @return SampleLocation Left, Right, Center, or Unknown
          */
         public SampleLocation getGoldPositionCV() {
@@ -824,6 +831,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         /**
          * Determines location of gold sample using CameraMineralDetector Lite ML
          * Assumes only 2 leftmost minerals are visible to camera
+         *
          * @return SampleLocation Left, Right, Center, or Unknown
          */
         public SampleLocation getGoldPositionTF() {
@@ -840,16 +848,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                         silverXCoord = (int) recognition.getLeft();
                     }
                 }
-                if (goldXCoord < silverXCoord){
+                if (goldXCoord < silverXCoord) {
                     return SampleLocation.LEFT;
-                }
-                else if (goldXCoord > silverXCoord) {
+                } else if (goldXCoord > silverXCoord) {
                     return SampleLocation.CENTER;
-                }
-                else if (goldXCoord == -1 && silverXCoord != -1){
+                } else if (goldXCoord == -1 && silverXCoord != -1) {
                     return SampleLocation.RIGHT;
-                }
-                else return SampleLocation.UNKNOWN;
+                } else return SampleLocation.UNKNOWN;
             }
             tfObjectDetector.shutdown();
             return SampleLocation.UNKNOWN;

@@ -57,7 +57,7 @@ public class DriveAlongTheWallTest extends LinearOpMode {
 
         //************The Test*************
 //        robot.goParkingGold();
-        robot.chassis.driveAlongTheWall(0.2, 350, 10, SwerveChassis.Side.LEFT, 8000);
+        robot.chassis.driveAlongTheWall(0.2, 350, 10, SwerveChassis.Wall.LEFT, 8000);
         //*********************************
 
 //        robot.AutoRoutineTest();

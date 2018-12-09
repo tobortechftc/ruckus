@@ -54,7 +54,6 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
         if (opModeIsActive()) {
             sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
         }
-
         // Step-2: landing mission
         if (opModeIsActive()) {
             robot.landAndDetach(null, false);
@@ -72,11 +71,11 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
             robot.hanging.markerDown();
             robot.chassis.driveStraightAuto(0.3, 20, 20, 3000);
             if (!Thread.currentThread().isInterrupted())
-                sleep(500);
+                sleep(200);
         }
         // Step-6: parking on the crater rim
         if (opModeIsActive()) {
-            robot.goParkingGold();
+            robot.goParking(ToboRuckus.Side.GOLD);
         }
 
         /*

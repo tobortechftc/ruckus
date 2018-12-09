@@ -90,7 +90,7 @@ public class NickTest extends LinearOpMode {
                 sleep(500);
 
                 // get out of depot
-                robot.chassis.driveAlongTheWall(.2, 100, 5, SwerveChassis.Side.LEFT, timeout);
+                robot.chassis.driveAlongTheWall(.2, 100, 5, SwerveChassis.Wall.LEFT, timeout);
 
 
                 //robot.chassis.driveStraightAuto(.2, 170, 0, timeout);

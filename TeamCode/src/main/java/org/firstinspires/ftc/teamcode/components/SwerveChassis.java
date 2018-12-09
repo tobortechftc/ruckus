@@ -302,7 +302,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(scalePower(power));
     }
 
-    double TICKS_PER_CM = 16.86;
+    final double TICKS_PER_CM = 16.86;
 
     //using the indicated absolute power to drive a certain distance at a certain heading
     public void driveStraightAuto(double power, double cm, double heading, int timeout) throws InterruptedException {
@@ -399,16 +399,16 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         driveMode = DriveMode.STOP;
     }
 
-    public enum Side {
+    public enum Wall {
         LEFT, RIGHT;
     }
 
     /**
-     * @param power should always be positive
-     * @param cm    distance to drive(forward positive, backward negative) in cm
-     * @param side  which wall to drive along
+     * @param power   should always be positive
+     * @param driveCm distance to drive(forward positive, backward negative) in cm
+     * @param side    which wall to drive along
      */
-    public void driveAlongTheWall(double power, double cm, double cmToWall, Side side, int timeout) throws InterruptedException {
+    public void driveAlongTheWall(double power, double driveCm, double cmToWall, Wall side, int timeout) throws InterruptedException {
         debug("driveAlongTheWall(pwr: %.3f, cmToWall: %.1f)", power, cmToWall);
         if (power < 0 || power > 1) {
             throw new IllegalArgumentException("Power must be between 0 and 1");
@@ -417,7 +417,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             throw new IllegalArgumentException("cmToWall must be between 0 and 30");
         }
 
-        double distance = TICKS_PER_CM * cm;
+        double distance = TICKS_PER_CM * driveCm;
 
         if (power == 0) {
             driveMode = DriveMode.STOP;
@@ -456,25 +456,25 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         long iniTime = System.currentTimeMillis();
 
         //waiting loop
-        double multiplier = side == Side.RIGHT ? +1.0 : -1.0;
+        double multiplier = side == Wall.RIGHT ? +1.0 : -1.0;
         while (true) {
             // check and correct heading as needed
-            double disToWall = side == Side.RIGHT ? distanceToRight() : distanceToLeft();
+            double disToWall = side == Wall.RIGHT ? distanceToRight() : distanceToLeft();
             double deviation = disToWall - cmToWall;
             debug("detected dis to wall: %.3f", disToWall);
             debug("deviation: %.3f", deviation);
             if (Math.abs(deviation) > 1) {
                 //if there's deviation
-                if (cm < 0) {
-                    backLeft.servo.setPosition(-multiplier * deviation / 2.0);
-                    backRight.servo.setPosition(-multiplier * deviation / 2.0);
+                if (driveCm < 0) {
+                    backLeft.servo.setPosition(-multiplier * Math.min(30, deviation / 2.0));
+                    backRight.servo.setPosition(-multiplier * Math.min(30, deviation / 2.0));
                 } else {
-                    frontLeft.servo.setPosition(multiplier * deviation / 2.0);
-                    frontRight.servo.setPosition(multiplier * deviation / 2.0);
+                    frontLeft.servo.setPosition(multiplier * Math.min(30, deviation / 2.0));
+                    frontRight.servo.setPosition(multiplier * Math.min(30, deviation / 2.0));
                 }
             } else {
                 servoCorrection = 0;
-                if (cm < 0) {
+                if (driveCm < 0) {
                     backLeft.servo.setPosition(frontLeft.servo.getPosition());
                     backRight.servo.setPosition(frontRight.servo.getPosition());
                 } else {
@@ -682,17 +682,14 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             }
             debug("currentHeading: %.1f, finalHeading: %.1f)", currentHeading, finalHeading);
             //if within acceptable range, terminate
-            if (Math.abs(finalHeading - currentHeading) < 0.5)
-                break;
+            if (Math.abs(finalHeading - currentHeading) < 0.5) break;
             //if overshoot, terminate
-            if (deltaD > 0 && currentHeading - finalHeading > 0)
-                break;
-            if (deltaD < 0 && currentHeading - finalHeading < 0)
-                break;
-            if (System.currentTimeMillis() - iniTime > 3000)
-                break;
-            if (Thread.currentThread().isInterrupted())
-                break;
+            if (deltaD > 0 && currentHeading - finalHeading > 0) break;
+            if (deltaD < 0 && currentHeading - finalHeading < 0) break;
+            //timeout, break
+            if (System.currentTimeMillis() - iniTime > 3000) break;
+            //stop pressed, break
+            if (Thread.currentThread().isInterrupted()) break;
             lastReading = currentHeading;
         }
         for (WheelAssembly wheel : wheels)
