@@ -51,7 +51,7 @@ public class AutoTest extends LinearOpMode {
 
         ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
         if (opModeIsActive()) {
-            sam_loc = robot.cameraMineralDetector.getGoldPositionTF();
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
         }
         telemetry.addData("1. Camera detect gold at", "%s (time=%.2f)", sam_loc.name(), getRuntime());
         telemetry.update();
