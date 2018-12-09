@@ -21,9 +21,10 @@ public class NickTest extends LinearOpMode {
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
 
-    int targetMineral = 1; // 0=left, 1=center, 2=right. default to center
     int timeout = 10000; // timeout time
-    double power = .3; // motor power
+    double power = .4; // motor power
+    ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -52,45 +53,50 @@ public class NickTest extends LinearOpMode {
 
         if (opModeIsActive()) {
             try {
-                ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
+                // camera
+                sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
 
                 // land, detach, sample
-                robot.landAndDetach(null, true);
+                robot.landAndDetach(null, false);
                 robot.retrieveSample(sam_loc);
 
                 // go back
-                if (targetMineral == 0)
-                    robot.chassis.driveStraightAuto(power, -37, -55, timeout); // change distance
-                else if (targetMineral == 1)
                     robot.chassis.driveStraightAuto(power, -31.6, 0, timeout);
-                else
-                    robot.chassis.driveStraightAuto(power, -37, 55, timeout); // change distance
 
                 // go to wall and turn parallel
-                robot.chassis.driveStraightAuto(power, 85, -90, timeout);
+                if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
+                    robot.chassis.driveStraightAuto(power, 45, -90, timeout);
+                else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)
+                    robot.chassis.driveStraightAuto(power, 85, -90, timeout);
+                else
+                    robot.chassis.driveStraightAuto(power, 125, -90, timeout);
+
                 robot.chassis.driveStraightAuto(.2, 15, -90, timeout);
-                robot.chassis.rotateTo(.2, -45);
+                robot.chassis.rotateTo(.2, -43);
 
                 // 6cm away from wall
                 double driveDistance = robot.chassis.distanceToLeft() - 5;
                 robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
 
                 // to depot
-                robot.chassis.driveStraightAuto(power, -100, 0, timeout);
+                robot.chassis.driveAlongTheWall(power, -100, 5, SwerveChassis.Wall.LEFT, timeout);
 
                 // realign
                 sleep(200);
-                robot.chassis.rotateTo(.2, -45);
-                driveDistance = robot.chassis.distanceToLeft() - 5;
-                robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
-                sleep(200);
+//                robot.chassis.rotateTo(.2, -43);
+//                driveDistance = robot.chassis.distanceToLeft() - 5;
+//                robot.chassis.driveStraightAuto(power, driveDistance, -90, timeout);
+//                sleep(200);
 
                 // drop marker
                 robot.hanging.markerDown();
                 sleep(500);
 
                 // get out of depot
-                robot.chassis.driveAlongTheWall(.2, 100, 5, SwerveChassis.Wall.LEFT, timeout);
+                //robot.chassis.driveAlongTheWall(.2, 100, 5, SwerveChassis.Wall.LEFT, timeout);
+
+                // park
+                robot.goParking(ToboRuckus.Side.SILVER);
 
 
                 //robot.chassis.driveStraightAuto(.2, 170, 0, timeout);
