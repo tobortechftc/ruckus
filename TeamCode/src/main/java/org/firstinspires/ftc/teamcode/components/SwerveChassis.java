@@ -740,7 +740,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
         //set up imu telemetry
         if (orientationSensor != null && setImuTelemetry) {
-            line.addData("imu", "%.1f", new Func<Double>() {
+            line.addData("imuC", "%.1f", new Func<Double>() {
                 @Override
                 public Double value() {
                     return orientationSensor.getHeading();

@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "RuckusAutoSilverLandPark", group = "Ruckus")
+@Autonomous(name = "Auto-Silver-Land-Park", group = "Ruckus")
 public class RuckusAutoSilverLandPark extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
@@ -51,64 +51,57 @@ public class RuckusAutoSilverLandPark extends LinearOpMode {
         waitForStart();
         resetStartTime();
 
+        // Step-1: check random sample position
+        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
         if (opModeIsActive()) {
-            try {
-                // camera
-                sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(false);
+        }
 
-                // land, detach, sample
-                robot.landAndDetach(null, false);
-                robot.retrieveSample(sam_loc);
+        // Step-2: landing mission
+        if (opModeIsActive()) {
+            robot.landAndDetach(null, true);
+        }
+        // Ste-3: sample mission
+        if (opModeIsActive()) {
+            robot.retrieveSample(sam_loc);
+        }
+        //Step-4: align with walls
+        // go to wall and turn parallel
+        if (opModeIsActive()) {
+            if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
+                robot.chassis.driveStraightAuto(power, 45, -90, timeout);
+            else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)
+                robot.chassis.driveStraightAuto(power, 85, -90, timeout);
+            else
+                robot.chassis.driveStraightAuto(power, 125, -90, timeout);
 
-                // go back
-                    robot.chassis.driveStraightAuto(power, -31.6, 0, timeout);
+            robot.chassis.driveStraightAuto(.2, 15, -90, timeout);
+            robot.chassis.rotateTo(.2, -43);
 
-                // go to wall and turn parallel
-                if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
-                    robot.chassis.driveStraightAuto(power, 45, -90, timeout);
-                else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)
-                    robot.chassis.driveStraightAuto(power, 85, -90, timeout);
-                else
-                    robot.chassis.driveStraightAuto(power, 125, -90, timeout);
+            // 6cm away from wall
+            double driveDistance = robot.chassis.distanceToLeft() - 5;
+            robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
+        }
 
-                robot.chassis.driveStraightAuto(.2, 15, -90, timeout);
-                robot.chassis.rotateTo(.2, -43);
-
-                // 6cm away from wall
-                double driveDistance = robot.chassis.distanceToLeft() - 5;
-                robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
-
-                // to depot
-                robot.chassis.driveAlongTheWall(power, -100, 5, SwerveChassis.Wall.LEFT, timeout);
-
-                // realign
-                sleep(200);
+        // stpe-5: marker mission
+        if (opModeIsActive()) {
+            // to depot
+            robot.chassis.driveAlongTheWall(power, -100, 5, SwerveChassis.Wall.LEFT, timeout);
+            // realign
+            if (opModeIsActive()) sleep(200);
 //                robot.chassis.rotateTo(.2, -43);
 //                driveDistance = robot.chassis.distanceToLeft() - 5;
 //                robot.chassis.driveStraightAuto(power, driveDistance, -90, timeout);
 //                sleep(200);
 
-                // drop marker
-                robot.hanging.markerDown();
-                sleep(500);
+            // drop marker
+            robot.hanging.markerDown();
+            if (opModeIsActive()) sleep(500);
+        }
 
-                // get out of depot
-                //robot.chassis.driveAlongTheWall(.2, 100, 5, SwerveChassis.Wall.LEFT, timeout);
-
-                // park
-                robot.goParking(ToboRuckus.Side.SILVER);
-
-
-                //robot.chassis.driveStraightAuto(.2, 170, 0, timeout);
-
-
-
-
-            } catch (Exception e) {
-                telemetry.addData("Error", e.getMessage());
-                handleException(e);
-                Thread.sleep(5000);
-            }
+        // Step-5 park on the rim
+        if (opModeIsActive()) {
+            robot.goParking(ToboRuckus.Side.SILVER);
         }
     }
 

@@ -629,7 +629,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         } else if (source.getTrigger(Events.Side.RIGHT) > 0.2) {
             // 0.2 is the dead zone threshold
             // turbo mode uses (100% + 1/2 trigger value) of power
-            adjustment = 0.6 + 0.4 * source.getTrigger(Events.Side.RIGHT);
+            adjustment = 0.6 + 1.6 * source.getTrigger(Events.Side.RIGHT)*source.getTrigger(Events.Side.RIGHT);
         }
         return adjustment;
     }
