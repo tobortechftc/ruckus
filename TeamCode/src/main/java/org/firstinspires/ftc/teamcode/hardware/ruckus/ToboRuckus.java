@@ -119,7 +119,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 } else {
                     // right stick with left stick operates robot in "car" mode
                     double heading = source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY) * 90;
-                    double power = currentY;
+                    double power = currentY * Math.abs(currentY);
                     debug("sticksOnly(): right / steer, pwr: %.2f, head: %.2f", power, heading);
                     chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
                 }
@@ -208,7 +208,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) == 0) {
                     // left stick with idle right stick rotates robot in place
                     chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source));
-                } else {
+                } else if (source.getTrigger(Events.Side.RIGHT)<0.2){
                     // right stick with left stick operates robot in "car" mode
                     double heading = currentX * 90;
                     double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
@@ -233,6 +233,21 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Events.Side.LEFT);
+//        em.onTrigger(new Events.Listener() {
+//            @Override
+//            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
+//                if (current>0.2) {
+//                    double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
+//                    power *= Math.abs(power);
+//                    if (power>1.0) power = 1.0;
+//                    else if (power<-1.0) power = -1.0;
+//                    double heading = source.getStick(Events.Side.RIGHT, Events.Axis.X_ONLY) * 90;
+//                    chassis.driveAndSteer(power, heading, false);
+//                } else if (current <= 0.2) {
+//                    chassis.driveAndSteer(0, 0, true);
+//                }
+//            }
+//        }, Events.Side.RIGHT);
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
@@ -622,14 +637,15 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
      * Left trigger down = turbo mode (up to 100%) power
      */
     private double powerAdjustment(EventManager source) {
-        double adjustment = 0.6;
+        double adjustment = 0.5; double trig_num=0.0;
         if (source.isPressed(Button.RIGHT_BUMPER)) {
             // slow mode uses 30% of power
-            adjustment = 0.3;
-        } else if (source.getTrigger(Events.Side.RIGHT) > 0.2) {
+            adjustment = 0.25;
+        }
+        else if ((trig_num=source.getTrigger(Events.Side.RIGHT)) > 0.2) {
             // 0.2 is the dead zone threshold
             // turbo mode uses (100% + 1/2 trigger value) of power
-            adjustment = 0.6 + 1.6 * source.getTrigger(Events.Side.RIGHT)*source.getTrigger(Events.Side.RIGHT);
+            adjustment = 0.8 + 0.2 * trig_num*trig_num;
         }
         return adjustment;
     }
