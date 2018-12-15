@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "Ruckus::Auto-Gold-Land", group = "Ruckus")
+@Autonomous(name = "Auto-Gold-Land", group = "Ruckus")
 public class RuckusAutoGoldLand extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 

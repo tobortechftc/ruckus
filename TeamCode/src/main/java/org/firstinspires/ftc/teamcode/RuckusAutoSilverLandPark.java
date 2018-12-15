@@ -59,15 +59,19 @@ public class RuckusAutoSilverLandPark extends LinearOpMode {
 
         // Step-2: landing mission
         if (opModeIsActive()) {
-            robot.landAndDetach(null, true);
+            robot.landAndDetach(null, false);
         }
         // Ste-3: sample mission
         if (opModeIsActive()) {
             robot.retrieveSample(sam_loc);
         }
+
         //Step-4: align with walls
         // go to wall and turn parallel
         if (opModeIsActive()) {
+            // go back
+            robot.chassis.driveStraightAuto(power, -31.6, 0, timeout);
+
             if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
                 robot.chassis.driveStraightAuto(power, 45, -90, timeout);
             else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)

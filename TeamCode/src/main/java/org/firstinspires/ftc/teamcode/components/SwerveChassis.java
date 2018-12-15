@@ -44,7 +44,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     // minimum power that should be applied to the wheel motors for robot to start moving
     private double minPower = 0.15;
     // maximum power that should be applied to the wheel motors
-    private double maxPower = 0.95;
+    private double maxPower = 0.99;
     private double maxRange = 127; // max range sensor detectable
 
     private WheelAssembly frontLeft;
