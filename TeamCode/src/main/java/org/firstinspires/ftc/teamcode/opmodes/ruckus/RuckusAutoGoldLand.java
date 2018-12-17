@@ -1,9 +1,8 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmodes.ruckus;
 
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
@@ -13,9 +12,9 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 10/13/2018.
  */
-@Disabled
-@Autonomous(name = "Auto Test", group = "Ruckus")
-public class AutoTest extends LinearOpMode {
+
+@Autonomous(name = "Auto-Gold-Land", group = "Ruckus")
+public class RuckusAutoGoldLand extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -46,29 +45,54 @@ public class AutoTest extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        resetStartTime();
+        if (opModeIsActive()) {
+            resetStartTime();
+        }
 
-//        robot.extendInakeForParking();
-
-        ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        // Step-1: check random sample position
+        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
         if (opModeIsActive()) {
             sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
         }
-        telemetry.addData("1. Camera detect gold at", "%s (time=%.2f)", sam_loc.name(), getRuntime());
-        telemetry.update();
-        robot.chassis.resetOrientation();
-        telemetry.addData("2. Reset IMUs", "%s (time=%.2f)", sam_loc.name(), getRuntime());
-        telemetry.update();
-        sleep(5000);
-//         robot.chassis.rotateTo(0.18, -90);
-//         sleep(200);
-//         robot.chassis.rotateTo(0.18, +180);
-//         sleep(200);
-//         robot.chassis.rotateTo(0.18, 90);
-//         sleep(200);
-//         robot.chassis.rotateTo(0.18, 0);
-//         sleep(200);
+        // Step-2: landing mission
+        if (opModeIsActive()) {
+            robot.landAndDetach(null, false);
+        }
+        // Ste-3: sample mission
+        if (opModeIsActive()) {
+            robot.retrieveSample(sam_loc);
+        }
+        //Step-4: align with walls
+        if (opModeIsActive()) {
+            robot.alignWithWallsGoldSide(sam_loc);
+        }
+        // Step-5: from sample mission to dumping marker
+        if (opModeIsActive()) {
+            robot.hanging.markerDown();
+            if (!Thread.currentThread().isInterrupted())
+                sleep(500);
+        }
+        // Step-5: parking on the crater rim
+        if (opModeIsActive()) {
+            robot.chassis.driveStraightAuto(0.3, 20, 0, 3000);
+//            robot.goParkingGold();
+//            robot.intake.moveSlider(robot.intake.getSliderInitOut());
+        }
+//        robot.AutoRoutineTest();
+        // run until driver presses STOP or runtime exceeds 30 seconds
+        if (opModeIsActive() && getRuntime() < 30) {
+            try {
+                // TODO: invoke something like robot.autonomousProgram()
+                telemetry.addLine(String.format("distance Left:%.3f; distance front:%.3f", robot.chassis.distanceToLeft(), robot.chassis.distanceToFront()));
+                telemetry.update();
+//                robot.chassis.driveAndSteerAuto(0.5,560*3,-45);
 
+            } catch (Exception E) {
+                telemetry.addData("Error", E.getMessage());
+                handleException(E);
+                Thread.sleep(5000);
+            }
+        }
     }
 
     protected void handleException(Throwable T) {

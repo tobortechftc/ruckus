@@ -1,8 +1,9 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmodes.ruckus;
 
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
@@ -12,9 +13,9 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 10/13/2018.
  */
-
-@Autonomous(name = "Auto-Silver-Land-QPark", group = "Ruckus")
-public class RuckusAutoSliverLandQPark extends LinearOpMode {
+@Disabled
+@Autonomous(name = "Auto Test", group = "Ruckus")
+public class AutoTest extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -45,29 +46,29 @@ public class RuckusAutoSliverLandQPark extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        if (opModeIsActive()) {
-            resetStartTime();
-        }
+        resetStartTime();
 
-        // Step-2: check random sample position
+//        robot.extendInakeForParking();
+
         ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
         if (opModeIsActive()) {
-            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(false);
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
         }
-        // Step-1: landing mission
-        if (opModeIsActive()) {
-            robot.landAndDetach(null, false);
-        }
-        // Ste-3: sample mission
-        if (opModeIsActive()) {
-            robot.retrieveSample(sam_loc);
-        }
-        // step-4: park on the rim
-        if (opModeIsActive()) {
-            robot.chassis.driveStraightAuto(0.15, 5, 0, Integer.MAX_VALUE);
-//            robot.goParkingGold();
-            robot.extendInakeForParking();
-        }
+        telemetry.addData("1. Camera detect gold at", "%s (time=%.2f)", sam_loc.name(), getRuntime());
+        telemetry.update();
+        robot.chassis.resetOrientation();
+        telemetry.addData("2. Reset IMUs", "%s (time=%.2f)", sam_loc.name(), getRuntime());
+        telemetry.update();
+        sleep(5000);
+//         robot.chassis.rotateTo(0.18, -90);
+//         sleep(200);
+//         robot.chassis.rotateTo(0.18, +180);
+//         sleep(200);
+//         robot.chassis.rotateTo(0.18, 90);
+//         sleep(200);
+//         robot.chassis.rotateTo(0.18, 0);
+//         sleep(200);
+
     }
 
     protected void handleException(Throwable T) {

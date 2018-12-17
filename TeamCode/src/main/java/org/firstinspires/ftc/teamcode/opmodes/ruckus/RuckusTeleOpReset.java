@@ -1,45 +1,46 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmodes.ruckus;
 
 import android.util.Log;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Adjuster;
-import org.firstinspires.ftc.teamcode.support.diagnostics.GamepadListener;
-import org.firstinspires.ftc.teamcode.support.diagnostics.Menu;
-import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
-import org.firstinspires.ftc.teamcode.support.events.Button;
 import org.firstinspires.ftc.teamcode.support.events.EventManager;
-import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
+import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
-import java.lang.reflect.InvocationTargetException;
-@Disabled
-@Autonomous(name = "Ruckus :: Auto-Example", group = "Ruckus")
-public class RuckusAutoExample extends LinearOpMode {
-    protected static int LOG_LEVEL = Log.VERBOSE;
+@TeleOp(name="Ruckus-TeleOp-Reset", group="Ruckus")
+public class RuckusTeleOpReset extends LinearOpMode {
+    protected static int LOG_LEVEL = Log.ERROR;
 
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
+
+    private EventManager eventManager1;
+    private EventManager eventManager2;
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Initializing Robot", "Please Wait ...");
         telemetry.update();
 
-        ToboRuckus robot = new ToboRuckus().configureLogging("ToboRuckus", LOG_LEVEL);
+        ToboRuckus robot = new ToboRuckus();
+        robot.configureLogging(robot.getName(),LOG_LEVEL);
         configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
 
         try {
             // configure robot and reset all hardware
-            robot.configure(configuration, telemetry, true);
+            robot.configure(configuration, telemetry, false);
             configuration.apply();
-            robot.reset(true);
+            robot.reset(false);
+            robot.intake.reset(true); // force it to reset
+
+            eventManager1 = new EventManager(gamepad1, true);
+            eventManager2 = new EventManager(gamepad2, true);
+
+            robot.mainTeleOp(eventManager1, eventManager2); // define events for the chassis drive
 
             telemetry.addData("Robot is ready", "Press Play");
             telemetry.update();
@@ -50,14 +51,17 @@ public class RuckusAutoExample extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        resetStartTime();
 
-        // run until driver presses STOP or runtime exceeds 30 seconds
-        while (opModeIsActive() && getRuntime() < 30) {
+        robot.initTeleOp();
+
+        // run until the end of the match (driver presses STOP)
+        while (opModeIsActive()) {
             try {
-                // TODO: invoke something like robot.autonomousProgram()
+                eventManager1.processEvents();
+                eventManager2.processEvents();
+                TaskManager.processTasks();
             } catch (Exception E) {
-                telemetry.addData("Error", E.getMessage());
+                telemetry.addData("Error in event handler", E.getMessage());
                 handleException(E);
                 Thread.sleep(5000);
             }

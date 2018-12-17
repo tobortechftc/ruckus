@@ -1,28 +1,20 @@
-package org.firstinspires.ftc.teamcode;
-
-/**
- * Created by 28761 on 11/25/2018.
- */
-
+package org.firstinspires.ftc.teamcode.opmodes.ruckus;
 
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.components.SwerveChassis;
-import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralIntake;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
- * Created by 28761 on 11/9/2018.
+ * Created by 28761 on 10/13/2018.
  */
-@Disabled
-@Autonomous(name = "Drive wall test", group = "Ruckus")
-public class DriveAlongTheWallTest extends LinearOpMode {
+
+@Autonomous(name = "Auto-Silver-Land-QPark", group = "Ruckus")
+public class RuckusAutoSliverLandQPark extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -53,27 +45,28 @@ public class DriveAlongTheWallTest extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        resetStartTime();
+        if (opModeIsActive()) {
+            resetStartTime();
+        }
 
-        //************The Test*************
-//        robot.goParkingGold();
-        robot.chassis.driveAlongTheWall(0.2, 350, 10, SwerveChassis.Wall.LEFT, 8000);
-        //*********************************
-
-//        robot.AutoRoutineTest();
-        // run until driver presses STOP or runtime exceeds 30 seconds
-        if (opModeIsActive() && getRuntime() < 30) {
-            try {
-                // TODO: invoke something like robot.autonomousProgram()
-                telemetry.addLine(String.format("distance Left:%.3f; distance front:%.3f", robot.chassis.distanceToLeft(), robot.chassis.distanceToFront()));
-                telemetry.update();
-//                robot.chassis.driveAndSteerAuto(0.5,560*3,-45);
-
-            } catch (Exception E) {
-                telemetry.addData("Error", E.getMessage());
-                handleException(E);
-                Thread.sleep(5000);
-            }
+        // Step-2: check random sample position
+        ToboRuckus.MineralDetection.SampleLocation sam_loc= ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        if (opModeIsActive()) {
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(false);
+        }
+        // Step-1: landing mission
+        if (opModeIsActive()) {
+            robot.landAndDetach(null, false);
+        }
+        // Ste-3: sample mission
+        if (opModeIsActive()) {
+            robot.retrieveSample(sam_loc);
+        }
+        // step-4: park on the rim
+        if (opModeIsActive()) {
+            robot.chassis.driveStraightAuto(0.15, 5, 0, Integer.MAX_VALUE);
+//            robot.goParkingGold();
+            robot.extendInakeForParking();
         }
     }
 
@@ -87,4 +80,3 @@ public class DriveAlongTheWallTest extends LinearOpMode {
         telemetry.update();
     }
 }
-

@@ -1,20 +1,22 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmodes.ruckus;
 
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralIntake;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
- * Created by 28761 on 10/13/2018.
+ * Created by 28761 on 11/16/2018.
  */
-
-@Autonomous(name = "Auto-Gold-Land-Park", group = "Ruckus")
-public class RuckusAutoGoldLandPark extends LinearOpMode {
+@Disabled
+@Autonomous(name = "Ruckus::Rotate test", group = "Ruckus")
+public class RotateTesting extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -32,7 +34,7 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
 
         try {
             // configure robot and reset all hardware
-            robot.configure(configuration, telemetry, true);
+            robot.configure(configuration, telemetry,true);
             configuration.apply();
             robot.reset(true);
 
@@ -45,46 +47,32 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        if (opModeIsActive()) {
-            resetStartTime();
-        }
+        resetStartTime();
 
-        // Step-1: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
-        if (opModeIsActive()) {
-            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
-        }
-        // Step-2: landing mission
-        if (opModeIsActive()) {
-            robot.landAndDetach(null, false);
-        }
-        // Ste-3: sample mission
-        if (opModeIsActive()) {
-            robot.retrieveSample(sam_loc);
-        }
-        //Step-4: align with walls
-        if (opModeIsActive()) {
-            robot.alignWithWallsGoldSide(sam_loc);
-        }
-        // Step-5: from sample mission to dumping marker
-        if (opModeIsActive()) {
-            robot.hanging.markerDown();
-            robot.chassis.driveStraightAuto(0.3, 20, 20, 3000);
-            if (!Thread.currentThread().isInterrupted())
-                sleep(200);
-        }
-        // Step-6: parking on the crater rim
-        if (opModeIsActive()) {
-            robot.goParking(ToboRuckus.Side.GOLD);
-        }
 
-        /*
-//        robot.AutoRoutineTest();
+
+//        if (robot.hanging!=null) {
+//            robot.chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+//            robot.hanging.latchUpInches(7);//Land
+//            sleep(2000);
+//        }
+//        robot.chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+//        sleep(200);
+//        robot.chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
+//        sleep(200);
+//        robot.chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+//        sleep(200);
+//        robot.chassis.rotateTo(0.25, -80, telemetry); //Turn 90 degrees left
+
+        //at this place, use open cv to determine the mineral configuration
+        robot.chassis.rotateTo(0.3,-90);
+        robot.chassis.rotateDegree(0.3,-135);
+        robot.chassis.rotateTo(0.18, 135);
         // run until driver presses STOP or runtime exceeds 30 seconds
         if (opModeIsActive() && getRuntime() < 30) {
             try {
                 // TODO: invoke something like robot.autonomousProgram()
-                telemetry.addLine(String.format("distance Left:%.3f; distance front:%.3f", robot.chassis.distanceToLeft(), robot.chassis.distanceToFront()));
+                telemetry.addLine(String.format("distance Left:%.3f; distance front:%.3f",robot.chassis.distanceToLeft(),robot.chassis.distanceToFront()));
                 telemetry.update();
 //                robot.chassis.driveAndSteerAuto(0.5,560*3,-45);
 
@@ -93,7 +81,7 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
                 handleException(E);
                 Thread.sleep(5000);
             }
-        } */
+        }
     }
 
     protected void handleException(Throwable T) {
@@ -106,3 +94,4 @@ public class RuckusAutoGoldLandPark extends LinearOpMode {
         telemetry.update();
     }
 }
+
