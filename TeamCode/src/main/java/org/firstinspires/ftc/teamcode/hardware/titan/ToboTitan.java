@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.hardware.ruckus;
+package org.firstinspires.ftc.teamcode.hardware.titan;
 
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -14,6 +14,8 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
+import org.firstinspires.ftc.teamcode.hardware.ruckus.CameraMineralDetector;
+import org.firstinspires.ftc.teamcode.hardware.ruckus.Hanging;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
 import org.firstinspires.ftc.teamcode.support.events.Button;
@@ -41,6 +43,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     public SwerveChassis chassis;
     public Hanging hanging;
     public CameraSystem cameraSystem;
+    public MineralArm mineralArm;
     public CameraMineralDetector cameraMineralDetector;
 
 
@@ -63,6 +66,8 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
         chassis.configure(configuration, auto);
         hanging = new Hanging().configureLogging("Hanging", logLevel);
         hanging.configure(configuration, auto);
+        mineralArm = new MineralArm().configureLogging("MineralArm", logLevel);
+        mineralArm.configure(configuration);
     }
 
     public void AutoRoutineTest() throws InterruptedException {
@@ -73,6 +78,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     public void reset(boolean auto) {
         chassis.reset();
         hanging.reset(auto);
+        mineralArm.reset(auto);
         if (auto) {
             chassis.setupTelemetry(telemetry);
         }
