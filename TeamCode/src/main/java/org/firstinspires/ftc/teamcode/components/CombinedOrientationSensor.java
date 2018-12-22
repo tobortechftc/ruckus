@@ -30,11 +30,11 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
     /**
      * Configures the hardware
      */
-    public void configure(HardwareMap hardwareMap, String ... deviceNames) {
+    public void configure(HardwareMap hardwareMap, String... deviceNames) {
         sensors = new LinkedHashMap<>();
         for (String deviceName : deviceNames) {
             BNO055IMU sensor = hardwareMap.tryGet(BNO055IMU.class, deviceName);
-            if (sensor==null) {
+            if (sensor == null) {
                 warn("%s is not available", deviceName);
                 continue;
             }
@@ -48,7 +48,7 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         reset();
     }
 
-    public void reset(){
+    public void reset() {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
 
@@ -57,19 +57,19 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         parameters.loggingEnabled = this.logLevel < Log.WARN;
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        for (Map.Entry<String, BNO055IMU> entry: sensors.entrySet()) {
+        for (Map.Entry<String, BNO055IMU> entry : sensors.entrySet()) {
             parameters.loggingTag = entry.getKey();
             entry.getValue().initialize(parameters);
         }
     }
 
 
-
     /**
      * Enables or disables correction mode. If enabled, sensor readings will be compared
-     *  to previous result and ignored if they deviate from it for more than <code>MAX_READING_DEVIATION</code>.
+     * to previous result and ignored if they deviate from it for more than <code>MAX_READING_DEVIATION</code>.
      * If disabled, current average reading will be returned.
      * Should only be enabled when robot is moving in a straight line.
+     *
      * @param enable <code>true</code> to enable correction mode
      */
     public void enableCorrections(boolean enable) {
@@ -80,16 +80,22 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
 
     /**
      * Returns current heading, averaged from reading of all available sensors.
-     * @see CombinedOrientationSensor#enableCorrections(boolean)
+     *
      * @return heading in the range of -180 to 180 degrees relative to robot
-     *  orientation during sensor initialization, with angles being measured
-     *  left (for negative values) and right (for positive values) of Y axis
-     *  with center of coordinates being the center of robot chassis
+     * orientation during sensor initialization, with angles being measured
+     * left (for negative values) and right (for positive values) of Y axis
+     * with center of coordinates being the center of robot chassis
+     * @see CombinedOrientationSensor#enableCorrections(boolean)
      */
     public double getHeading() {
         if (sensors.isEmpty()) return 0.0d;
 
-        return hardwareReading(sensors.get("imu2"));
+        double reading1 = hardwareReading(sensors.get("imu"));
+        double reading2 = hardwareReading(sensors.get("imu2"));
+        return reading1 * reading2 < -100 ? reading1 : (reading1 + reading2) / 2;
+
+//        return hardwareReading(sensors.get("imu2"));
+
         /*
         // get readings from all sensors and calculate an average
         double[] readings = new double[sensors.size()];
@@ -140,11 +146,13 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         if (sensors.isEmpty()) {
             line.addData("imu", "Not Found").setRetained(true);
         } else {
-            for (Map.Entry<String, BNO055IMU> entry: sensors.entrySet()) {
+            for (Map.Entry<String, BNO055IMU> entry : sensors.entrySet()) {
                 final BNO055IMU imu = entry.getValue();
                 line.addData(entry.getKey(), "%.2f", new Func<Double>() {
                     @Override
-                    public Double value() { return hardwareReading(imu); }
+                    public Double value() {
+                        return hardwareReading(imu);
+                    }
                 });
             }
             line.addData("Heading", new Func<String>() {

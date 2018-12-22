@@ -142,8 +142,10 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         );
 
         if (auto) {
+
             orientationSensor = new CombinedOrientationSensor().configureLogging(logTag + "-sensor", logLevel);
             orientationSensor.configure(configuration.getHardwareMap(), "imu", "imu2");
+
             frontRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "front_range");
             backRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
             leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
