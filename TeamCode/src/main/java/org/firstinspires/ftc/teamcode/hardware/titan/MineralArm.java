@@ -157,6 +157,13 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public void setSliderPower(double sliderPower) {
         this.sliderPower = sliderPower;
     }
+    public void slideIn() { if (armSlider!=null) armSlider.setPower(sliderPower);}
+    public void slideOut() { if (armSlider!=null) armSlider.setPower(-sliderPower);}
+    public void slideStop() { if (armSlider!=null) armSlider.setPower(0);}
+
+    public void shoulderUp() { if (shoulder!=null) shoulder.setPower(shoulderPower);}
+    public void shoulderDown() { if (shoulder!=null) shoulder.setPower(-shoulderPower);}
+    public void shoulderStop() { if (shoulder!=null) shoulder.setPower(0);}
 
     public void configure(Configuration configuration) {
         sweeperServo = configuration.getHardwareMap().servo.get("sv_sweeper");

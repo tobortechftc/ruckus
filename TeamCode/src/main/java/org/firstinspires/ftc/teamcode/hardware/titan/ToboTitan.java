@@ -40,11 +40,10 @@ import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABE
 
 public class ToboTitan extends Logger<ToboTitan> implements Robot {
     private Telemetry telemetry;
-    public SwerveChassis chassis;
-    public Hanging hanging;
-    public CameraSystem cameraSystem;
+    // public SwerveChassis chassis;
+    // public Hanging hanging;
     public MineralArm mineralArm;
-    public CameraMineralDetector cameraMineralDetector;
+    // public CameraMineralDetector cameraMineralDetector;
 
 
     @Override
@@ -56,31 +55,29 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     public void configure(Configuration configuration, Telemetry telemetry, boolean auto) {
         this.telemetry = telemetry;
 
-//        cameraSystem = new CameraSystem(null);
-//        cameraSystem.init(configuration.getHardwareMap());
-        if (auto) {
-            cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
-            cameraMineralDetector.configure(configuration);
-        }
-        chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
-        chassis.configure(configuration, auto);
-        hanging = new Hanging().configureLogging("Hanging", logLevel);
-        hanging.configure(configuration, auto);
+//        if (auto) {
+//            cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
+//            cameraMineralDetector.configure(configuration);
+//        }
+//        chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
+//        chassis.configure(configuration, auto);
+//        hanging = new Hanging().configureLogging("Hanging", logLevel);
+//        hanging.configure(configuration, auto);
         mineralArm = new MineralArm().configureLogging("MineralArm", logLevel);
         mineralArm.configure(configuration);
     }
 
     public void AutoRoutineTest() throws InterruptedException {
-        chassis.driveAndSteerAuto(0.6, 560 * 3, 45);
+//        chassis.driveAndSteerAuto(0.6, 560 * 3, 45);
     }
 
     @Override
     public void reset(boolean auto) {
-        chassis.reset();
-        hanging.reset(auto);
+//        chassis.reset();
+//        hanging.reset(auto);
         mineralArm.reset(auto);
         if (auto) {
-            chassis.setupTelemetry(telemetry);
+//            chassis.setupTelemetry(telemetry);
         }
     }
 
@@ -90,12 +87,12 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                 .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true)
                 .addData("[LB]/[LT]", "Slow / Fast").setRetained(true);
-        chassis.setupTelemetry(telemetry);
-        hanging.setupTelemetry(telemetry);
+//        chassis.setupTelemetry(telemetry);
+//        hanging.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
-        if (!hanging.latchIsBusy()) {
-            hanging.resetLatch();
-        }
+//        if (!hanging.latchIsBusy()) {
+//            hanging.resetLatch();
+//        }
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -111,13 +108,13 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                         power = -1 * power;
                     }
                     debug("sticksOnly(): straight, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power * powerAdjustment(source), heading, true);
+//                    chassis.driveAndSteer(power * powerAdjustment(source), heading, true);
                 } else {
                     // right stick with left stick operates robot in "car" mode
                     double heading = source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY) * 90;
                     double power = currentY * Math.abs(currentY);
                     debug("sticksOnly(): right / steer, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
+//                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
                 }
             }
         }, Events.Axis.BOTH, Events.Side.RIGHT);
@@ -128,13 +125,13 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                                    float currentY, float changeY) throws InterruptedException {
                 if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) == 0) {
                     // left stick with idle right stick rotates robot in place
-                    chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source));
+//                    chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source));
                 } else if (source.getTrigger(Events.Side.RIGHT)<0.2){
                     // right stick with left stick operates robot in "car" mode
                     double heading = currentX * 90;
                     double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
                     debug("sticksOnly(): left / steer, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
+//                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
                 }
             }
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
@@ -145,29 +142,29 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) {
-                if (source.isPressed(Button.RIGHT_BUMPER)) {
-                    // operate latch
-                    if (currentY > 0.2) {
-                        hanging.latchUp(source.isPressed(Button.BACK));
-                    } else if (currentY < -0.2) {
-                        hanging.latchDown(source.isPressed(Button.BACK));
-                    } else if (!hanging.latchIsBusy()) {
-                        hanging.latchStop();
-                    }
-                    return;
-                } else if (!hanging.latchIsBusy()) {
-                    hanging.latchStop();
-                }
+//                if (source.isPressed(Button.RIGHT_BUMPER)) {
+//                    // operate latch
+//                    if (currentY > 0.2) {
+//                        hanging.latchUp(source.isPressed(Button.BACK));
+//                    } else if (currentY < -0.2) {
+//                        hanging.latchDown(source.isPressed(Button.BACK));
+//                    } else if (!hanging.latchIsBusy()) {
+//                        hanging.latchStop();
+//                    }
+//                    return;
+//                } else if (!hanging.latchIsBusy()) {
+//                    hanging.latchStop();
+//                }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
 
     }
 
-    @MenuEntry(label = "Drive Straight", group = "Test Chassis")
+    @MenuEntry(label = "Drive Straight", group = "Test")
     public void testStraight(EventManager em) {
         telemetry.addLine().addData("(LS)", "Drive").setRetained(true)
                 .addData("Hold [LB]/[RB]", "45 degree").setRetained(true);
-        chassis.setupTelemetry(telemetry);
+//        chassis.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 1000);
         em.onStick(new Events.Listener() {
             @Override
@@ -186,29 +183,54 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                 }
 
                 // adjust heading / power for driving backwards
-                if (heading > 90) {
-                    chassis.driveStraight(-1.0 * power, heading - 180);
-                } else if (heading < -90) {
-                    chassis.driveStraight(-1.0 * power, heading + 180);
-                } else {
-                    chassis.driveStraight(power, heading);
-                }
+//                if (heading > 90) {
+//                    chassis.driveStraight(-1.0 * power, heading - 180);
+//                } else if (heading < -90) {
+//                    chassis.driveStraight(-1.0 * power, heading + 180);
+//                } else {
+//                    chassis.driveStraight(power, heading);
+//                }
             }
         }, Events.Axis.BOTH, Events.Side.LEFT);
     }
 
-    @MenuEntry(label = "Rotate in Place", group = "Test Chassis")
-    public void testRotate(EventManager em) {
+    @MenuEntry(label = "Mineral Arm", group = "Test")
+    public void testMineralArm(EventManager em) {
         telemetry.addLine().addData(" < (LS) >", "Power").setRetained(true);
-        chassis.setupTelemetry(telemetry);
+        mineralArm.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
+
+        // left Stick-Y control arm slider In/Out
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
-                chassis.rotate(currentX);
+            if (currentY>0.2) {
+                mineralArm.slideOut();
+            } else if (currentY<-0.2) {
+                mineralArm.slideIn();
+            } else {
+                mineralArm.slideStop();
             }
-        }, Events.Axis.X_ONLY, Events.Side.LEFT);
+
+            }
+        }, Events.Axis.Y_ONLY, Events.Side.LEFT);
+
+        // rigth Stick-Y control arm shoulder up/down
+        em.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
+                                   float currentY, float changeY) throws InterruptedException {
+                if (currentY>0.2) {
+                    mineralArm.shoulderUp();
+                } else if (currentY<-0.2) {
+                    mineralArm.shoulderDown();
+                } else {
+                    mineralArm.shoulderStop();
+                }
+
+            }
+        }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
     }
 
     public enum Side {
@@ -217,102 +239,79 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
 
     @MenuEntry(label = "Test Sample", group = "Test Auto")
     public void alignWithWallsGoldSide(ToboTitan.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
-        //drive to default start position for gold side
-        chassis.driveStraightAuto(0.35, 20, 0, Integer.MAX_VALUE);
-        if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(100);
-        //rotate robot parallel to the walls
-//        telemetry.addLine("imu heading:%");
-        chassis.rotateTo(0.3, 135);
-//        chassis.rotateTo(0.18, 135);
-
-        //from here, three different routine will converge into the depot
-        if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(100);
-
-        //align with right wall
-
-        double detectedRightDistance = chassis.distanceToRight();
-        switch (sam_loc) {
-            case CENTER: // center
-                detectedRightDistance = Math.min(60, detectedRightDistance);
-                break;
-            case RIGHT:
-                detectedRightDistance = Math.min(100, detectedRightDistance);
-                break;
-            case LEFT:
-                detectedRightDistance = Math.min(20, detectedRightDistance);
-                break;
-            default: // go straight like center
-                detectedRightDistance = Math.min(60, detectedRightDistance);
-        }
-        chassis.driveStraightAuto(0.30, detectedRightDistance - 15, +90, 2000);
-        detectedRightDistance = chassis.distanceToRight();
-        if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(100);
-        chassis.driveStraightAuto(0.18, detectedRightDistance - 15, +90, 2000);
-//        telemetry.addLine(String.format("adjusted distance to right: %.3f",chassis.distanceToRight()));
-//        telemetry.update();
-
-        //force heading correction
-        if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(100);
-//        chassis.rotateTo(0.18, 138);
-
-        //align with back wall
-//        telemetry.addLine(String.format("detected distance to back: %.3f",chassis.distanceToBack()));
-//        telemetry.update();
-        double detectedBackDistance = chassis.distanceToBack();
-        switch (sam_loc) {
-            case CENTER: // center
-                detectedBackDistance = Math.min(50, detectedBackDistance);
-                break;
-            case RIGHT:
-                detectedBackDistance = Math.min(20, detectedBackDistance);
-                break;
-            case LEFT:
-                detectedBackDistance = Math.min(80, detectedBackDistance);
-                break;
-            default: // go straight like center
-                detectedBackDistance = Math.min(50, detectedBackDistance);
-        }
-
-        chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance, 0, 3000);
-        detectedBackDistance = chassis.distanceToBack();
-        if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(100);
-        chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance, 0, 3000);
-//        telemetry.addLine(String.format("adjusted distance to back: %.3f",chassis.distanceToBack()));
-//        telemetry.update();
+//        //drive to default start position for gold side
+//        chassis.driveStraightAuto(0.35, 20, 0, Integer.MAX_VALUE);
+//        chassis.rotateTo(0.3, 135);
+//        //from here, three different routine will converge into the depot
+//        if (!Thread.currentThread().isInterrupted())
+//            Thread.sleep(100);
+//
+//        //align with right wall
+//
+//        double detectedRightDistance = chassis.distanceToRight();
+//        switch (sam_loc) {
+//            case CENTER: // center
+//                detectedRightDistance = Math.min(60, detectedRightDistance);
+//                break;
+//            case RIGHT:
+//                detectedRightDistance = Math.min(100, detectedRightDistance);
+//                break;
+//            case LEFT:
+//                detectedRightDistance = Math.min(20, detectedRightDistance);
+//                break;
+//            default: // go straight like center
+//                detectedRightDistance = Math.min(60, detectedRightDistance);
+//        }
+//        chassis.driveStraightAuto(0.30, detectedRightDistance - 15, +90, 2000);
+//        detectedRightDistance = chassis.distanceToRight();
+//        if (!Thread.currentThread().isInterrupted())
+//            Thread.sleep(100);
+//        chassis.driveStraightAuto(0.18, detectedRightDistance - 15, +90, 2000);
+//
+//        if (!Thread.currentThread().isInterrupted())
+//            Thread.sleep(100);
+//
+//        double detectedBackDistance = chassis.distanceToBack();
+//        switch (sam_loc) {
+//            case CENTER: // center
+//                detectedBackDistance = Math.min(50, detectedBackDistance);
+//                break;
+//            case RIGHT:
+//                detectedBackDistance = Math.min(20, detectedBackDistance);
+//                break;
+//            case LEFT:
+//                detectedBackDistance = Math.min(80, detectedBackDistance);
+//                break;
+//            default: // go straight like center
+//                detectedBackDistance = Math.min(50, detectedBackDistance);
+//        }
+//
+//        chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance, 0, 3000);
+//        detectedBackDistance = chassis.distanceToBack();
+//        if (!Thread.currentThread().isInterrupted())
+//            Thread.sleep(100);
+//        chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance, 0, 3000);
     }
 
     @MenuEntry(label = "Test Land", group = "Test Auto")
     public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException {
         // chassis.resetOrientation();
-        if ((hanging != null) && !skipLanding) {
-            chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-            hanging.latchUpInches(8);
-            if (!Thread.currentThread().isInterrupted())
-                Thread.sleep(500);
-        }
-        chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
-        chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
-        chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
-
-        chassis.rotateTo(0.3, -90); //Turn 90 degrees left
-//        if (!Thread.currentThread().isInterrupted())
-//            Thread.sleep(200);
-//        chassis.rotateTo(0.18, -90);
-
-        //for testing
-//        Thread.sleep(10000);
-//        chassis.driveStraightAuto(0.25, 2, 90, 3000); //Strafe right ~1 in.
-//        chassis.driveStraightAuto(0.25, -4, 0, 3000); //Drive back ~2 in.
+//        if ((hanging != null) && !skipLanding) {
+//            chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+//            hanging.latchUpInches(8);
+//            if (!Thread.currentThread().isInterrupted())
+//                Thread.sleep(500);
+//        }
+//        chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+//        chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
+//        chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+//
+//        chassis.rotateTo(0.3, -90); //Turn 90 degrees left
     }
 
     @MenuEntry(label = "Retract Latch", group = "Test Auto")
     public void retractLatch(EventManager em) throws InterruptedException {
-        hanging.latchDownInches(8.5);
+//        hanging.latchDownInches(8.5);
     }
 
     public void initTeleOp() throws InterruptedException {
@@ -371,31 +370,6 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
 
         @Override
         public Mat processFrame(Mat rgba, Mat grayscale) {
-//            boolean showContours = false;
-//            Mat silverHSV = new Mat();
-//            Mat silverThresholded = new Mat();
-//            Mat goldHSV = new Mat();
-//            Mat goldThresholded = new Mat();
-//            List<MatOfPoint> silverContours;
-//            List<MatOfPoint> goldContours;
-//
-//            Imgproc.cvtColor(rgba, silverHSV, Imgproc.COLOR_RGB2HSV, 3);
-//            Imgproc.cvtColor(rgba, goldHSV, Imgproc.COLOR_RGB2HSV, 3);
-//            Core.inRange(silverHSV, new Scalar(0, 0, 90), new Scalar(0, 0, 100), silverThresholded);
-//            Core.inRange(goldHSV, new Scalar(27, 223, 69.8), new Scalar(51, 160, 100), goldThresholded);
-//
-//            Imgproc.blur(silverThresholded, silverThresholded, new Size(3, 3));
-//
-//            Imgproc.blur(goldThresholded, goldThresholded, new Size(3, 3));
-//            silverContours = new ArrayList<>();
-//            goldContours = new ArrayList<>();
-//            Imgproc.findContours(silverThresholded, silverContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-//            Imgproc.findContours(goldThresholded, goldContours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-//
-//            if (showContours) {
-//                Imgproc.drawContours(rgba, silverContours, -1, new Scalar(144, 255, 255), 2, 8);
-//                Imgproc.drawContours(rgba, goldContours, -1, new Scalar(255, 144, 255), 2, 8);
-//            }
             return rgba;
         }
 
@@ -576,30 +550,5 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             tfObjectDetector.shutdown();
             return SampleLocation.UNKNOWN;
         }
-
-//        public synchronized List<MatOfPoint> getGoldContours() {
-//            return goldContours;
-//        }
-//        public synchronized  List<MatOfPoint> getSilverContours(){
-//            return silverContours;
-//        }
-//        public Point[] findSilver(){
-//            List<Moments> mu = new ArrayList<>(silverContours.size());
-//            Point[] coordCenter = new Point[mu.size()];
-//            for (int i = 0; i < silverContours.size(); i++) {
-//                mu.add(Imgproc.moments(silverContours.get(i)));
-//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
-//            }
-//            return coordCenter;
-//        }
-//        public Point[] findGold(){
-//            List<Moments> mu = new ArrayList<>(goldContours.size());
-//            Point[] coordCenter = new Point[mu.size()];
-//            for (int i = 0; i < goldContours.size(); i++) {
-//                mu.add(Imgproc.moments(goldContours.get(i)));
-//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
-//            }
-//            return coordCenter;
-//        }
     }
 }
