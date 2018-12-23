@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware.titan;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Func;
@@ -46,7 +47,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     private int sliderDump = 300; // position to dump minerals into delivery box
     private int sliderInitOut = 450; // position for initial TeleOp out
     private int sliderAutoPark = 650; // position for Auto Out parking;
-    private double sliderPower = 0.6;
+    private double sliderPower = 0.8;
     private double shoulderPower = 0.8;
 
     @Override
@@ -157,12 +158,12 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public void setSliderPower(double sliderPower) {
         this.sliderPower = sliderPower;
     }
-    public void slideIn() { if (armSlider!=null) armSlider.setPower(sliderPower);}
-    public void slideOut() { if (armSlider!=null) armSlider.setPower(-sliderPower);}
+    public void slideIn(double scale) { if (armSlider!=null) armSlider.setPower(sliderPower*scale);}
+    public void slideOut(double scale) { if (armSlider!=null) armSlider.setPower(-sliderPower*scale);}
     public void slideStop() { if (armSlider!=null) armSlider.setPower(0);}
 
-    public void shoulderUp() { if (shoulder!=null) shoulder.setPower(shoulderPower);}
-    public void shoulderDown() { if (shoulder!=null) shoulder.setPower(-shoulderPower);}
+    public void shoulderUp(double scale) { if (shoulder!=null) shoulder.setPower(shoulderPower*scale);}
+    public void shoulderDown(double scale) { if (shoulder!=null) shoulder.setPower(-shoulderPower*scale);}
     public void shoulderStop() { if (shoulder!=null) shoulder.setPower(0);}
 
     public void configure(Configuration configuration) {
