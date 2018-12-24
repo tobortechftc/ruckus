@@ -206,9 +206,9 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
             if (currentY>0.2) {
-                mineralArm.slideOut();
+                mineralArm.slideOut(currentY*currentY);
             } else if (currentY<-0.2) {
-                mineralArm.slideIn();
+                mineralArm.slideIn(currentY*currentY);
             } else {
                 mineralArm.slideStop();
             }
@@ -222,9 +222,9 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
                 if (currentY>0.2) {
-                    mineralArm.shoulderUp();
+                    mineralArm.shoulderUp(currentY*currentY);
                 } else if (currentY<-0.2) {
-                    mineralArm.shoulderDown();
+                    mineralArm.shoulderDown(currentY*currentY);
                 } else {
                     mineralArm.shoulderStop();
                 }
