@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware.titan;
 
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -14,16 +15,18 @@ import org.firstinspires.ftc.teamcode.support.tasks.Progress;
 import org.firstinspires.ftc.teamcode.support.tasks.Task;
 import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
+import java.math.BigDecimal;
+
 /**
  * MineralArm consists of 2 motors (1 arm shoulder, and 1 controlling the slider)
  * and 1 servo controlling the angle of the collection box.<br />
  * Expected hardware configuration is:<br />
- *   Servos:  sweeper (continuous servo), gate
- *   Motors: shoulder and arm_slider <br />
+ * Servos:  sweeper (continuous servo), gate
+ * Motors: shoulder and arm_slider <br />
  */
 public class MineralArm extends Logger<MineralArm> implements Configurable {
 
-    public enum SweeperMode { INTAKE, PUSH_OUT, VERTICAL_STOP, HORIZONTAL_STOP }
+    public enum SweeperMode {INTAKE, PUSH_OUT, VERTICAL_STOP, HORIZONTAL_STOP}
 
     // open and closed positions for the box gate
     // actual servo positions are configured via <code>AdjustableServo</code>
@@ -39,6 +42,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     private Servo sweeperServo;
     private AdjustableServo gate;
     private boolean adjustmentMode = false;
+    private AnalogInput potentiometer;
 
     // slider encoder positions
     private int sliderContracted = 0; // contracted
@@ -76,7 +80,11 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
             );
         }
     }
-    public void sweeperIn() { this.sweeperServo.setPosition(SWEEPER_IN); }
+
+    public void sweeperIn() {
+        this.sweeperServo.setPosition(SWEEPER_IN);
+    }
+
     public void sweeperOut() {
         this.sweeperServo.setPosition(SWEEPER_OUT);
     }
@@ -89,6 +97,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public double getShoulderPower() {
         return shoulderPower;
     }
+
     public void setShoulderPower(double power) {
         this.shoulderPower = power;
         if (adjustmentMode) {
@@ -102,6 +111,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public double getSlidertPower() {
         return sliderPower;
     }
+
     public void setSweeperOutPower(double power) {
         this.sliderPower = power;
         if (adjustmentMode) {
@@ -119,6 +129,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public int getSliderExtended() {
         return sliderExtended;
     }
+
     public void setSliderExtended(int sliderExtended) {
         this.sliderExtended = sliderExtended;
         if (adjustmentMode) {
@@ -133,6 +144,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public int getSliderDump() {
         return sliderDump;
     }
+
     public void setSliderDump(int sliderDump) {
         this.sliderDump = sliderDump;
         if (adjustmentMode) {
@@ -146,6 +158,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public int getSliderInitOut() {
         return sliderInitOut;
     }
+
     public void setSliderAutoPark() {
         moveSlider(sliderAutoPark);
     }
@@ -154,22 +167,40 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public double getSliderPower() {
         return sliderPower;
     }
+
     public void setSliderPower(double sliderPower) {
         this.sliderPower = sliderPower;
     }
-    public void slideIn() { if (armSlider!=null) armSlider.setPower(sliderPower);}
-    public void slideOut() { if (armSlider!=null) armSlider.setPower(-sliderPower);}
-    public void slideStop() { if (armSlider!=null) armSlider.setPower(0);}
 
-    public void shoulderUp() { if (shoulder!=null) shoulder.setPower(shoulderPower);}
-    public void shoulderDown() { if (shoulder!=null) shoulder.setPower(-shoulderPower);}
-    public void shoulderStop() { if (shoulder!=null) shoulder.setPower(0);}
+    public void slideIn() {
+        if (armSlider != null) armSlider.setPower(sliderPower);
+    }
+
+    public void slideOut() {
+        if (armSlider != null) armSlider.setPower(-sliderPower);
+    }
+
+    public void slideStop() {
+        if (armSlider != null) armSlider.setPower(0);
+    }
+
+    public void shoulderUp() {
+        if (shoulder != null) shoulder.setPower(shoulderPower);
+    }
+
+    public void shoulderDown() {
+        if (shoulder != null) shoulder.setPower(-shoulderPower);
+    }
+
+    public void shoulderStop() {
+        if (shoulder != null) shoulder.setPower(0);
+    }
 
     public void configure(Configuration configuration) {
         sweeperServo = configuration.getHardwareMap().servo.get("sv_sweeper");
 
         gate = new AdjustableServo(GATE_OPEN, GATE_CLOSED).configureLogging(
-                logTag + ":boxGate" , logLevel
+                logTag + ":boxGate", logLevel
         );
         gate.configure(configuration.getHardwareMap(), "arm_gate");
         configuration.register(gate);
@@ -180,7 +211,28 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         armSlider = configuration.getHardwareMap().tryGet(DcMotor.class, "arm_slider");
         armSlider.setDirection(DcMotor.Direction.FORWARD);
 
+        potentiometer = configuration.getHardwareMap().analogInput.get("pm1");
+        coefficients = new BigDecimal[6];
+        coefficients[0] = new BigDecimal("0.113543");
+        coefficients[1] = new BigDecimal("1.4075");
+        coefficients[2] = new BigDecimal("8.87737E-3");
+        coefficients[3] = new BigDecimal("1.17293E-4");
+        coefficients[4] = new BigDecimal("4.5348E-7");
+        coefficients[5] = new BigDecimal("-5.9825E-10");
+
         configuration.register(this);
+    }
+
+    BigDecimal[] coefficients;
+
+    public double getDegree() {
+        BigDecimal reading = new BigDecimal(270 * (potentiometer.getVoltage() - 0.001) / (3.35 - 0.001));
+        BigDecimal fx = BigDecimal.ZERO;
+        for (int i = 5; i >= 0; i--) {
+            fx = fx.multiply(reading);
+            fx = fx.add(coefficients[i]);
+        }
+        return fx.doubleValue();
     }
 
     public void reset(boolean auto) {
@@ -200,6 +252,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
 
     /**
      * Moves collection box gate to specified position (open or closed)
+     *
      * @param open <code>true</code> to open the gate, <code>false</code> to close it
      * @return estimated progress
      */
@@ -249,6 +302,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
 
     /**
      * Moves the slider to given position
+     *
      * @param position to move slider to
      * @return operation showing whether movement is complete
      */
@@ -270,6 +324,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
             }
         };
     }
+
     public Progress moveSliderFast(int position) {
         if (position < this.sliderContracted) {
             throw new IllegalArgumentException("Slider position cannot be less than [sliderContracted]");
@@ -315,7 +370,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         line.addData("Sweeper/gate", new Func<String>() {
             @Override
             public String value() {
-                return (sweeperServo.getPosition()==0.5 ? "Stop" : "Moving") + "/"
+                return (sweeperServo.getPosition() == 0.5 ? "Stop" : "Moving") + "/"
                         + (isGateOpen() ? "Open" : "Closed");
             }
         });
@@ -324,8 +379,8 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
             public String value() {
                 int position = armSlider.getTargetPosition();
                 String name = "0";
-                if (position==sliderDump) name = "Dump";
-                if (position==sliderExtended) name = "Ext";
+                if (position == sliderDump) name = "Dump";
+                if (position == sliderExtended) name = "Ext";
                 return String.format("%s:%d", name, armSlider.getCurrentPosition());
             }
         });
@@ -333,6 +388,12 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
             @Override
             public Integer value() {
                 return shoulder.getCurrentPosition();
+            }
+        });
+        line.addData("degree", "%f", new Func<Double>() {
+            @Override
+            public Double value() {
+                return getDegree();
             }
         });
     }
