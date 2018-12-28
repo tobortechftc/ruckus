@@ -40,10 +40,10 @@ import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABE
 
 public class ToboTitan extends Logger<ToboTitan> implements Robot {
     private Telemetry telemetry;
-    // public SwerveChassis chassis;
+    public SwerveChassis chassis;
     // public Hanging hanging;
     public MineralArm mineralArm;
-    // public CameraMineralDetector cameraMineralDetector;
+    public CameraMineralDetector cameraMineralDetector;
 
 
     @Override
@@ -55,12 +55,12 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     public void configure(Configuration configuration, Telemetry telemetry, boolean auto) {
         this.telemetry = telemetry;
 
-//        if (auto) {
-//            cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
-//            cameraMineralDetector.configure(configuration);
-//        }
-//        chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
-//        chassis.configure(configuration, auto);
+        if (auto) {
+            cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
+            cameraMineralDetector.configure(configuration);
+        }
+        chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
+        chassis.configure(configuration, auto);
 //        hanging = new Hanging().configureLogging("Hanging", logLevel);
 //        hanging.configure(configuration, auto);
         mineralArm = new MineralArm().configureLogging("MineralArm", logLevel);
@@ -68,16 +68,16 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     }
 
     public void AutoRoutineTest() throws InterruptedException {
-//        chassis.driveAndSteerAuto(0.6, 560 * 3, 45);
+        chassis.driveAndSteerAuto(0.6, 560 * 3, 45);
     }
 
     @Override
     public void reset(boolean auto) {
-//        chassis.reset();
+        chassis.reset();
 //        hanging.reset(auto);
         mineralArm.reset(auto);
         if (auto) {
-//            chassis.setupTelemetry(telemetry);
+            chassis.setupTelemetry(telemetry);
         }
     }
 
@@ -87,7 +87,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                 .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true)
                 .addData("[LB]/[LT]", "Slow / Fast").setRetained(true);
-//        chassis.setupTelemetry(telemetry);
+        chassis.setupTelemetry(telemetry);
 //        hanging.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
 //        if (!hanging.latchIsBusy()) {
@@ -108,13 +108,13 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                         power = -1 * power;
                     }
                     debug("sticksOnly(): straight, pwr: %.2f, head: %.2f", power, heading);
-//                    chassis.driveAndSteer(power * powerAdjustment(source), heading, true);
+                    chassis.driveAndSteer(power * powerAdjustment(source), heading, true);
                 } else {
                     // right stick with left stick operates robot in "car" mode
                     double heading = source.getStick(Events.Side.LEFT, Events.Axis.X_ONLY) * 90;
                     double power = currentY * Math.abs(currentY);
                     debug("sticksOnly(): right / steer, pwr: %.2f, head: %.2f", power, heading);
-//                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
+                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
                 }
             }
         }, Events.Axis.BOTH, Events.Side.RIGHT);
@@ -125,17 +125,41 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                                    float currentY, float changeY) throws InterruptedException {
                 if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) == 0) {
                     // left stick with idle right stick rotates robot in place
-//                    chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source));
+                    chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source));
                 } else if (source.getTrigger(Events.Side.RIGHT)<0.2){
                     // right stick with left stick operates robot in "car" mode
                     double heading = currentX * 90;
                     double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
                     debug("sticksOnly(): left / steer, pwr: %.2f, head: %.2f", power, heading);
-//                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
+                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
                 }
             }
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
-
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+                // intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+                mineralArm.sweeperIn();
+            }
+        }, Button.LEFT_BUMPER);
+        em.onButtonUp(new Events.Listener() {
+            @Override
+            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+                //intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
+                mineralArm.stopSweeper();
+            }
+        }, Button.LEFT_BUMPER);
+        em.onTrigger(new Events.Listener() {
+            @Override
+            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
+                // 0.2 is a dead zone threshold for the trigger
+                if (current > 0.2) {
+                    mineralArm.sweeperOut();
+                } else if (current == 0) {
+                    mineralArm.stopSweeper();
+                }
+            }
+        }, Events.Side.LEFT);
         // (RS) operates delivery arm. With [RT] pressed changes are gradual
         // (RS) with [RB] pressed operates latch up / down. [Back] overrides encoder position limits
         em2.onStick(new Events.Listener() {
@@ -164,7 +188,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     public void testStraight(EventManager em) {
         telemetry.addLine().addData("(LS)", "Drive").setRetained(true)
                 .addData("Hold [LB]/[RB]", "45 degree").setRetained(true);
-//        chassis.setupTelemetry(telemetry);
+        chassis.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 1000);
         em.onStick(new Events.Listener() {
             @Override
@@ -183,13 +207,13 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                 }
 
                 // adjust heading / power for driving backwards
-//                if (heading > 90) {
-//                    chassis.driveStraight(-1.0 * power, heading - 180);
-//                } else if (heading < -90) {
-//                    chassis.driveStraight(-1.0 * power, heading + 180);
-//                } else {
-//                    chassis.driveStraight(power, heading);
-//                }
+                if (heading > 90) {
+                    chassis.driveStraight(-1.0 * power, heading - 180);
+                } else if (heading < -90) {
+                    chassis.driveStraight(-1.0 * power, heading + 180);
+                } else {
+                    chassis.driveStraight(power, heading);
+                }
             }
         }, Events.Axis.BOTH, Events.Side.LEFT);
     }

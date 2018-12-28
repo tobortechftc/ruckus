@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware.titan;
 
 import com.qualcomm.robotcore.hardware.AnalogInput;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -34,13 +35,13 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public static final double GATE_OPEN = 0.0;
     public static final double GATE_CLOSED = 1.0;
 
-    public static final double SWEEPER_OFF = 0.5;
-    public static final double SWEEPER_IN = 1.0;
-    public static final double SWEEPER_OUT = 0.0;
+    public static final double SWEEPER_OFF = 0.0;
+    public static final double SWEEPER_IN = -1.0;
+    public static final double SWEEPER_OUT = 1.0;
 
     private DcMotor shoulder;
     private DcMotor armSlider;
-    private Servo sweeperServo;
+    private CRServo sweeperServo;
     private AdjustableServo gate;
     private boolean adjustmentMode = false;
     private AnalogInput potentiometer;
@@ -65,17 +66,17 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         this.adjustmentMode = on;
         if (on) {
             debug("Adjustment: ON, sweeper: %.2f, gate: %.1f, shoulder: %s / %d, slider: %s / %d",
-                    sweeperServo.getPosition(), gate.getPosition(),
+                    sweeperServo.getPower(), gate.getPosition(),
                     shoulder.getMode(), shoulder.getCurrentPosition(),
                     armSlider.getMode(), armSlider.getCurrentPosition()
             );
         } else {
             this.armSlider.setPower(0);
             this.shoulder.setPower(0);
-            this.sweeperServo.setPosition(SWEEPER_OFF);
+            this.sweeperServo.setPower(SWEEPER_OFF);
             this.gate.setPosition(GATE_CLOSED);
             debug("Adjustment: OFF, sweeper: %.2f, gate: %.1f, shoulder: %s / %d, slider: %s / %d",
-                    sweeperServo.getPosition(), gate.getPosition(),
+                    sweeperServo.getPower(), gate.getPosition(),
                     shoulder.getMode(), shoulder.getCurrentPosition(),
                     armSlider.getMode(), armSlider.getCurrentPosition()
             );
@@ -83,15 +84,15 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     }
 
     public void sweeperIn() {
-        this.sweeperServo.setPosition(SWEEPER_IN);
+        this.sweeperServo.setPower(SWEEPER_IN);
     }
 
     public void sweeperOut() {
-        this.sweeperServo.setPosition(SWEEPER_OUT);
+        this.sweeperServo.setPower(SWEEPER_OUT);
     }
 
     public void stopSweeper() {
-        this.sweeperServo.setPosition(SWEEPER_OFF);
+        this.sweeperServo.setPower(SWEEPER_OFF);
     }
 
     @Adjustable(min = 0.0, max = 1.0, step = 0.01)
@@ -181,7 +182,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public void shoulderStop() { if (shoulder!=null) shoulder.setPower(0);}
 
     public void configure(Configuration configuration) {
-        sweeperServo = configuration.getHardwareMap().servo.get("sv_sweeper");
+        sweeperServo = configuration.getHardwareMap().crservo.get("sv_sweeper");
 
         gate = new AdjustableServo(GATE_OPEN, GATE_CLOSED).configureLogging(
                 logTag + ":boxGate", logLevel
@@ -220,14 +221,14 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     }
 
     public void reset(boolean auto) {
-        sweeperServo.setPosition(SWEEPER_OFF);
+        sweeperServo.setPower(SWEEPER_OFF);
         gate.setPosition(GATE_CLOSED);
         resetMotor(shoulder);
         if (auto) {
             resetMotor(armSlider);
         }
         debug("Reset mininal arm, sweeper: %.2f, gate: %.1f, shoulder: %s / %d, slider: %s / %d",
-                sweeperServo.getPosition(), gate.getPosition(),
+                sweeperServo.getPower(), gate.getPosition(),
                 shoulder.getMode(), shoulder.getCurrentPosition(),
                 armSlider.getMode(), armSlider.getCurrentPosition()
         );
@@ -354,7 +355,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         line.addData("Sweeper/gate", new Func<String>() {
             @Override
             public String value() {
-                return (sweeperServo.getPosition() == 0.5 ? "Stop" : "Moving") + "/"
+                return (sweeperServo.getPower() == 0.0 ? "Stop" : "Moving") + "/"
                         + (isGateOpen() ? "Open" : "Closed");
             }
         });
