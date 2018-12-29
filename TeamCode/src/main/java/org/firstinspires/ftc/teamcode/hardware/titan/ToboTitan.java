@@ -41,9 +41,9 @@ import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABE
 public class ToboTitan extends Logger<ToboTitan> implements Robot {
     private Telemetry telemetry;
     public SwerveChassis chassis;
-    // public Hanging hanging;
     public MineralArm mineralArm;
     public CameraMineralDetector cameraMineralDetector;
+    public LandingLatch landing;
 
 
     @Override
@@ -61,8 +61,8 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
         }
         chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
         chassis.configure(configuration, auto);
-//        hanging = new Hanging().configureLogging("Hanging", logLevel);
-//        hanging.configure(configuration, auto);
+        landing = new LandingLatch().configureLogging("LandingLatch", logLevel);
+        landing.configure(configuration, auto);
         mineralArm = new MineralArm().configureLogging("MineralArm", logLevel);
         mineralArm.configure(configuration);
     }
@@ -74,7 +74,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     @Override
     public void reset(boolean auto) {
         chassis.reset();
-//        hanging.reset(auto);
+        landing.reset(auto);
         mineralArm.reset(auto);
         if (auto) {
             chassis.setupTelemetry(telemetry);
@@ -88,11 +88,11 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true)
                 .addData("[LB]/[LT]", "Slow / Fast").setRetained(true);
         chassis.setupTelemetry(telemetry);
-//        hanging.setupTelemetry(telemetry);
+        landing.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
-//        if (!hanging.latchIsBusy()) {
-//            hanging.resetLatch();
-//        }
+        if (!landing.latchIsBusy()) {
+            landing.resetLatch();
+        }
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -166,19 +166,19 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) {
-//                if (source.isPressed(Button.RIGHT_BUMPER)) {
-//                    // operate latch
-//                    if (currentY > 0.2) {
-//                        hanging.latchUp(source.isPressed(Button.BACK));
-//                    } else if (currentY < -0.2) {
-//                        hanging.latchDown(source.isPressed(Button.BACK));
-//                    } else if (!hanging.latchIsBusy()) {
-//                        hanging.latchStop();
-//                    }
-//                    return;
-//                } else if (!hanging.latchIsBusy()) {
-//                    hanging.latchStop();
-//                }
+                if (source.isPressed(Button.RIGHT_BUMPER)) {
+                    // operate latch
+                    if (currentY > 0.2) {
+                        landing.latchUp(source.isPressed(Button.BACK));
+                    } else if (currentY < -0.2) {
+                        landing.latchDown(source.isPressed(Button.BACK));
+                    } else if (!landing.latchIsBusy()) {
+                        landing.latchStop();
+                    }
+                    return;
+                } else if (!landing.latchIsBusy()) {
+                    landing.latchStop();
+                }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
 
@@ -187,14 +187,17 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
-                if (currentY>0.2) {
-                    mineralArm.slideOut(currentY*currentY);
-                } else if (currentY<-0.2) {
-                    mineralArm.slideIn(currentY*currentY);
+                if (!source.isPressed(Button.RIGHT_BUMPER)) {
+                    if (currentY > 0.2) {
+                        mineralArm.slideOut(currentY * currentY);
+                    } else if (currentY < -0.2) {
+                        mineralArm.slideIn(currentY * currentY);
+                    } else {
+                        mineralArm.slideStop();
+                    }
                 } else {
                     mineralArm.slideStop();
                 }
-
             }
         }, Events.Axis.Y_ONLY, Events.Side.LEFT);
 
@@ -203,10 +206,14 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
-                if (currentY>0.2) {
-                    mineralArm.shoulderUp(currentY*currentY);
-                } else if (currentY<-0.2) {
-                    mineralArm.shoulderDown(currentY*currentY);
+                if (!source.isPressed(Button.RIGHT_BUMPER)) {
+                    if (currentY > 0.2) {
+                        mineralArm.shoulderUp(currentY * currentY);
+                    } else if (currentY < -0.2) {
+                        mineralArm.shoulderDown(currentY * currentY);
+                    } else {
+                        mineralArm.shoulderStop();
+                    }
                 } else {
                     mineralArm.shoulderStop();
                 }
@@ -350,23 +357,22 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
 
     @MenuEntry(label = "Test Land", group = "Test Auto")
     public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException {
-        // chassis.resetOrientation();
-//        if ((hanging != null) && !skipLanding) {
-//            chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-//            hanging.latchUpInches(8);
-//            if (!Thread.currentThread().isInterrupted())
-//                Thread.sleep(500);
-//        }
-//        chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
-//        chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
-//        chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
-//
-//        chassis.rotateTo(0.3, -90); //Turn 90 degrees left
+        if ((landing != null) && !skipLanding) {
+            chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+            landing.latchUpInches(8);
+            if (!Thread.currentThread().isInterrupted())
+                Thread.sleep(500);
+        }
+        chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+        chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
+        chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+
+        chassis.rotateTo(0.3, -90); //Turn 90 degrees left
     }
 
     @MenuEntry(label = "Retract Latch", group = "Test Auto")
     public void retractLatch(EventManager em) throws InterruptedException {
-//        hanging.latchDownInches(8.5);
+        landing.latchDownInches(8.5);
     }
 
     public void initTeleOp() throws InterruptedException {
