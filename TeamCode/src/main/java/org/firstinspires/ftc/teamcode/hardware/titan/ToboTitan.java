@@ -182,6 +182,37 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
 
+        // left Stick-Y control arm slider In/Out
+        em2.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
+                                   float currentY, float changeY) throws InterruptedException {
+                if (currentY>0.2) {
+                    mineralArm.slideOut(currentY*currentY);
+                } else if (currentY<-0.2) {
+                    mineralArm.slideIn(currentY*currentY);
+                } else {
+                    mineralArm.slideStop();
+                }
+
+            }
+        }, Events.Axis.Y_ONLY, Events.Side.LEFT);
+
+        // rigth Stick-Y control arm shoulder up/down
+        em2.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
+                                   float currentY, float changeY) throws InterruptedException {
+                if (currentY>0.2) {
+                    mineralArm.shoulderUp(currentY*currentY);
+                } else if (currentY<-0.2) {
+                    mineralArm.shoulderDown(currentY*currentY);
+                } else {
+                    mineralArm.shoulderStop();
+                }
+
+            }
+        }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
     }
 
     @MenuEntry(label = "Drive Straight", group = "Test")
