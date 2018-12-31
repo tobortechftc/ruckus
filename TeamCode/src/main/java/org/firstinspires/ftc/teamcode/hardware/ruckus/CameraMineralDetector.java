@@ -5,11 +5,10 @@ import android.util.Log;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.hardware.titan.ToboTitan;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
@@ -142,6 +141,93 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
                                     sampleLocation = ToboRuckus.MineralDetection.SampleLocation.CENTER;
                                 } else if (goldXCoord == -1 && silverXCoord != -1) {
                                     sampleLocation = ToboRuckus.MineralDetection.SampleLocation.RIGHT;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (tfod != null) {
+            tfod.deactivate();
+            tfod.shutdown();
+            logger.verbose("Tfod shutdown", tfod);
+        }
+
+        switch (sampleLocation) {
+            case LEFT:
+                logger.verbose("SampleLocation: Left");
+            case RIGHT:
+                logger.verbose("SampleLocation: Right");
+            case CENTER:
+                logger.verbose("SampleLocation: Center");
+            case UNKNOWN:
+                logger.verbose("Sample Location: Unknown");
+            default:
+                logger.verbose("Sample Location: Unknown");
+        }
+        return sampleLocation;
+    }
+
+    public ToboTitan.MineralDetection.SampleLocation getGoldPositionTF_Titan(boolean isHanging) {
+        // The TFObjectDetector uses the camera frames from the VuforiaLocalizer, so we create that
+        // first.
+
+        logger.verbose("Start getGoldPositionTF()");
+        /** Activate Tensor Flow Object Detection. */
+        if (tfod != null) {
+            logger.verbose("Start tfod Activation");
+            tfod.activate();
+            logger.verbose("tfod activate: ", tfod);
+        }
+
+        ElapsedTime elapsedTime = new ElapsedTime();
+        elapsedTime.startTime();
+
+        int minDistanceFromTop;
+        if (isHanging)
+            minDistanceFromTop = 300;
+        else
+            minDistanceFromTop = 150;
+
+        ToboTitan.MineralDetection.SampleLocation sampleLocation = ToboTitan.MineralDetection.SampleLocation.UNKNOWN;
+        int goldXCoord = -1;
+        int silverXCoord = -1;
+        while (elapsedTime.seconds() < 2 && goldXCoord == -1 && silverXCoord == -1) {
+            if (tfod != null) {
+                // getUpdatedRecognitions() will return null if no new information is available since
+                // the last time that call was made.
+                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                if (updatedRecognitions != null) {
+                    if (updatedRecognitions.size() >= 2) {
+                        logger.verbose("Starting recognitions");
+                        logger.verbose("Recognitions: %d", (int) updatedRecognitions.size());
+                        int validRecognitions = 0;
+                        for (Recognition recognition :
+                                updatedRecognitions) {
+                            if (recognition.getTop() > minDistanceFromTop) {
+                                validRecognitions++;
+                            }
+                        }
+                        logger.verbose("Valid recognitions: %d", validRecognitions);
+                        if (validRecognitions >= 2) {
+                            for (Recognition recognition :
+                                    updatedRecognitions) {
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                                    goldXCoord = (int) recognition.getLeft();
+                                    logger.verbose("Gold X = %d", (int) goldXCoord);
+                                    logger.verbose("Gold -Y = %d", (int) recognition.getTop());
+                                } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                                    silverXCoord = (int) recognition.getLeft();
+                                    logger.verbose("Silver X = %d", (int) silverXCoord);
+                                    logger.verbose("Silver -Y = %d", (int) recognition.getTop());
+                                }
+                                if (goldXCoord != -1 && goldXCoord < silverXCoord) {
+                                    sampleLocation = ToboTitan.MineralDetection.SampleLocation.LEFT;
+                                } else if (goldXCoord != -1 && goldXCoord > silverXCoord) {
+                                    sampleLocation = ToboTitan.MineralDetection.SampleLocation.CENTER;
+                                } else if (goldXCoord == -1 && silverXCoord != -1) {
+                                    sampleLocation = ToboTitan.MineralDetection.SampleLocation.RIGHT;
                                 }
                             }
                         }
