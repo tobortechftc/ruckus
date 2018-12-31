@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
@@ -24,6 +25,8 @@ import java.util.Arrays;
  * Orientation sensors (optional): imu, imu2
  */
 public class SwerveChassis extends Logger<SwerveChassis> implements Configurable {
+
+    final private CoreSystem core;
 
     public enum DriveMode {
         STOP,      // not moving
@@ -118,6 +121,21 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     @Override
     public String getUniqueName() {
         return "chassis";
+    }
+
+    /**
+     * SwerveChassis constructor
+     */
+    public SwerveChassis(CoreSystem core) {
+        this.core = core;
+    }
+
+    /**
+     * Used only for ToboRuckus, old code
+     */
+    @Deprecated
+    public SwerveChassis() {
+        this.core = new CoreSystem(); // Prevents null pointer exception
     }
 
     @Override

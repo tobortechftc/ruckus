@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
@@ -21,6 +22,8 @@ import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
 public class LandingLatch extends Logger<LandingLatch> implements Configurable{
 
+    final private CoreSystem core;
+
     private DcMotor latch;
     private Servo marker;
     private double latch_power = .95;
@@ -32,8 +35,16 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
     private final int LATCH_COUNT_PER_INCH = 1198;
     private boolean markerIsDown = false;
     private ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public String getUniqueName(){return "LandingLatch";}
+
+    /**
+     * Landing latch constructor
+     */
+    public LandingLatch(CoreSystem core) {
+        this.core = core;
+    }
 
     @Override
     public void setAdjustmentMode(boolean on) {

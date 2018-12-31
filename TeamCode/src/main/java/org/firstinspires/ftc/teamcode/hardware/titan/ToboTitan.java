@@ -16,7 +16,9 @@ import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.CameraMineralDetector;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.Hanging;
+import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
+import org.firstinspires.ftc.teamcode.support.YieldHandler;
 import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
 import org.firstinspires.ftc.teamcode.support.events.Button;
 import org.firstinspires.ftc.teamcode.support.events.EventManager;
@@ -44,7 +46,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     public MineralArm mineralArm;
     public CameraMineralDetector cameraMineralDetector;
     public LandingLatch landing;
-
+    private CoreSystem core;
 
     @Override
     public String getName() {
@@ -54,17 +56,18 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     @Override
     public void configure(Configuration configuration, Telemetry telemetry, boolean auto) {
         this.telemetry = telemetry;
-
         if (auto) {
             cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
             cameraMineralDetector.configure(configuration);
         }
-        chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
+        this.core = new CoreSystem();
+        chassis = new SwerveChassis(this.core).configureLogging("Swerve", logLevel); // Log.DEBUG
         chassis.configure(configuration, auto);
-        landing = new LandingLatch().configureLogging("LandingLatch", logLevel);
+        landing = new LandingLatch(this.core).configureLogging("LandingLatch", logLevel);
         landing.configure(configuration, auto);
-        mineralArm = new MineralArm().configureLogging("MineralArm", logLevel);
+        mineralArm = new MineralArm(this.core).configureLogging("MineralArm", logLevel);
         mineralArm.configure(configuration);
+
     }
 
     public void AutoRoutineTest() throws InterruptedException {

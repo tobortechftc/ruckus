@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.components.AdjustableServo;
+import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
@@ -27,6 +28,8 @@ import java.math.BigDecimal;
  * Motors: shoulder and arm_slider <br />
  */
 public class MineralArm extends Logger<MineralArm> implements Configurable {
+
+    final private CoreSystem core;
 
     public enum SweeperMode {INTAKE, PUSH_OUT, VERTICAL_STOP, HORIZONTAL_STOP}
 
@@ -54,6 +57,13 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     private int sliderAutoPark = 650; // position for Auto Out parking;
     private double sliderPower = 0.8;
     private double shoulderPower = 0.8;
+
+    /**
+     * MineralArm constructor
+      */
+    public MineralArm(CoreSystem core) {
+        this.core = core;
+    }
 
     @Override
     public String getUniqueName() {
