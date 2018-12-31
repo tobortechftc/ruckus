@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "Auto-Gold-Land-Park", group = "Ruckus")
+@Autonomous(name = "Titan-Gold-Land-Park", group = "Titan")
 public class TitanAutoGoldLandPark extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
@@ -61,7 +61,7 @@ public class TitanAutoGoldLandPark extends LinearOpMode {
         }
         // Ste-3: sample mission
         if (opModeIsActive()) {
-            // robot.retrieveSample(sam_loc);
+             robot.scoreSample(sam_loc);
         }
         //Step-4: align with walls
         if (opModeIsActive()) {
@@ -69,14 +69,14 @@ public class TitanAutoGoldLandPark extends LinearOpMode {
         }
         // Step-5: from sample mission to dumping marker
         if (opModeIsActive()) {
-            //robot.hanging.markerDown();
+            robot.landing.markerDown();
             robot.chassis.driveStraightAuto(0.3, 20, 20, 3000);
             if (!Thread.currentThread().isInterrupted())
                 sleep(200);
         }
         // Step-6: parking on the crater rim
         if (opModeIsActive()) {
-            //robot.goParking(ToboRuckus.Side.GOLD);
+            robot.goParking(ToboTitan.Side.GOLD);
         }
 
         /*

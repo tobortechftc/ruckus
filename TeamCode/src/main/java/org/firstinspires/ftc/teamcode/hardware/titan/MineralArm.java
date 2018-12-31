@@ -46,6 +46,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     private DcMotor armSlider;
     private CRServo sweeperServo;
     private AdjustableServo gate;
+    private Servo pusher;
     private boolean adjustmentMode = false;
     private AnalogInput potentiometer;
 
@@ -103,6 +104,14 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
 
     public void stopSweeper() {
         this.sweeperServo.setPower(SWEEPER_OFF);
+    }
+
+    public void pusherPush(){
+
+    }
+
+    public void pusherPull(){
+
     }
 
     @Adjustable(min = 0.0, max = 1.0, step = 0.01)

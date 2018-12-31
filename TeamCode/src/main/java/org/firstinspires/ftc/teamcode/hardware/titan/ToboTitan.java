@@ -16,6 +16,8 @@ import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.CameraMineralDetector;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.Hanging;
+import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralIntake;
+import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.YieldHandler;
@@ -298,71 +300,96 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
     }
 
+    @MenuEntry(label = "Test Sample", group = "Test Auto")
+    public void scoreSample(ToboTitan.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
+        switch (sam_loc) {
+            case CENTER: // center
+                chassis.driveStraightAuto(0.35, 43, 9, Integer.MAX_VALUE);
+                break;
+            case RIGHT:
+                chassis.driveStraightAuto(0.35, 58, 53, Integer.MAX_VALUE);
+                break;
+            case LEFT:
+                chassis.driveStraightAuto(0.35, 55, -37, Integer.MAX_VALUE);
+                break;
+            default: // go straight like center
+                chassis.driveStraightAuto(0.35, 43, 9, Integer.MAX_VALUE);
+        }
+        mineralArm.pusherPush();
+        chassis.driveStraightAuto(0.35, 10, 0, Integer.MAX_VALUE);
+        mineralArm.pusherPull();
+    }
+
     public enum Side {
         GOLD, SILVER;
     }
 
     @MenuEntry(label = "Test Sample", group = "Test Auto")
     public void alignWithWallsGoldSide(ToboTitan.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
-//        //drive to default start position for gold side
-//        chassis.driveStraightAuto(0.35, 20, 0, Integer.MAX_VALUE);
-//        chassis.rotateTo(0.3, 135);
-//        //from here, three different routine will converge into the depot
-//        if (!Thread.currentThread().isInterrupted())
-//            Thread.sleep(100);
-//
-//        //align with right wall
-//
-//        double detectedRightDistance = chassis.distanceToRight();
-//        switch (sam_loc) {
-//            case CENTER: // center
-//                detectedRightDistance = Math.min(60, detectedRightDistance);
-//                break;
-//            case RIGHT:
-//                detectedRightDistance = Math.min(100, detectedRightDistance);
-//                break;
-//            case LEFT:
-//                detectedRightDistance = Math.min(20, detectedRightDistance);
-//                break;
-//            default: // go straight like center
-//                detectedRightDistance = Math.min(60, detectedRightDistance);
-//        }
-//        chassis.driveStraightAuto(0.30, detectedRightDistance - 15, +90, 2000);
-//        detectedRightDistance = chassis.distanceToRight();
-//        if (!Thread.currentThread().isInterrupted())
-//            Thread.sleep(100);
-//        chassis.driveStraightAuto(0.18, detectedRightDistance - 15, +90, 2000);
-//
-//        if (!Thread.currentThread().isInterrupted())
-//            Thread.sleep(100);
-//
-//        double detectedBackDistance = chassis.distanceToBack();
-//        switch (sam_loc) {
-//            case CENTER: // center
-//                detectedBackDistance = Math.min(50, detectedBackDistance);
-//                break;
-//            case RIGHT:
-//                detectedBackDistance = Math.min(20, detectedBackDistance);
-//                break;
-//            case LEFT:
-//                detectedBackDistance = Math.min(80, detectedBackDistance);
-//                break;
-//            default: // go straight like center
-//                detectedBackDistance = Math.min(50, detectedBackDistance);
-//        }
-//
-//        chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance, 0, 3000);
-//        detectedBackDistance = chassis.distanceToBack();
-//        if (!Thread.currentThread().isInterrupted())
-//            Thread.sleep(100);
-//        chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance, 0, 3000);
+        //drive to default start position for gold side
+        chassis.driveStraightAuto(0.35, 20, 0, Integer.MAX_VALUE);
+        chassis.rotateTo(0.3, -45);
+        //from here, three different routine will converge into the depot
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
+
+        //align with right wall
+
+        double detectedLeftDistance = chassis.distanceToLeft();
+        switch (sam_loc) {
+            case CENTER: // center
+                detectedLeftDistance = Math.min(60, detectedLeftDistance);
+                break;
+            case RIGHT:
+                detectedLeftDistance = Math.min(100, detectedLeftDistance);
+                break;
+            case LEFT:
+                detectedLeftDistance = Math.min(20, detectedLeftDistance);
+                break;
+            default: // go straight like center
+                detectedLeftDistance = Math.min(60, detectedLeftDistance);
+        }
+        chassis.driveStraightAuto(0.30, detectedLeftDistance - 15, -90, 2000);
+        detectedLeftDistance = chassis.distanceToLeft();
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
+        chassis.driveStraightAuto(0.18, detectedLeftDistance - 15, -90, 2000);
+
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
+
+        double detectedFrontDistance = chassis.distanceToFront();
+        switch (sam_loc) {
+            case CENTER: // center
+                detectedFrontDistance = Math.min(50, detectedFrontDistance);
+                break;
+            case RIGHT:
+                detectedFrontDistance = Math.min(20, detectedFrontDistance);
+                break;
+            case LEFT:
+                detectedFrontDistance = Math.min(80, detectedFrontDistance);
+                break;
+            default: // go straight like center
+                detectedFrontDistance = Math.min(50, detectedFrontDistance);
+        }
+
+        chassis.driveStraightAuto(0.30, detectedFrontDistance-30.0 , 0, 3000);
+        detectedFrontDistance = chassis.distanceToFront();
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
+        chassis.driveStraightAuto(0.18, detectedFrontDistance-30.0 , 0, 3000);
+    }
+
+    public void goParking(ToboTitan.Side side) throws InterruptedException {
+        chassis.driveAlongTheWall(0.4, -145, 5, side == ToboTitan.Side.GOLD ? SwerveChassis.Wall.LEFT : SwerveChassis.Wall.RIGHT, 4000);
+        chassis.driveStraightAuto(0.5, -40, side == ToboTitan.Side.GOLD ? +10 : -10, 2000);
     }
 
     @MenuEntry(label = "Test Land", group = "Test Auto")
     public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException {
         if ((landing != null) && !skipLanding) {
             chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-            landing.latchUpInches(8);
+            landing.latchUpInches(7.75);
             if (!Thread.currentThread().isInterrupted())
                 Thread.sleep(500);
         }
