@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
-import org.firstinspires.ftc.teamcode.hardware.ruckus.CameraMineralDetector;
+import org.firstinspires.ftc.teamcode.hardware.titan.CameraMineralDetector;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.Hanging;
 import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
@@ -454,6 +454,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
          *
          * @return SampleLocation Left, Right, Center, or Unknown
          */
+        @Deprecated
         public SampleLocation getGoldPositionCV() {
             Mat mat = getMatFromCamera();
             Mat goldHSV = new Mat();
