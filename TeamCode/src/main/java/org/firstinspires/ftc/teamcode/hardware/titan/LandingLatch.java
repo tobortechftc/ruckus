@@ -158,8 +158,11 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
         latch.setTargetPosition(tar_pos);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
-        while (latch.isBusy() && (runtime.seconds()<5.0)) {
+        while (latch.isBusy() && runtime.seconds()<5.0) {
             cur_pos = latch.getCurrentPosition();
+
+            // yield handler
+            this.core.yield();
         }
         latchStop();
     }
@@ -173,8 +176,11 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
         latch.setTargetPosition(tar_pos);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
-        while (latch.isBusy() && (runtime.seconds()<5.0)) {
+        while (latch.isBusy() && runtime.seconds()<5.0) {
             cur_pos = latch.getCurrentPosition();
+
+            // yield handler
+            this.core.yield();
         }
         latchStop();
     }

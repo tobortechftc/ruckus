@@ -42,11 +42,11 @@ import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABE
 
 public class ToboTitan extends Logger<ToboTitan> implements Robot {
     private Telemetry telemetry;
+    public CameraMineralDetector cameraMineralDetector;
     public SwerveChassis chassis;
     public MineralArm mineralArm;
-    public CameraMineralDetector cameraMineralDetector;
     public LandingLatch landing;
-    private CoreSystem core;
+    public CoreSystem core;
 
     @Override
     public String getName() {

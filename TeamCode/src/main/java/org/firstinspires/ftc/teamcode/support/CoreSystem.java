@@ -20,6 +20,7 @@ public class CoreSystem {
         yieldHandler.on_yield();
     }
 
+    // TODO rename to yieldFor
     public void yield_for(double seconds) {
         long millisec = Math.round(seconds * 1000);
         long start = System.currentTimeMillis();

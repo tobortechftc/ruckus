@@ -187,6 +187,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 e.printStackTrace();
             }
             dist = frontRangeSensor.getDistance(DistanceUnit.CM);
+
+            // yield handler
+            this.core.yield();
         }
         if (dist > maxRange)
             dist = maxRange;
@@ -205,6 +208,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 e.printStackTrace();
             }
             dist = backRangeSensor.getDistance(DistanceUnit.CM);
+
+            // yield handler
+            this.core.yield();
         }
         if (dist > maxRange)
             dist = maxRange;
@@ -223,6 +229,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 e.printStackTrace();
             }
             dist = leftRangeSensor.getDistance(DistanceUnit.CM);
+
+            // yield handler
+            this.core.yield();
         }
         if (dist > maxRange)
             dist = maxRange;
@@ -241,6 +250,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 e.printStackTrace();
             }
             dist = rightRangeSensor.getDistance(DistanceUnit.CM);
+
+            // yield handler
+            this.core.yield();
         }
         if (dist > maxRange)
             dist = maxRange;
@@ -414,6 +426,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 break;
             if (Thread.currentThread().isInterrupted())
                 break;
+
+            // yield handler
+            this.core.yield();
         }
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(0);
         driveMode = DriveMode.STOP;
@@ -516,6 +531,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             //stop at stop button bring pushed
             if (Thread.currentThread().isInterrupted())
                 break;
+
+            // yield handler
+            this.core.yield();
         }
         //stop everything
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(0);
@@ -603,6 +621,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             }
             if (distance - maxTraveled < 10)
                 break;
+
+            // yield handler
+            this.core.yield();
         }
         driveAndSteer(0, angle, true);
     }
@@ -711,6 +732,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             //stop pressed, break
             if (Thread.currentThread().isInterrupted()) break;
             lastReading = currentHeading;
+
+            // yield handler
+            this.core.yield();
         }
         for (WheelAssembly wheel : wheels)
             wheel.motor.setPower(0);
