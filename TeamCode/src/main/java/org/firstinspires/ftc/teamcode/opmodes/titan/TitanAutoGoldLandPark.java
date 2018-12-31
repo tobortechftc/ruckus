@@ -3,9 +3,11 @@ package org.firstinspires.ftc.teamcode.opmodes.titan;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
+import org.firstinspires.ftc.teamcode.hardware.titan.CameraMineralDetector;
 import org.firstinspires.ftc.teamcode.hardware.titan.ToboTitan;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
@@ -53,7 +55,7 @@ public class TitanAutoGoldLandPark extends LinearOpMode {
         // Step-1: check random sample position
         ToboTitan.MineralDetection.SampleLocation sam_loc = ToboTitan.MineralDetection.SampleLocation.CENTER;
         if (opModeIsActive()) {
-            sam_loc = robot.cameraMineralDetector.getGoldPositionTF_Titan(true);
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
         }
         // Step-2: landing mission
         if (opModeIsActive()) {

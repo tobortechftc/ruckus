@@ -61,7 +61,7 @@ public class RuckusAutoSilverLandPark extends LinearOpMode {
         if (opModeIsActive()) {
             robot.landAndDetach(null, false);
         }
-        // Ste-3: sample mission
+        // Step-3: sample mission
         if (opModeIsActive()) {
             robot.retrieveSample(sam_loc);
         }
