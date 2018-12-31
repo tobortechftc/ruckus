@@ -73,6 +73,14 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private boolean setImuTelemetry = false;//unless debugging, don't set telemetry for imu
     private boolean setRangeSensorTelemetry = false;//unless debugging, don't set telemetry for range sensor
 
+    public void enableRangeSensorTelemetry() { // must be call before reset() or setupTelemetry()
+        setRangeSensorTelemetry = true;
+    }
+
+    public void enableImuTelemetry() {
+        setImuTelemetry = true;
+    }
+
     @Adjustable(min = 8.0, max = 18.0, step = 0.02)
     public double getTrack() {
         return track;
