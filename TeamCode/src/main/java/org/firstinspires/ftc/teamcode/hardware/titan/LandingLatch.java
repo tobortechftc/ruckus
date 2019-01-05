@@ -27,8 +27,8 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
     private DcMotor latch;
     private Servo marker;
     private double latch_power = .95;
-    private final double MARKER_UP = 0.42;
-    private final double MARKER_DOWN = 0.05;
+    private final double MARKER_UP = 0.05;
+    private final double MARKER_DOWN = 0.42;
     private final int MAX_LATCH_POS = 10400; //Max distance is 8.75 inches
     private final int LATCH_ENDGAME_POS = 6646; // position for end game to latch
     private final int MIN_LATCH_POS = 0;

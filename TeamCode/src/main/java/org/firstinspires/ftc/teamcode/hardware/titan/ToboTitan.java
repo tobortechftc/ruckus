@@ -304,16 +304,16 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
     public void scoreSample(ToboTitan.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
         switch (sam_loc) {
             case CENTER: // center
-                chassis.driveStraightAuto(0.35, 43, 9, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 43, 0, Integer.MAX_VALUE);
                 break;
             case RIGHT:
-                chassis.driveStraightAuto(0.35, 58, 53, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 58, 45, Integer.MAX_VALUE);
                 break;
             case LEFT:
-                chassis.driveStraightAuto(0.35, 55, -37, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 55, -45, Integer.MAX_VALUE);
                 break;
             default: // go straight like center
-                chassis.driveStraightAuto(0.35, 43, 9, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 58, 0, Integer.MAX_VALUE);
         }
         mineralArm.pusherPush();
         chassis.driveStraightAuto(0.35, 10, 0, Integer.MAX_VALUE);
@@ -329,6 +329,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
         //drive to default start position for gold side
         chassis.driveStraightAuto(0.35, 20, 0, Integer.MAX_VALUE);
         chassis.rotateTo(0.3, -45);
+        chassis.rotateTo(0.18, -45);
         //from here, three different routine will converge into the depot
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
@@ -393,9 +394,9 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             if (!Thread.currentThread().isInterrupted())
                 Thread.sleep(500);
         }
-        chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+        chassis.driveStraightAuto(0.25, -4, 0, 3000); //Drive back ~2 in.
         chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
-        chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+        chassis.driveStraightAuto(0.25, 4, 0, 3000); //Drive forward ~2 in.
 
         chassis.rotateTo(0.3, -90); //Turn 90 degrees left
     }

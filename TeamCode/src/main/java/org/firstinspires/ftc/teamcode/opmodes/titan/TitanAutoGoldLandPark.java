@@ -10,6 +10,8 @@ import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.hardware.titan.CameraMineralDetector;
 import org.firstinspires.ftc.teamcode.hardware.titan.ToboTitan;
 import org.firstinspires.ftc.teamcode.support.Logger;
+import org.firstinspires.ftc.teamcode.support.OpModeTerminationException;
+import org.firstinspires.ftc.teamcode.support.YieldHandler;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
@@ -17,7 +19,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  */
 
 @Autonomous(name = "Titan-Gold-Land-Park", group = "Titan")
-public class TitanAutoGoldLandPark extends LinearOpMode {
+public class TitanAutoGoldLandPark extends LinearOpMode implements YieldHandler{
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -46,6 +48,7 @@ public class TitanAutoGoldLandPark extends LinearOpMode {
             handleException(E);
         }
 
+        robot.core.set_yield_handler(this);
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         if (opModeIsActive()) {
@@ -72,7 +75,7 @@ public class TitanAutoGoldLandPark extends LinearOpMode {
         // Step-5: from sample mission to dumping marker
         if (opModeIsActive()) {
             robot.landing.markerDown();
-            robot.chassis.driveStraightAuto(0.3, 20, 20, 3000);
+            robot.chassis.driveStraightAuto(0.3, -20, 20, 3000);
             if (!Thread.currentThread().isInterrupted())
                 sleep(200);
         }
@@ -107,5 +110,11 @@ public class TitanAutoGoldLandPark extends LinearOpMode {
             if (--linesToShow == 0) break;
         }
         telemetry.update();
+    }
+
+    @Override
+    public void on_yield() {
+        if (!opModeIsActive())
+            throw new OpModeTerminationException();
     }
 }
