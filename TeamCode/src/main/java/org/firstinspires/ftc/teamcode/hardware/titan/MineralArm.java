@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode.hardware.titan;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -31,33 +29,52 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
 
     final private CoreSystem core;
 
-    public enum SweeperMode {INTAKE, PUSH_OUT, VERTICAL_STOP, HORIZONTAL_STOP}
+    public enum ArmMode {INTAKE, VERTICAL_POS, DUMP_SHORT, DUMP_LONG}
 
     // open and closed positions for the box gate
     // actual servo positions are configured via <code>AdjustableServo</code>
     public static final double GATE_OPEN = 0.0;
+    public static final double GATE_PARTIAL_OPEN = 0.3;
     public static final double GATE_CLOSED = 1.0;
+    public static final double PUSHER_UP = 1.0;
+    public static final double PUSHER_DOWN = 0.0;
 
     public static final double SWEEPER_OFF = 0.0;
     public static final double SWEEPER_IN = -1.0;
     public static final double SWEEPER_OUT = 1.0;
 
+    public static final int SHOULDER_INIT_POS = 0;
+    public static final int SHOULDER_VERTICAL_POS = 4000;
+    public static final int SHOULDER_DUMP_SHORT_POS = 5000;
+    public static final int SHOULDER_DUMP_LONG_POS = 6000;
+    public static final int SHOULDER_INTAKE_POS = 10000;
+
+    public static final int ARM_SLIDE_MAX_POS = 6000;
+    public static final int ARM_SLIDE_DUMP_POS = 6000;
+    public static final int ARM_SLIDE_MIN_INTAKE_POS = 0;
+    public static final int ARM_SLIDE_INIT_POS = 0;
+
     private DcMotor shoulder;
     private DcMotor armSlider;
     private CRServo sweeperServo;
     private AdjustableServo gate;
-    private Servo pusher;
+    private AdjustableServo pusher;
     private boolean adjustmentMode = false;
     private AnalogInput potentiometer;
 
     // slider encoder positions
     private int sliderContracted = 0; // contracted
-    private int sliderExtended = 1520; // fully extended
+    private int sliderExtended = ARM_SLIDE_MAX_POS; // fully extended
     private int sliderDump = 300; // position to dump minerals into delivery box
     private int sliderInitOut = 450; // position for initial TeleOp out
     private int sliderAutoPark = 650; // position for Auto Out parking;
     private double sliderPower = 0.8;
     private double shoulderPower = 0.8;
+    private int shoulder_init_pos = 0;
+    private int shoulder_intake_pos = SHOULDER_INTAKE_POS;
+    private int shoulder_dump_short_pos = SHOULDER_DUMP_SHORT_POS;
+    private int shoulder_dump_long_pos = SHOULDER_DUMP_LONG_POS;
+    private int shoulder_vertical_pos = SHOULDER_VERTICAL_POS;
 
     /**
      * MineralArm constructor
@@ -86,6 +103,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
             this.shoulder.setPower(0);
             this.sweeperServo.setPower(SWEEPER_OFF);
             this.gate.setPosition(GATE_CLOSED);
+            this.pusherUp();
             debug("Adjustment: OFF, sweeper: %.2f, gate: %.1f, shoulder: %s / %d, slider: %s / %d",
                     sweeperServo.getPower(), gate.getPosition(),
                     shoulder.getMode(), shoulder.getCurrentPosition(),
@@ -107,11 +125,11 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     }
 
     public void pusherPush(){
-
+       pusher.setPosition(PUSHER_DOWN);
     }
 
-    public void pusherPull(){
-
+    public void pusherUp(){
+        pusher.setPosition(PUSHER_UP);
     }
 
     @Adjustable(min = 0.0, max = 1.0, step = 0.01)
@@ -140,6 +158,39 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
             this.shoulder.setTargetPosition(0);
             this.shoulder.setPower(-1 * power);
         }
+    }
+
+    public void setArmPosition(ArmMode mode) {
+        switch(mode) {
+            case INTAKE:
+                setShoulderPosition(shoulder_intake_pos);
+                moveSlider(ARM_SLIDE_MIN_INTAKE_POS);
+                break;
+            case DUMP_SHORT:
+                setShoulderPosition(shoulder_dump_short_pos);
+                moveSlider(ARM_SLIDE_DUMP_POS);
+                break;
+            case DUMP_LONG:
+                setShoulderPosition(shoulder_dump_long_pos);
+                moveSlider(ARM_SLIDE_DUMP_POS);
+                break;
+            case VERTICAL_POS:
+                setShoulderPosition(shoulder_vertical_pos);
+                // moveSlider(ARM_SLIDE_DUMP_POS);
+                break;
+        }
+    }
+
+    public Progress setShoulderPosition(int pos) {
+        this.shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.shoulder.setTargetPosition(pos);
+        this.shoulder.setPower(shoulderPower);
+        return new Progress() {
+            @Override
+            public boolean isDone() {
+                return shoulder.isBusy();
+            }
+        };
     }
 
     public int getSliderContracted() {
@@ -192,9 +243,23 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public void setSliderPower(double sliderPower) {
         this.sliderPower = sliderPower;
     }
-    public void slideIn(double scale) { if (armSlider!=null) armSlider.setPower(sliderPower*scale);}
-    public void slideOut(double scale) { if (armSlider!=null) armSlider.setPower(-sliderPower*scale);}
-    public void slideStop() { if (armSlider!=null) armSlider.setPower(0);}
+    public void slideIn(double scale) {
+        if (armSlider==null)
+            return;
+        armSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armSlider.setPower(sliderPower*scale);
+    }
+    public void slideOut(double scale) {
+        if (armSlider==null) return;
+        armSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armSlider.setPower(-sliderPower*scale);
+    }
+
+    public void slideStop() {
+        if (armSlider==null) return;
+        armSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armSlider.setPower(0);
+    }
 
     public void shoulderUp(double scale) { if (shoulder!=null) shoulder.setPower(shoulderPower*scale);}
     public void shoulderDown(double scale) { if (shoulder!=null) shoulder.setPower(-shoulderPower*scale);}
@@ -202,12 +267,19 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
 
     public void configure(Configuration configuration) {
         sweeperServo = configuration.getHardwareMap().crservo.get("sv_sweeper");
+        sweeperServo.setPower(0);
 
         gate = new AdjustableServo(GATE_OPEN, GATE_CLOSED).configureLogging(
                 logTag + ":boxGate", logLevel
         );
         gate.configure(configuration.getHardwareMap(), "arm_gate");
         configuration.register(gate);
+
+        pusher = new AdjustableServo(PUSHER_DOWN, PUSHER_UP).configureLogging(
+                logTag + ":pusher", logLevel
+        );
+        pusher.configure(configuration.getHardwareMap(), "pusher");
+        configuration.register(pusher);
 
         shoulder = configuration.getHardwareMap().tryGet(DcMotor.class, "shoulder");
         shoulder.setDirection(DcMotor.Direction.FORWARD);
@@ -274,6 +346,11 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
             }
         };
     }
+
+    public void gateOpen() { gate.setPosition(GATE_OPEN);}
+    public void gatePartialOpen() { gate.setPosition(GATE_PARTIAL_OPEN);}
+    public void gateClose() { gate.setPosition(GATE_CLOSED);}
+
 
     public boolean isGateOpen() {
         return Math.abs(gate.getPosition() - GATE_OPEN) < 0.01;

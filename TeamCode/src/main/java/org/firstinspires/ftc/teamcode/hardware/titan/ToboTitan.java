@@ -93,6 +93,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true)
                 .addData("[LB]/[LT]", "Slow / Fast").setRetained(true);
         chassis.setupTelemetry(telemetry);
+        mineralArm.setupTelemetry(telemetry);
         landing.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
         if (!landing.latchIsBusy()) {
@@ -317,7 +318,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
         }
         mineralArm.pusherPush();
         chassis.driveStraightAuto(0.35, 10, 0, Integer.MAX_VALUE);
-        mineralArm.pusherPull();
+        mineralArm.pusherUp();
     }
 
     public enum Side {
