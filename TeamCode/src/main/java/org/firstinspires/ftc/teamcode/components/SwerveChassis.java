@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.hardware17.SwerveSystem;
 import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
@@ -14,6 +15,8 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 import org.opencv.core.Mat;
 
 import java.util.Arrays;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Swerve chassis consists of 4 wheels with a Servo and DcMotor attached to each.
@@ -57,7 +60,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     // array contains the same wheel assemblies as above variables
     //  and is convenient to use when actions have to be performed on all 4
     private WheelAssembly[] wheels = new WheelAssembly[4];
-    private CombinedOrientationSensor orientationSensor;
+    public CombinedOrientationSensor orientationSensor;
 
     private DistanceSensor frontRangeSensor;
     private DistanceSensor backRangeSensor;
@@ -71,7 +74,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
     private boolean useScalePower = true;//
     private boolean setImuTelemetry = false;//unless debugging, don't set telemetry for imu
-    private boolean setRangeSensorTelemetry = false;//unless debugging, don't set telemetry for range sensor
+    private boolean setRangeSensorTelemetry = true;//unless debugging, don't set telemetry for range sensor
 
     public void enableRangeSensorTelemetry() { // must be call before reset() or setupTelemetry()
         setRangeSensorTelemetry = true;
@@ -183,6 +186,49 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         configuration.register(this);
     }
 
+
+    /***
+     * returns distance of given range sensor
+     * @param direction sensor direction
+     * @return distance
+     */
+    public double getDistance(sensor direction) {
+        double dist = 0;
+        int count = 0;
+        DistanceSensor rangeSensor;
+
+        switch (direction) {
+            case FRONT: rangeSensor = frontRangeSensor;
+                break;
+            case LEFT: rangeSensor = leftRangeSensor;
+                break;
+            case RIGHT: rangeSensor = rightRangeSensor;
+                break;
+            case BACK: rangeSensor = backRangeSensor;
+                break;
+            default: rangeSensor = null;
+        }
+
+        if (rangeSensor == null)
+            return 0;
+        dist = rangeSensor.getDistance(DistanceUnit.CM);
+        while (dist > maxRange && (++count) < 5) {
+            try {
+                sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            dist = rangeSensor.getDistance(DistanceUnit.CM);
+
+            // yield handler
+            this.core.yield();
+        }
+        if (dist > maxRange)
+            dist = maxRange;
+        return dist;
+    }
+
+
     public double distanceToFront() {
         if (frontRangeSensor == null)
             return 0;
@@ -190,7 +236,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         int count = 0;
         while (dist > maxRange && (++count) < 5) {
             try {
-                Thread.sleep(10);
+                sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -211,7 +257,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         int count = 0;
         while (dist > maxRange && (++count) < 5) {
             try {
-                Thread.sleep(10);
+                sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -232,7 +278,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         int count = 0;
         while (dist > maxRange && (++count) < 5) {
             try {
-                Thread.sleep(10);
+                sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -253,7 +299,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         int count = 0;
         while (dist > maxRange && (++count) < 5) {
             try {
-                Thread.sleep(10);
+                sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -435,6 +481,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             if (Thread.currentThread().isInterrupted())
                 break;
 
+            sleep(0);
             // yield handler
             this.core.yield();
         }
@@ -442,6 +489,9 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         driveMode = DriveMode.STOP;
     }
 
+    public enum sensor {
+        FRONT, LEFT, RIGHT, BACK;
+    }
     public enum Wall {
         LEFT, RIGHT;
     }
@@ -689,7 +739,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
     public void rotateTo(double power, double finalHeading) throws InterruptedException {
         rawRotateTo(power, finalHeading);
-        Thread.sleep(200);
+        sleep(200);
         rawRotateTo(0.18, finalHeading);
     }
 
@@ -740,7 +790,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             //stop pressed, break
             if (Thread.currentThread().isInterrupted()) break;
             lastReading = currentHeading;
-
+            sleep(0);
             // yield handler
             this.core.yield();
         }
@@ -772,7 +822,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             wheels[index].servo.setPosition(newPositions[index]);
         }
         if (!Thread.currentThread().isInterrupted())
-            Thread.sleep((int) Math.round(2 * maxServoAdjustment));
+            sleep((int) Math.round(2 * maxServoAdjustment));
     }
 
     /**

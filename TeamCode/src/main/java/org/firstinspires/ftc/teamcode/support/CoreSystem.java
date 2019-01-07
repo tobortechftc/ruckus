@@ -6,11 +6,18 @@ package org.firstinspires.ftc.teamcode.support;
 
 public class CoreSystem {
 
-    private YieldHandler yieldHandler;
+    private YieldHandler yieldHandler = DEFAULT_HANDLER;
 
     public CoreSystem() {
 
     }
+
+    final static YieldHandler DEFAULT_HANDLER = new YieldHandler() {
+        @Override
+        public void on_yield() {
+            // Default handler, does nothing
+        }
+    };
 
     public void set_yield_handler(YieldHandler y) {
         yieldHandler = y;

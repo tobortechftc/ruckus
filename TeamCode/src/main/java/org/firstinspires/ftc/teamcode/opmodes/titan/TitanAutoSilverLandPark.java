@@ -62,8 +62,7 @@ public class TitanAutoSilverLandPark extends LinearOpMode implements YieldHandle
         robot.landAndDetach(null, false);
 
         // Ste-3: sample mission
-        //robot.retrieveSample(sam_loc);
-        robot.chassis.driveStraightAuto(power, 10, 0, timeout);
+        robot.scoreSample(sam_loc);
 
         //Step-4: align with walls
         robot.chassis.driveStraightAuto(power, -31.6, 0, timeout);

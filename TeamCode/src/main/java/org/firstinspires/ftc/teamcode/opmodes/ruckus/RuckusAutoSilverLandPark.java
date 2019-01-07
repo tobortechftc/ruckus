@@ -42,9 +42,9 @@ public class RuckusAutoSilverLandPark extends LinearOpMode {
 
             telemetry.addData("Robot is ready", "Press Play");
             telemetry.update();
-        } catch (Exception E) {
-            telemetry.addData("Init Failed", E.getMessage());
-            handleException(E);
+        } catch (Exception e) {
+            telemetry.addData("Init Failed", e.getMessage());
+            handleException(e);
         }
 
         // Wait for the game to start (driver presses PLAY)
@@ -54,7 +54,7 @@ public class RuckusAutoSilverLandPark extends LinearOpMode {
         // Step-1: check random sample position
         ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
         if (opModeIsActive()) {
-            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(false);
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
         }
 
         // Step-2: landing mission

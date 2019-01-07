@@ -480,12 +480,12 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }
         intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
 //        intake.sweeperOut();
-        if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(100);
-        chassis.driveStraightAuto(0.35, 10, 0, Integer.MAX_VALUE);
-        if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(100);
-        intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
+        //if (!Thread.currentThread().isInterrupted())
+        //    Thread.sleep(100);
+        chassis.driveStraightAuto(0.35, 7, 0, Integer.MAX_VALUE);
+        //if (!Thread.currentThread().isInterrupted())
+        //    Thread.sleep(100);
+        //intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
         intake.stopSweeper();
     }
 
