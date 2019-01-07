@@ -142,16 +142,44 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         */
     }
 
+    public double getRoll() {
+        if (sensors.isEmpty()) return 0.0d;
+
+        double roll1 = hardwareReading2(sensors.get("imu"));
+        double roll2 = hardwareReading2(sensors.get("imu2"));
+        return (roll1 + roll2) / 2;
+    }
+
+    public double getPitch() {
+        if (sensors.isEmpty()) return 0.0d;
+
+        double p1 = hardwareReading3(sensors.get("imu"));
+        double p2 = hardwareReading3(sensors.get("imu2"));
+        return (p1 + p2) / 2;
+    }
+
     public void setupTelemetry(Telemetry.Line line) {
         if (sensors.isEmpty()) {
             line.addData("imu", "Not Found").setRetained(true);
         } else {
             for (Map.Entry<String, BNO055IMU> entry : sensors.entrySet()) {
                 final BNO055IMU imu = entry.getValue();
-                line.addData(entry.getKey(), "%.2f", new Func<Double>() {
+                line.addData(entry.getKey(), "h:%.2f/", new Func<Double>() {
                     @Override
                     public Double value() {
                         return hardwareReading(imu);
+                    }
+                });
+                line.addData("r:", "%.2f/", new Func<Double>() {
+                    @Override
+                    public Double value() {
+                        return hardwareReading2(imu);
+                    }
+                });
+                line.addData("p:", "%.2f/", new Func<Double>() {
+                    @Override
+                    public Double value() {
+                        return hardwareReading3(imu);
                     }
                 });
             }
@@ -164,12 +192,26 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         }
     }
 
-    private double hardwareReading(BNO055IMU sensor) {
+    private double hardwareReading(BNO055IMU sensor) { // heading
         Orientation orientation = sensor.getAngularOrientation(
                 AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES
         );
         // hardware sensor returns positive angle for left deviation
         //  and negative for right deviation from Y axis, so it's reversed here
         return -1 * orientation.firstAngle;
+    }
+
+    private double hardwareReading2(BNO055IMU sensor) { // pitch
+        Orientation orientation = sensor.getAngularOrientation(
+                AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES
+        );
+        return orientation.secondAngle;
+    }
+
+    private double hardwareReading3(BNO055IMU sensor) { // roll
+        Orientation orientation = sensor.getAngularOrientation(
+                AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES
+        );
+        return orientation.thirdAngle;
     }
 }
