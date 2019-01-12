@@ -187,7 +187,16 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                 }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
-
+        em2.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.LEFT_BUMPER)) {
+                    // mineralDelivery.deliveryCombo(intake);
+                } else {
+                    mineralArm.gateAuto();
+                }
+            }
+        }, Button.X);
         // left Stick-Y control arm slider In/Out
         em2.onStick(new Events.Listener() {
             @Override

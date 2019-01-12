@@ -35,7 +35,7 @@
   },
   "arm_gate": {
     "center": 0.5,
-    "left": 0.2,
+    "left": 0.41,
     "right": 0.8
   },
   "pusher": {

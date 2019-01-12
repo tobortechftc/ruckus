@@ -270,7 +270,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         sweeperServo.setPower(0);
 
         gate = new AdjustableServo(GATE_OPEN, GATE_CLOSED).configureLogging(
-                logTag + ":boxGate", logLevel
+                logTag + ":armGate", logLevel
         );
         gate.configure(configuration.getHardwareMap(), "arm_gate");
         configuration.register(gate);
@@ -327,7 +327,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
 
 
     /**
-     * Moves collection box gate to specified position (open or closed)
+     * Moves collection arm gate to specified position (open or closed)
      *
      * @param open <code>true</code> to open the gate, <code>false</code> to close it
      * @return estimated progress
@@ -350,6 +350,13 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public void gateOpen() { gate.setPosition(GATE_OPEN);}
     public void gatePartialOpen() { gate.setPosition(GATE_PARTIAL_OPEN);}
     public void gateClose() { gate.setPosition(GATE_CLOSED);}
+    public void gateAuto() {
+        if (isGateOpen()) {
+            gateClose();
+        } else {
+            gateOpen();
+        }
+    }
 
 
     public boolean isGateOpen() {
