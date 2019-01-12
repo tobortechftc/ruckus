@@ -75,7 +75,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
 
         tfodParameters.minimumConfidence = 0.2;
 
-        com.vuforia.CameraDevice.getInstance().setFlashTorchMode(false);
+        com.vuforia.CameraDevice.getInstance().setFlashTorchMode(true);
 //        com.vuforia.CameraDevice.getInstance().setField("iso", "800");
 
         // register CameraMineralDetector as a configurable component
@@ -99,9 +99,9 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
 
         int minDistanceFromTop;
         if (isHanging)
-            minDistanceFromTop = 300;
+            minDistanceFromTop = 250;
         else
-            minDistanceFromTop = 150;
+            minDistanceFromTop = 100;
 
         ToboTitan.MineralDetection.SampleLocation sampleLocation = ToboTitan.MineralDetection.SampleLocation.UNKNOWN;
         int goldXCoord = -1;
@@ -151,6 +151,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         if (tfod != null) {
             tfod.deactivate();
             tfod.shutdown();
+            com.vuforia.CameraDevice.getInstance().setFlashTorchMode(false);
             logger.verbose("Tfod shutdown", tfod);
         }
 
