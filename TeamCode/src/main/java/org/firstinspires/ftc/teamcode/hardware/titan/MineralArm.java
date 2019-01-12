@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.hardware.titan;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -40,17 +41,17 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public static final double PUSHER_DOWN = 0.0;
 
     public static final double SWEEPER_OFF = 0.0;
-    public static final double SWEEPER_IN = -1.0;
-    public static final double SWEEPER_OUT = 1.0;
+    public static final double SWEEPER_IN = 1.0;
+    public static final double SWEEPER_OUT = -1.0;
 
     public static final int SHOULDER_INIT_POS = 0;
-    public static final int SHOULDER_VERTICAL_POS = 4000;
-    public static final int SHOULDER_DUMP_SHORT_POS = 5000;
-    public static final int SHOULDER_DUMP_LONG_POS = 6000;
-    public static final int SHOULDER_INTAKE_POS = 10000;
+    public static final int SHOULDER_VERTICAL_POS = 1482;
+    public static final int SHOULDER_DUMP_SHORT_POS = 777;
+    public static final int SHOULDER_DUMP_LONG_POS = 777;
+    public static final int SHOULDER_INTAKE_POS = 3281;
 
-    public static final int ARM_SLIDE_MAX_POS = 6000;
-    public static final int ARM_SLIDE_DUMP_POS = 6000;
+    public static final int ARM_SLIDE_MAX_POS = 4993;
+    public static final int ARM_SLIDE_DUMP_POS = 4993;
     public static final int ARM_SLIDE_MIN_INTAKE_POS = 0;
     public static final int ARM_SLIDE_INIT_POS = 0;
 
@@ -164,25 +165,25 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         switch(mode) {
             case INTAKE:
                 setShoulderPosition(shoulder_intake_pos);
-                moveSlider(ARM_SLIDE_MIN_INTAKE_POS);
+                // moveSlider(ARM_SLIDE_MIN_INTAKE_POS);
                 break;
             case DUMP_SHORT:
                 setShoulderPosition(shoulder_dump_short_pos);
-                moveSlider(ARM_SLIDE_DUMP_POS);
+                // moveSlider(ARM_SLIDE_DUMP_POS);
                 break;
             case DUMP_LONG:
                 setShoulderPosition(shoulder_dump_long_pos);
-                moveSlider(ARM_SLIDE_DUMP_POS);
+                // moveSlider(ARM_SLIDE_DUMP_POS);
                 break;
             case VERTICAL_POS:
                 setShoulderPosition(shoulder_vertical_pos);
-                // moveSlider(ARM_SLIDE_DUMP_POS);
+                moveSlider(ARM_SLIDE_DUMP_POS);
                 break;
         }
     }
 
     public Progress setShoulderPosition(int pos) {
-        this.shoulder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.shoulder.setTargetPosition(pos);
         this.shoulder.setPower(shoulderPower);
         return new Progress() {
@@ -243,16 +244,20 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public void setSliderPower(double sliderPower) {
         this.sliderPower = sliderPower;
     }
-    public void slideIn(double scale) {
+    public void slideIn(double scale, boolean force) {
         if (armSlider==null)
+            return;
+        if (!force && armSlider.getCurrentPosition()<0)
+            return;
+        armSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armSlider.setPower(-sliderPower*scale);
+    }
+    public void slideOut(double scale, boolean force) {
+        if (armSlider==null) return;
+        if (!force && armSlider.getCurrentPosition()>ARM_SLIDE_MAX_POS)
             return;
         armSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armSlider.setPower(sliderPower*scale);
-    }
-    public void slideOut(double scale) {
-        if (armSlider==null) return;
-        armSlider.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        armSlider.setPower(-sliderPower*scale);
     }
 
     public void slideStop() {
@@ -262,7 +267,11 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     }
 
     public void shoulderUp(double scale) { if (shoulder!=null) shoulder.setPower(shoulderPower*scale);}
-    public void shoulderDown(double scale) { if (shoulder!=null) shoulder.setPower(-shoulderPower*scale);}
+    public void shoulderDown(double scale, boolean force) {
+        if (!force && (shoulder.getCurrentPosition()<0))
+            return;
+        if (shoulder!=null) shoulder.setPower(-shoulderPower*scale);
+    }
     public void shoulderStop() { if (shoulder!=null) shoulder.setPower(0);}
 
     public void configure(Configuration configuration) {
@@ -285,7 +294,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         shoulder.setDirection(DcMotor.Direction.FORWARD);
 
         armSlider = configuration.getHardwareMap().tryGet(DcMotor.class, "arm_slider");
-        armSlider.setDirection(DcMotor.Direction.FORWARD);
+        armSlider.setDirection(DcMotor.Direction.REVERSE);
 
         potentiometer = configuration.getHardwareMap().analogInput.get("pm1");
         coefficients = new BigDecimal[6];

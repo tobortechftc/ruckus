@@ -187,16 +187,6 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                 }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
-        em2.onButtonDown(new Events.Listener() {
-            @Override
-            public void buttonDown(EventManager source, Button button) {
-                if (source.isPressed(Button.LEFT_BUMPER)) {
-                    // mineralDelivery.deliveryCombo(intake);
-                } else {
-                    mineralArm.gateAuto();
-                }
-            }
-        }, Button.X);
         // left Stick-Y control arm slider In/Out
         em2.onStick(new Events.Listener() {
             @Override
@@ -204,9 +194,9 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                                    float currentY, float changeY) throws InterruptedException {
                 if (!source.isPressed(Button.RIGHT_BUMPER)) {
                     if (currentY > 0.2) {
-                        mineralArm.slideOut(currentY * currentY);
+                        mineralArm.slideOut(currentY * currentY, source.isPressed(Button.BACK));
                     } else if (currentY < -0.2) {
-                        mineralArm.slideIn(currentY * currentY);
+                        mineralArm.slideIn(currentY * currentY, source.isPressed(Button.BACK));
                     } else {
                         mineralArm.slideStop();
                     }
@@ -225,7 +215,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                     if (currentY > 0.2) {
                         mineralArm.shoulderUp(currentY * currentY);
                     } else if (currentY < -0.2) {
-                        mineralArm.shoulderDown(currentY * currentY);
+                        mineralArm.shoulderDown(currentY * currentY, source.isPressed(Button.BACK));
                     } else {
                         mineralArm.shoulderStop();
                     }
@@ -235,6 +225,28 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
 
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
+        em2.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.LEFT_BUMPER)) {
+                    mineralArm.setArmPosition(MineralArm.ArmMode.INTAKE);
+                    mineralArm.gateClose(); // auto close gate
+                } else if (!source.isPressed(Button.START)) {
+                    mineralArm.gateClose();
+                }
+            }
+        }, Button.B);
+        em2.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.LEFT_BUMPER)) {
+                    mineralArm.setArmPosition(MineralArm.ArmMode.DUMP_SHORT);
+                    mineralArm.gateClose(); // auto close gate
+                } else if (!source.isPressed(Button.START)) {
+                    mineralArm.gateAuto();
+                }
+            }
+        }, Button.X);
     }
 
     @MenuEntry(label = "Drive Straight", group = "Test")
@@ -283,9 +295,9 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
             if (currentY>0.2) {
-                mineralArm.slideOut(currentY*currentY);
+                mineralArm.slideOut(currentY*currentY, source.isPressed(Button.BACK));
             } else if (currentY<-0.2) {
-                mineralArm.slideIn(currentY*currentY);
+                mineralArm.slideIn(currentY*currentY, source.isPressed(Button.BACK));
             } else {
                 mineralArm.slideStop();
             }
@@ -301,7 +313,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                 if (currentY>0.2) {
                     mineralArm.shoulderUp(currentY*currentY);
                 } else if (currentY<-0.2) {
-                    mineralArm.shoulderDown(currentY*currentY);
+                    mineralArm.shoulderDown(currentY*currentY, source.isPressed(Button.BACK));
                 } else {
                     mineralArm.shoulderStop();
                 }
