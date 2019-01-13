@@ -6,13 +6,11 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.hardware17.SwerveSystem;
 import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
-import org.opencv.core.Mat;
 
 import java.util.Arrays;
 
@@ -75,6 +73,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private boolean useScalePower = true;//
     private boolean setImuTelemetry = false;//unless debugging, don't set telemetry for imu
     private boolean setRangeSensorTelemetry = false;//unless debugging, don't set telemetry for range sensor
+
+    final double TICKS_PER_CM = 16.86;//number of encoder ticks per cm of driving
 
     public void enableRangeSensorTelemetry() { // must be call before reset() or setupTelemetry()
         setRangeSensorTelemetry = true;
@@ -171,7 +171,6 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         );
 
         if (auto || setImuTelemetry) {
-
             orientationSensor = new CombinedOrientationSensor().configureLogging(logTag + "-sensor", logLevel);
             orientationSensor.configure(configuration.getHardwareMap(), "imu", "imu2");
         }
@@ -183,7 +182,6 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             rightRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "right_range");
         }
 
-
         // register chassis as configurable component
         configuration.register(this);
     }
@@ -194,7 +192,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
      * @param direction sensor direction
      * @return distance
      */
-    public double getDistance(sensor direction) {
+    public double getDistance(Direction direction) {
         double dist = 0;
         int count = 0;
         DistanceSensor rangeSensor;
@@ -390,8 +388,6 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         for (WheelAssembly wheel : wheels) wheel.motor.setPower(scalePower(power));
     }
 
-    final double TICKS_PER_CM = 16.86;
-
     //using the indicated absolute power to drive a certain distance at a certain heading
     public void driveStraightAuto(double power, double cm, double heading, int timeout) throws InterruptedException {
         if (Thread.currentThread().isInterrupted()) return;
@@ -491,9 +487,10 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         driveMode = DriveMode.STOP;
     }
 
-    public enum sensor {
+    public enum Direction {
         FRONT, LEFT, RIGHT, BACK;
     }
+
     public enum Wall {
         LEFT, RIGHT;
     }
@@ -509,11 +506,12 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             throw new IllegalArgumentException("Power must be between 0 and 1");
         }
         if (cmToWall < 5 || cmToWall > 30) {
-            throw new IllegalArgumentException("cmToWall must be between 0 and 30");
+            throw new IllegalArgumentException("cmToWall must be between 5 and 30");
         }
 
         double distance = TICKS_PER_CM * driveCm;
 
+        //zero power call
         if (power == 0) {
             driveMode = DriveMode.STOP;
             targetHeading = 0;
@@ -591,7 +589,6 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             //stop at stop button bring pushed
             if (Thread.currentThread().isInterrupted())
                 break;
-
             // yield handler
             this.core.yield();
         }
@@ -688,6 +685,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         driveAndSteer(0, angle, true);
     }
 
+    @Deprecated
     public void driveAlongWall(double power, double distance, double wallDistance) {
 
     }
@@ -880,7 +878,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 });
             }
             if (backRangeSensor != null) {
-                line.addData("rangeB", "%.1f", new Func<Double>() {
+                line.addData("distance to ground", "%.1f", new Func<Double>() {
                     @Override
                     public Double value() {
                         return backRangeSensor.getDistance(DistanceUnit.CM);

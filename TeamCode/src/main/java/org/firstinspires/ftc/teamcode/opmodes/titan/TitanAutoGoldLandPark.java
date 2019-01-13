@@ -114,6 +114,7 @@ public class TitanAutoGoldLandPark extends LinearOpMode implements YieldHandler{
 
     @Override
     public void on_yield() {
+
         if (!opModeIsActive())
             throw new OpModeTerminationException();
     }

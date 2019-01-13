@@ -72,6 +72,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
 
     }
 
+    @Deprecated
     public void AutoRoutineTest() throws InterruptedException {
         chassis.driveAndSteerAuto(0.6, 560 * 3, 45);
     }

@@ -6,10 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
-import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralIntake;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
-import org.firstinspires.ftc.teamcode.support.YieldHandler;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
@@ -103,8 +101,8 @@ public class RuckusAutoSilverLandDouble extends LinearOpMode {
             robot.hanging.markerDown();
 
         // right=(60,117) center=(89,89) left(117,60) wheel = (38,35)
-        double wheelX = 38 + robot.chassis.getDistance(SwerveChassis.sensor.LEFT);
-        double wheelY = 35 + robot.chassis.getDistance(SwerveChassis.sensor.BACK);
+        double wheelX = 38 + robot.chassis.getDistance(SwerveChassis.Direction.LEFT);
+        double wheelY = 35 + robot.chassis.getDistance(SwerveChassis.Direction.BACK);
         double deltaX;
         double deltaY;
         double distance;

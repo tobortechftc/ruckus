@@ -2,12 +2,13 @@ package org.firstinspires.ftc.teamcode.hardware.titan;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
@@ -16,16 +17,19 @@ import org.firstinspires.ftc.teamcode.support.tasks.Progress;
 import org.firstinspires.ftc.teamcode.support.tasks.Task;
 import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
+import static java.lang.Thread.sleep;
+
 /**
  * Created by carlw on 12/28/2018.
  */
 
-public class LandingLatch extends Logger<LandingLatch> implements Configurable{
+public class LandingLatch extends Logger<LandingLatch> implements Configurable {
 
     final private CoreSystem core;
 
     private DcMotor latch;
     private Servo marker;
+    private DistanceSensor bottomRangeSensor;
     private double latch_power = .95;
     private final double MARKER_UP = 0.05;
     private final double MARKER_DOWN = 0.42;
@@ -37,7 +41,9 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
     private ElapsedTime runtime = new ElapsedTime();
 
     @Override
-    public String getUniqueName(){return "LandingLatch";}
+    public String getUniqueName() {
+        return "LandingLatch";
+    }
 
     /**
      * Landing latch constructor
@@ -54,9 +60,9 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
 
     public void reset(boolean Auto) {
         latch.setPower(0);
-        if (marker!=null)
+        if (marker != null)
             markerUp();
-        if (Auto && (latch!=null)) {
+        if (Auto && (latch != null)) {
             latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
@@ -73,52 +79,69 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
         if (auto) {
             marker = configuration.getHardwareMap().servo.get("sv_marker");
             markerUp();
+            bottomRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
         }
         // register hanging as configurable component
         configuration.register(this);
     }
 
-    public void markerUp(){
+    public double distanceToGround() {
+        if (bottomRangeSensor == null)
+            return 0;
+        double dist = bottomRangeSensor.getDistance(DistanceUnit.CM);
+        int count = 0;
+        while (dist > 127 && (++count) < 5) {
+            dist = bottomRangeSensor.getDistance(DistanceUnit.CM);
+        }
+        if (dist > 127)
+            dist = 127;
+        return dist;
+    }
+
+    public void markerUp() {
         marker.setPosition(MARKER_UP);
         markerIsDown = false;
     }
-    public void markerDown(){
+
+    public void markerDown() {
         marker.setPosition(MARKER_DOWN);
         markerIsDown = true;
     }
-    public void markerAuto(){
+
+    public void markerAuto() {
         if (markerIsDown) {
             markerUp();
-        }
-        else {
+        } else {
             markerDown();
         }
     }
-    public void latchUp(boolean force){ // encoder going up
+
+    public void latchUp(boolean force) { // encoder going up
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         int cur_pos = latch.getCurrentPosition();
-        if (cur_pos>=MAX_LATCH_POS && force==false) {
+        if (cur_pos >= MAX_LATCH_POS && force == false) {
             latch.setPower(0);
         } else {
             latch.setPower(latch_power);
         }
     }
-    public void latchDown(boolean force){ // encoder going down
+
+    public void latchDown(boolean force) { // encoder going down
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         int cur_pos = latch.getCurrentPosition();
-        if ((cur_pos<=MIN_LATCH_POS) && force==false) {
+        if ((cur_pos <= MIN_LATCH_POS) && force == false) {
             latch.setPower(0);
         } else {
             latch.setPower(-latch_power);
         }
     }
 
-    public Progress latchAuto(){ // encoder going to end game
+    public Progress latchAuto() { // encoder going to end game
         latch.setPower(0);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setTargetPosition(LATCH_ENDGAME_POS);
         int cur_pos = latch.getCurrentPosition();
-        if (Math.abs(cur_pos-LATCH_ENDGAME_POS)<20) {
+        if (Math.abs(cur_pos - LATCH_ENDGAME_POS) < 20) {
             latch.setPower(0);
             latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         } else {
@@ -127,7 +150,7 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
         return new Progress() {
             @Override
             public boolean isDone() {
-                return !latch.isBusy() || (Math.abs(latch.getCurrentPosition()-LATCH_ENDGAME_POS)<20);
+                return !latch.isBusy() || (Math.abs(latch.getCurrentPosition() - LATCH_ENDGAME_POS) < 20);
             }
         };
     }
@@ -144,23 +167,30 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
         }, taskName);
     }
 
-    public void latchStop(){
-        if (!latch.isBusy())
-            latch.setPower(0);
+    public void latchStop() {
+        latch.setPower(0);
+        latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void latchUpInches(double inches) { // encoder going down
         runtime.reset();
         int cur_pos = latch.getCurrentPosition();
-        int tar_pos = cur_pos + (int)(inches*LATCH_COUNT_PER_INCH);
-        if (tar_pos>MAX_LATCH_POS)
+        int tar_pos = cur_pos + (int) (inches * LATCH_COUNT_PER_INCH);
+        if (tar_pos > MAX_LATCH_POS)
             tar_pos = MAX_LATCH_POS;
         latch.setTargetPosition(tar_pos);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
-        while (latch.isBusy() && runtime.seconds()<5.0) {
+        while (latch.isBusy() && runtime.seconds() < 5.0) {
             cur_pos = latch.getCurrentPosition();
-
+            if (distanceToGround() < 15){
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
             // yield handler
             this.core.yield();
         }
@@ -170,13 +200,13 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
     public void latchDownInches(double inches) { // encoder going up
         runtime.reset();
         int cur_pos = latch.getCurrentPosition();
-        int tar_pos = cur_pos - (int)(inches*LATCH_COUNT_PER_INCH);
-        if (tar_pos< MIN_LATCH_POS)
+        int tar_pos = cur_pos - (int) (inches * LATCH_COUNT_PER_INCH);
+        if (tar_pos < MIN_LATCH_POS)
             tar_pos = MIN_LATCH_POS;
         latch.setTargetPosition(tar_pos);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
-        while (latch.isBusy() && runtime.seconds()<5.0) {
+        while (latch.isBusy() && runtime.seconds() < 5.0) {
             cur_pos = latch.getCurrentPosition();
 
             // yield handler
@@ -197,24 +227,26 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable{
     /**
      * Set up telemetry lines for chassis metrics
      * Shows current motor power, orientation sensors,
-     *  drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
-     *  and servo position for each wheel
+     * drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
+     * and servo position for each wheel
      */
     public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
-        if (latch!=null)
+        if (latch != null)
             line.addData("Latch", "enc=%d", new Func<Integer>() {
                 @Override
                 public Integer value() {
                     return latch.getCurrentPosition();
-                }});
+                }
+            });
 
-        if(marker!=null){
+        if (marker != null) {
             line.addData("Marker", "pos=%.2f", new Func<Double>() {
                 @Override
                 public Double value() {
                     return marker.getPosition();
-                }});
+                }
+            });
         }
     }
 }
