@@ -47,8 +47,8 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public static final int SHOULDER_INIT_POS = 0;
     public static final int SHOULDER_VERTICAL_POS = 1482;
     public static final int SHOULDER_DUMP_SHORT_POS = 777;
-    public static final int SHOULDER_DUMP_LONG_POS = 777;
-    public static final int SHOULDER_INTAKE_POS = 3281;
+    public static final int SHOULDER_DUMP_LONG_POS = 677;
+    public static final int SHOULDER_INTAKE_POS = 3524;
 
     public static final int ARM_SLIDE_MAX_POS = 4993;
     public static final int ARM_SLIDE_DUMP_POS = 4993;
@@ -266,13 +266,24 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         armSlider.setPower(0);
     }
 
-    public void shoulderUp(double scale) { if (shoulder!=null) shoulder.setPower(shoulderPower*scale);}
+    public void shoulderUp(double scale) {
+        if (shoulder==null)
+            return;
+        shoulder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shoulder.setPower(shoulderPower*scale);
+    }
     public void shoulderDown(double scale, boolean force) {
+        if (shoulder==null)
+            return;
         if (!force && (shoulder.getCurrentPosition()<0))
             return;
-        if (shoulder!=null) shoulder.setPower(-shoulderPower*scale);
+        shoulder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shoulder.setPower(-shoulderPower*scale);
     }
-    public void shoulderStop() { if (shoulder!=null) shoulder.setPower(0);}
+    public void shoulderStop() {
+        if (shoulder==null)
+            return;
+        shoulder.setPower(0);}
 
     public void configure(Configuration configuration) {
         sweeperServo = configuration.getHardwareMap().crservo.get("sv_sweeper");

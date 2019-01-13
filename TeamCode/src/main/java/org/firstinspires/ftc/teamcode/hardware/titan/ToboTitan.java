@@ -212,6 +212,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
                 if (!source.isPressed(Button.RIGHT_BUMPER)) {
+
                     if (currentY > 0.2) {
                         mineralArm.shoulderUp(currentY * currentY);
                     } else if (currentY < -0.2) {
@@ -225,6 +226,37 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
 
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
+        em2.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (!source.isPressed(Button.B) && !source.isPressed(Button.X)) {
+                    mineralArm.sweeperIn();
+                }
+            }
+        }, Button.LEFT_BUMPER);
+        em.onButtonUp(new Events.Listener() {
+            @Override
+            public void buttonUp(EventManager source, Button button) throws InterruptedException {
+                //intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
+                mineralArm.stopSweeper();
+            }
+        }, Button.LEFT_BUMPER);
+        em.onTrigger(new Events.Listener() {
+            @Override
+            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
+                // 0.2 is a dead zone threshold for the trigger
+                /* if (current > 0.2) {
+                    intake.rotateSweeper(MineralIntake.SweeperMode.PUSH_OUT);
+                } else if (current == 0) {
+                    intake.rotateSweeper(MineralIntake.SweeperMode.HORIZONTAL_STOP);
+                }*/
+                if (current > 0.2) {
+                    mineralArm.sweeperOut();
+                } else if (current == 0) {
+                    mineralArm.stopSweeper();
+                }
+            }
+        }, Events.Side.LEFT);
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
