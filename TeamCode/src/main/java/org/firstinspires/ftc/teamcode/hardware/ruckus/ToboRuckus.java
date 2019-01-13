@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -66,7 +67,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
         hanging = new Hanging().configureLogging("Hanging", logLevel);
-        hanging.configure(configuration, auto);
+        hanging.configure(configuration, auto, chassis.orientationSensor);
         mineralDelivery = new MineralDelivery().configureLogging("Delivery", logLevel);
         mineralDelivery.configure(configuration);
     }
@@ -603,6 +604,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void retractLatch(EventManager em) throws InterruptedException {
         hanging.latchDownInches(8.5);
     }
+
+    @MenuEntry(label = "Test IMU landing", group = "Test Auto")
+    public void landIMU(EventManager em) throws InterruptedException{
+        chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+        hanging.landWithIMU();
+    }
+
 
     public void initTeleOp() throws InterruptedException {
         // slider out at dump pos

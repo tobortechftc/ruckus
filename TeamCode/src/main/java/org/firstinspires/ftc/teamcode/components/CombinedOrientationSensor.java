@@ -5,6 +5,7 @@ import android.util.Log;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -26,6 +27,8 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
     private Map<String, BNO055IMU> sensors;
     private boolean correctionEnabled = false;
     private Double lastReading = null;
+
+    Double[] rollLog = new Double[5];
 
     /**
      * Configures the hardware
@@ -60,6 +63,9 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         for (Map.Entry<String, BNO055IMU> entry : sensors.entrySet()) {
             parameters.loggingTag = entry.getKey();
             entry.getValue().initialize(parameters);
+        }
+        for(int i = 0; i<rollLog.length; i++){ //Initialize roll log
+            rollLog[i] = 0.0;
         }
     }
 
@@ -150,6 +156,24 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         return (roll1 + roll2) / 2;
     }
 
+    /**
+     * Returns if the roll has stabalized, used for detecting the ground while landing during autonomous.
+     *
+     * @return If roll values have stabalized, meaning that for X iterations with a 50Hz frequence
+     * , the difference between the current and previous values is less than Y
+     */
+    public boolean hasRollStabalized(int inputIndex, double minDiff){
+        inputIndex = inputIndex%rollLog.length;
+        rollLog[inputIndex] = getRoll();
+        if(rollLog[rollLog.length-1] != 0){
+            for(int i = rollLog.length; i >= 1; i--){
+                if(rollLog[i] - rollLog[i-1] >= minDiff) return false;
+            }
+            return true;
+        }
+        else return false;
+    }
+
     public double getPitch() {
         if (sensors.isEmpty()) return 0.0d;
 
@@ -201,14 +225,14 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
         return -1 * orientation.firstAngle;
     }
 
-    private double hardwareReading2(BNO055IMU sensor) { // pitch
+    private double hardwareReading2(BNO055IMU sensor) { // roll
         Orientation orientation = sensor.getAngularOrientation(
                 AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES
         );
         return orientation.secondAngle;
     }
 
-    private double hardwareReading3(BNO055IMU sensor) { // roll
+    private double hardwareReading3(BNO055IMU sensor) { // pitch
         Orientation orientation = sensor.getAngularOrientation(
                 AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES
         );

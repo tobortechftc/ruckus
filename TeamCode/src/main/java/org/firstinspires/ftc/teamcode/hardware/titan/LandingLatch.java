@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorREV2mDistance;
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -37,6 +38,7 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable {
     private final int LATCH_ENDGAME_POS = 6646; // position for end game to latch
     private final int MIN_LATCH_POS = 0;
     private final int LATCH_COUNT_PER_INCH = 1198;
+    private final double MIN_RANGE_DISTANCE = 4.5;
     private boolean markerIsDown = false;
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -223,6 +225,7 @@ public class LandingLatch extends Logger<LandingLatch> implements Configurable {
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         latch.setPower(0);
     }
+
 
     /**
      * Set up telemetry lines for chassis metrics

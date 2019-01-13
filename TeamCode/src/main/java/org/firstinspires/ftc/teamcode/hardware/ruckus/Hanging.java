@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.components.CombinedOrientationSensor;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
@@ -28,6 +29,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private DcMotor latch;
     private Servo marker;
     private DigitalChannel prox = null;
+    public CombinedOrientationSensor orientationSensor;
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
     private double latch_power = .95;
@@ -66,7 +68,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         }
     }
 
-    public void configure(Configuration configuration, boolean auto) {
+    public void configure(Configuration configuration, boolean auto, CombinedOrientationSensor cos) {
         // set up motors / sensors as wheel assemblies
         latch = configuration.getHardwareMap().dcMotor.get("latch");
         latch.setPower(0);
@@ -79,6 +81,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             markerUp();
             prox = configuration.getHardwareMap().get(DigitalChannel.class, "prox");
             prox.setMode(DigitalChannel.Mode.INPUT);
+            orientationSensor = cos;
         }
         // register hanging as configurable component
         configuration.register(this);
@@ -185,6 +188,29 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latchStop();
     }
 
+    public void landWithIMU(){
+        runtime.reset();
+        int counter = 0;
+        int cur_pos = latch.getCurrentPosition();
+        int tar_pos = cur_pos + (int)(8.25*LATCH_COUNT_PER_INCH);
+        if (tar_pos>MAX_LATCH_POS)
+            tar_pos = MAX_LATCH_POS;
+        latch.setTargetPosition(tar_pos);
+        latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        latch.setPower(Math.abs(latch_power));
+        while (latch.isBusy() && (runtime.seconds()<5.0)) {
+            if(runtime.milliseconds()%20==0 && orientationSensor != null){
+                if(orientationSensor.hasRollStabalized(counter,0.1)){
+                    latchStop();
+                    markerDown();
+                    break;
+                }
+                counter++;
+            }
+        }
+        latchStop();
+    }
+
     public boolean latchIsBusy() {
         return latch.isBusy();
     }
@@ -194,9 +220,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setPower(0);
     }
 
-    public boolean proxWithin15cm() {
-        return prox.getState()==false;
-    }
 
     /**
      * Set up telemetry lines for chassis metrics

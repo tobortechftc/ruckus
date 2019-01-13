@@ -922,6 +922,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         orientationSensor.reset();
     }
 
+    public boolean hasRollStabalized(int inputIndex, double minDiff) {
+        return orientationSensor.hasRollStabalized(inputIndex, minDiff);
+    }
+
+
     final class WheelAssembly {
         AdjustableServo servo;
         DcMotor motor;
