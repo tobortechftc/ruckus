@@ -70,19 +70,19 @@ public class RuckusAutoSilverLandPark extends LinearOpMode {
         // go to wall and turn parallel
         if (opModeIsActive()) {
             // go back
-            robot.chassis.driveStraightAuto(power, -31.6, 0, timeout);
+            robot.chassis.driveStraightAuto(power, (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT ? -22.6 : -26.6), 0, timeout);
 
             if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
                 robot.chassis.driveStraightAuto(power, 45, -90, timeout);
-            else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)
-                robot.chassis.driveStraightAuto(power, 85, -90, timeout);
-            else
+            else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT)
                 robot.chassis.driveStraightAuto(power, 125, -90, timeout);
+            else
+                robot.chassis.driveStraightAuto(power, 85, -90, timeout);
 
             robot.chassis.driveStraightAuto(.2, 15, -90, timeout);
             robot.chassis.rotateTo(.2, -43);
 
-            // 6cm away from wall
+            // 5cm away from wall
             double driveDistance = robot.chassis.distanceToLeft() - 5;
             robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
         }

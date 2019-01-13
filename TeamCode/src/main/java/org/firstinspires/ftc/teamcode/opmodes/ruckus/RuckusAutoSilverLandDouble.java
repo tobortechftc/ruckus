@@ -55,10 +55,10 @@ public class RuckusAutoSilverLandDouble extends LinearOpMode {
 
 
         // Step-1: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.LEFT;
+        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
 
         if (opModeIsActive()) {
-            //sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
+            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
         }
 
         // Step-2: landing mission
@@ -78,10 +78,10 @@ public class RuckusAutoSilverLandDouble extends LinearOpMode {
 
             if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
                 robot.chassis.driveStraightAuto(power, 45, -90, timeout);
-            else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)
-                robot.chassis.driveStraightAuto(power, 85, -90, timeout);
-            else
+            else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT)
                 robot.chassis.driveStraightAuto(power, 125, -90, timeout);
+            else
+                robot.chassis.driveStraightAuto(power, 85, -90, timeout);
 
             robot.chassis.driveStraightAuto(.2, 15, -90, timeout);
             robot.chassis.rotateTo(.2, -45);
@@ -111,7 +111,7 @@ public class RuckusAutoSilverLandDouble extends LinearOpMode {
         double heading;
         double offset;
         int outcome = 0;
-        sleep(1000);
+        sleep(100);
         if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT) {
             deltaX = 117 - wheelX;
             deltaY = 62 - wheelY;
@@ -139,20 +139,8 @@ public class RuckusAutoSilverLandDouble extends LinearOpMode {
         telemetry.addData("heading", heading);
         telemetry.addData("outcome", outcome);
         telemetry.update();
-        sleep(5000);
+        sleep(400);
         robot.chassis.driveStraightAuto(power, distance, heading, timeout);
-        sleep(5000);
-
-//            double distanceBack = robot.chassis.distanceToBack();
-//            telemetry.addData("Back", -distanceBack);
-//            telemetry.update();
-//            sleep(5000);
-//            robot.chassis.driveStraightAuto(.1, 10 - distanceBack, 0, timeout);
-//            double distanceLeft = robot.chassis.distanceToLeft();
-//            telemetry.addData("Left", distanceLeft);
-//            telemetry.update();
-//            sleep(5000);
-//            robot.chassis.driveStraightAuto(.1, 10 - distanceLeft, 90, timeout);
 
 
 //
