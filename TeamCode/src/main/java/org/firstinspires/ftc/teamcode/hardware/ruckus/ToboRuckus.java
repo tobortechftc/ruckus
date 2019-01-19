@@ -495,8 +495,14 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     public void goParking(Side side) throws InterruptedException {
-        chassis.driveAlongTheWall(0.4, 145, 5, side == Side.GOLD ? SwerveChassis.Wall.RIGHT : SwerveChassis.Wall.LEFT, 4000);
-        chassis.driveStraightAuto(0.5, 40, side == Side.GOLD ? +10 : -10, 2000);
+        if (side == side.GOLD) {
+            chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.RIGHT, 4000);
+            chassis.driveStraightAuto(0.5, 40, 10, 2000);
+        }
+        else {
+            chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.LEFT, 4000);
+            chassis.driveStraightAuto(0.6, 60, 0, 2000);
+        }
         extendInakeForParking();
     }
 

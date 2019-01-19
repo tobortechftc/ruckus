@@ -100,7 +100,7 @@ public class RuckusAutoSilverLandPark extends LinearOpMode {
 
             // drop marker
             robot.hanging.markerDown();
-            if (opModeIsActive()) sleep(500);
+            if (opModeIsActive()) sleep(750);
         }
 
         // Step-5 park on the rim
