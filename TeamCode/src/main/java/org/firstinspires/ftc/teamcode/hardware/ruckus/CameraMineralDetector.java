@@ -75,7 +75,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
 
         tfodParameters.minimumConfidence = 0.2;
 
-        com.vuforia.CameraDevice.getInstance().setFlashTorchMode(false);
+        com.vuforia.CameraDevice.getInstance().setFlashTorchMode(true);
 //        com.vuforia.CameraDevice.getInstance().setField("iso", "800");
 
         // register CameraMineralDetector as a configurable component
