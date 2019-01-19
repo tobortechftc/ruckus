@@ -2,11 +2,13 @@ package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.components.CombinedOrientationSensor;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
@@ -18,7 +20,7 @@ import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 /**
  * Swerve chassis consists of 4 wheels with a Servo and DcMotor attached to each.
  * Track (distance between left and right wheels), wheelbase (distance between front and back wheels)
- *  and wheel radius are adjustable.
+ * and wheel radius are adjustable.
  * Expected hardware configuration is:<br />
  * Servos: servoFrontLeft, servoFrontRight, servoBackLeft, servoBackRight.<br />
  * Motors: motorFrontLeft, motorFrontRight, motorBackLeft, motorBackRight.<br />
@@ -28,6 +30,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
     private DcMotor latch;
     private Servo marker;
+    private DistanceSensor bottomRangeSensor;
     private DigitalChannel prox = null;
     public CombinedOrientationSensor orientationSensor;
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
@@ -42,6 +45,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private final int LATCH_COUNT_PER_INCH = 1774;
     private boolean markerIsDown = false;
     private ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public String getUniqueName() {
         return "hanging";
@@ -55,13 +59,13 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
     public void reset(boolean Auto) {
         latch.setPower(0);
-        if (marker!=null)
-           markerUp();
-        if (Auto && (latch!=null)) {
+        if (marker != null)
+            markerUp();
+        if (Auto && (latch != null)) {
             latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
-        if (prox!=null) {
+        if (prox != null) {
             prox.setMode(DigitalChannel.Mode.OUTPUT);
             prox.setState(true);
             prox.setMode(DigitalChannel.Mode.INPUT);
@@ -82,52 +86,67 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             prox = configuration.getHardwareMap().get(DigitalChannel.class, "prox");
             prox.setMode(DigitalChannel.Mode.INPUT);
             orientationSensor = cos;
+            bottomRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
         }
         // register hanging as configurable component
         configuration.register(this);
     }
 
-    public void markerUp(){
+    public double distanceToGround() {
+        if (bottomRangeSensor == null)
+            return 0;
+        double dist = bottomRangeSensor.getDistance(DistanceUnit.CM);
+        int count = 0;
+        while (dist > 127 && (++count) < 5) {
+            dist = bottomRangeSensor.getDistance(DistanceUnit.CM);
+        }
+        return Math.min(127, dist);
+    }
+
+    public void markerUp() {
         marker.setPosition(MARKER_UP);
         markerIsDown = false;
     }
-    public void markerDown(){
+
+    public void markerDown() {
         marker.setPosition(MARKER_DOWN);
         markerIsDown = true;
     }
-    public void markerAuto(){
+
+    public void markerAuto() {
         if (markerIsDown) {
             markerUp();
-        }
-        else {
+        } else {
             markerDown();
         }
     }
-    public void latchUp(boolean force){ // encoder going up
+
+    public void latchUp(boolean force) { // encoder going up
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         int cur_pos = latch.getCurrentPosition();
-        if (cur_pos>=MAX_LATCH_POS && force==false) {
+        if (cur_pos >= MAX_LATCH_POS && force == false) {
             latch.setPower(0);
         } else {
             latch.setPower(latch_power);
         }
     }
-    public void latchDown(boolean force){ // encoder going down
+
+    public void latchDown(boolean force) { // encoder going down
         latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         int cur_pos = latch.getCurrentPosition();
-        if ((cur_pos<=MIN_LATCH_POS) && force==false) {
+        if ((cur_pos <= MIN_LATCH_POS) && force == false) {
             latch.setPower(0);
         } else {
             latch.setPower(-latch_power);
         }
     }
 
-    public Progress latchAuto(){ // encoder going to end game
+    public Progress latchAuto() { // encoder going to end game
         latch.setPower(0);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setTargetPosition(LATCH_ENDGAME_POS);
         int cur_pos = latch.getCurrentPosition();
-        if (Math.abs(cur_pos-LATCH_ENDGAME_POS)<20) {
+        if (Math.abs(cur_pos - LATCH_ENDGAME_POS) < 20) {
             latch.setPower(0);
             latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         } else {
@@ -136,7 +155,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         return new Progress() {
             @Override
             public boolean isDone() {
-                return !latch.isBusy() || (Math.abs(latch.getCurrentPosition()-LATCH_ENDGAME_POS)<20);
+                return !latch.isBusy() || (Math.abs(latch.getCurrentPosition() - LATCH_ENDGAME_POS) < 20);
             }
         };
     }
@@ -153,7 +172,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         }, taskName);
     }
 
-    public void latchStop(){
+    public void latchStop() {
         if (!latch.isBusy())
             latch.setPower(0);
     }
@@ -161,14 +180,24 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     public void latchUpInches(double inches) { // encoder going down
         runtime.reset();
         int cur_pos = latch.getCurrentPosition();
-        int tar_pos = cur_pos + (int)(inches*LATCH_COUNT_PER_INCH);
-        if (tar_pos>MAX_LATCH_POS)
+        int tar_pos = cur_pos + (int) (inches * LATCH_COUNT_PER_INCH);
+        if (tar_pos > MAX_LATCH_POS)
             tar_pos = MAX_LATCH_POS;
         latch.setTargetPosition(tar_pos);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
-        while (latch.isBusy() && (runtime.seconds()<5.0)) {
+        while (latch.isBusy() && (runtime.seconds() < 5.0)) {
             cur_pos = latch.getCurrentPosition();
+            if (distanceToGround() < 10){
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //force stop
+                latch.setPower(0.0);
+                break;
+            }
         }
         latchStop();
     }
@@ -176,31 +205,31 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     public void latchDownInches(double inches) { // encoder going up
         runtime.reset();
         int cur_pos = latch.getCurrentPosition();
-        int tar_pos = cur_pos - (int)(inches*LATCH_COUNT_PER_INCH);
-        if (tar_pos< MIN_LATCH_POS)
+        int tar_pos = cur_pos - (int) (inches * LATCH_COUNT_PER_INCH);
+        if (tar_pos < MIN_LATCH_POS)
             tar_pos = MIN_LATCH_POS;
         latch.setTargetPosition(tar_pos);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
-        while (latch.isBusy() && (runtime.seconds()<5.0)) {
+        while (latch.isBusy() && (runtime.seconds() < 5.0)) {
             cur_pos = latch.getCurrentPosition();
         }
         latchStop();
     }
 
-    public void landWithIMU(){
+    public void landWithIMU() {
         runtime.reset();
         int counter = 0;
         int cur_pos = latch.getCurrentPosition();
-        int tar_pos = cur_pos + (int)(8.25*LATCH_COUNT_PER_INCH);
-        if (tar_pos>MAX_LATCH_POS)
+        int tar_pos = cur_pos + (int) (8.25 * LATCH_COUNT_PER_INCH);
+        if (tar_pos > MAX_LATCH_POS)
             tar_pos = MAX_LATCH_POS;
         latch.setTargetPosition(tar_pos);
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
-        while (latch.isBusy() && (runtime.seconds()<5.0)) {
-            if(runtime.milliseconds()%20==0 && orientationSensor != null){
-                if(orientationSensor.hasRollStabalized(counter,0.1)){
+        while (latch.isBusy() && (runtime.seconds() < 5.0)) {
+            if (runtime.milliseconds() % 20 == 0 && orientationSensor != null) {
+                if (orientationSensor.hasRollStabalized(counter, 0.1)) {
                     latchStop();
                     markerDown();
                     break;
@@ -224,31 +253,34 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     /**
      * Set up telemetry lines for chassis metrics
      * Shows current motor power, orientation sensors,
-     *  drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
-     *  and servo position for each wheel
+     * drive mode, heading deviation / servo adjustment (in <code>STRAIGHT</code> mode)
+     * and servo position for each wheel
      */
     public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
-        if (latch!=null)
-           line.addData("Latch", "enc=%d", new Func<Integer>() {
-               @Override
-               public Integer value() {
-                   return latch.getCurrentPosition();
-               }});
+        if (latch != null)
+            line.addData("Latch", "enc=%d", new Func<Integer>() {
+                @Override
+                public Integer value() {
+                    return latch.getCurrentPosition();
+                }
+            });
 
-        if(marker!=null){
+        if (marker != null) {
             line.addData("Marker", "pos=%.2f", new Func<Double>() {
                 @Override
                 public Double value() {
                     return marker.getPosition();
-                }});
+                }
+            });
         }
-        if (prox!=null) {
+        if (prox != null) {
             line.addData("prox", "<15cm=%s", new Func<String>() {
                 @Override
                 public String value() {
-                    return (prox.getState()?"No":"Yes");
-                }});
+                    return (prox.getState() ? "No" : "Yes");
+                }
+            });
         }
     }
 

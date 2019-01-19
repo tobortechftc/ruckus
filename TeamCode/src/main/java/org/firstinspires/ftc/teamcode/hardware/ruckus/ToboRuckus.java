@@ -468,13 +468,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void retrieveSample(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
         switch (sam_loc) {
             case CENTER: // center
-                chassis.driveStraightAuto(0.35, 43, 9, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 43, 11, Integer.MAX_VALUE);
                 break;
             case RIGHT:
                 chassis.driveStraightAuto(0.35, 58, 53, Integer.MAX_VALUE);
                 break;
             case LEFT:
-                chassis.driveStraightAuto(0.35, 55, -37, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 55, -38, Integer.MAX_VALUE);
                 break;
             default: // go straight like center
                 chassis.driveStraightAuto(0.35, 43, 9, Integer.MAX_VALUE);
@@ -497,7 +497,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void goParking(Side side) throws InterruptedException {
         if (side == side.GOLD) {
             chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.RIGHT, 4000);
-            chassis.driveStraightAuto(0.5, 40, 10, 2000);
+            chassis.driveStraightAuto(0.6, 50, 10, 2000);
         }
         else {
             chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.LEFT, 4000);

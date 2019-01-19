@@ -64,6 +64,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private DistanceSensor backRangeSensor;
     private DistanceSensor leftRangeSensor;
     private DistanceSensor rightRangeSensor;
+    private DistanceSensor bottomRangeSensor;
 
     private DriveMode driveMode = DriveMode.STOP;      // current drive mode
     private double targetHeading;     // intended heading for DriveMode.STRAIGHT as reported by orientation sensor
@@ -180,6 +181,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             backRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
             leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");
             rightRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "right_range");
+            bottomRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "bottom_range");
         }
 
         // register chassis as configurable component
@@ -205,6 +207,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             case RIGHT: rangeSensor = rightRangeSensor;
                 break;
             case BACK: rangeSensor = backRangeSensor;
+                break;
+            case BOTTOM: rangeSensor = bottomRangeSensor;
                 break;
             default: rangeSensor = null;
         }
@@ -488,7 +492,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public enum Direction {
-        FRONT, LEFT, RIGHT, BACK;
+        FRONT, LEFT, RIGHT, BACK, BOTTOM;
     }
 
     public enum Wall {
@@ -878,14 +882,21 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 });
             }
             if (backRangeSensor != null) {
-                line.addData("distance to ground", "%.1f", new Func<Double>() {
+                line.addData("rangeB", "%.1f", new Func<Double>() {
                     @Override
                     public Double value() {
                         return backRangeSensor.getDistance(DistanceUnit.CM);
                     }
                 });
             }
-
+            if (bottomRangeSensor != null) {
+                line.addData("distance to ground", "%.1f", new Func<Double>() {
+                    @Override
+                    public Double value() {
+                        return getDistance(Direction.BOTTOM);
+                    }
+                });
+            }
         }
 
         telemetry.addLine().addData("M", new Func<String>() {
