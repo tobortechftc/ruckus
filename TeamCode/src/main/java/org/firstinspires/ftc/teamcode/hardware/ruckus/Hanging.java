@@ -86,7 +86,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             prox = configuration.getHardwareMap().get(DigitalChannel.class, "prox");
             prox.setMode(DigitalChannel.Mode.INPUT);
             orientationSensor = cos;
-            bottomRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
+            bottomRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "bottom_range");
         }
         // register hanging as configurable component
         configuration.register(this);
@@ -94,7 +94,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
 
     public double distanceToGround() {
         if (bottomRangeSensor == null)
-            return 0;
+            return 999.0;
         double dist = bottomRangeSensor.getDistance(DistanceUnit.CM);
         int count = 0;
         while (dist > 127 && (++count) < 5) {
@@ -195,6 +195,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
                     e.printStackTrace();
                 }
                 //force stop
+                latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 latch.setPower(0.0);
                 break;
             }
