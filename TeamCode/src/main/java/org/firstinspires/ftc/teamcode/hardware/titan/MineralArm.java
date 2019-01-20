@@ -49,9 +49,10 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public static final int SHOULDER_DUMP_SHORT_POS = 777;
     public static final int SHOULDER_DUMP_LONG_POS = 677;
     public static final int SHOULDER_INTAKE_POS = 3524;
+    public static final int SHOULDER_MAX_POS = 3541;
 
-    public static final int ARM_SLIDE_MAX_POS = 4993;
-    public static final int ARM_SLIDE_DUMP_POS = 4993;
+    public static final int ARM_SLIDE_MAX_POS = 5050;
+    public static final int ARM_SLIDE_DUMP_POS = 5050;
     public static final int ARM_SLIDE_MIN_INTAKE_POS = 0;
     public static final int ARM_SLIDE_INIT_POS = 0;
 
@@ -165,11 +166,11 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         switch(mode) {
             case INTAKE:
                 setShoulderPosition(shoulder_intake_pos);
-                // moveSlider(ARM_SLIDE_MIN_INTAKE_POS);
+                moveSlider(ARM_SLIDE_MIN_INTAKE_POS);
                 break;
             case DUMP_SHORT:
                 setShoulderPosition(shoulder_dump_short_pos);
-                // moveSlider(ARM_SLIDE_DUMP_POS);
+                moveSlider(ARM_SLIDE_DUMP_POS);
                 break;
             case DUMP_LONG:
                 setShoulderPosition(shoulder_dump_long_pos);
@@ -181,6 +182,39 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
                 break;
         }
     }
+
+    public void mineralDumpCombo()  {
+        final String taskName = "armShake";
+        if (!TaskManager.isComplete(taskName)) return;
+        gateClose();
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                int cur_pos = shoulder.getCurrentPosition();
+                final Progress armProgress = setShoulderPosition(cur_pos+75);;
+                return new Progress() {
+                    @Override
+                    public boolean isDone() {
+                        return armProgress.isDone();
+                    }
+                };
+            }
+        }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                int cur_pos = shoulder.getCurrentPosition();
+                final Progress armProgress = setShoulderPosition(cur_pos-75);;
+                return new Progress() {
+                    @Override
+                    public boolean isDone() {
+                        return armProgress.isDone();
+                    }
+                };
+            }
+        }, taskName);
+    }
+
 
     public Progress setShoulderPosition(int pos) {
         this.shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -372,7 +406,8 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public void gateClose() { gate.setPosition(GATE_CLOSED);}
     public void gateAuto() {
         if (isGateOpen()) {
-            gateClose();
+            // gateClose();
+            mineralDumpCombo();
         } else {
             gateOpen();
         }
@@ -383,31 +418,6 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
         return Math.abs(gate.getPosition() - GATE_OPEN) < 0.01;
     }
 
-    public void mineralDumpCombo() {
-        final String taskName = "mineralDump";
-        if (!TaskManager.isComplete(taskName)) return;
-
-//        TaskManager.add(new Task() {
-//            @Override
-//            public Progress start() {
-//                moveSliderFast(getSliderDump());
-//                final Progress boxProgress = moveBox(true);
-//                return new Progress() {
-//                    @Override
-//                    public boolean isDone() {
-//                        return boxProgress.isDone() && Math.abs(getSliderCurrent() - getSliderDump()) < 30;
-//                    }
-//                };
-//            }
-//        }, taskName);
-        TaskManager.add(new Task() {
-            @Override
-            public Progress start() {
-                return moveGate(true);
-            }
-        }, taskName);
-    }
-
     /**
      * Moves the slider to given position
      *
@@ -415,12 +425,12 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
      * @return operation showing whether movement is complete
      */
     public Progress moveSlider(int position) {
-        if (position < this.sliderContracted) {
-            throw new IllegalArgumentException("Slider position cannot be less than [sliderContracted]");
-        }
-        if (position > this.sliderExtended) {
-            throw new IllegalArgumentException("Slider position cannot be greater than [sliderExtended]");
-        }
+        //if (position < this.sliderContracted) {
+        //    throw new IllegalArgumentException("Slider position cannot be less than [sliderContracted]");
+        //}
+        //if (position > this.sliderExtended) {
+        //    throw new IllegalArgumentException("Slider position cannot be greater than [sliderExtended]");
+        //}
 
         this.armSlider.setTargetPosition(position);
         this.armSlider.setMode(DcMotor.RunMode.RUN_TO_POSITION);

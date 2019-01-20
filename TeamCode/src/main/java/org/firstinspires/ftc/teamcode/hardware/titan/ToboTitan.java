@@ -142,20 +142,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
                 }
             }
         }, Events.Axis.X_ONLY, Events.Side.LEFT);
-        em.onButtonDown(new Events.Listener() {
-            @Override
-            public void buttonDown(EventManager source, Button button) throws InterruptedException {
-                // intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
-                mineralArm.sweeperIn();
-            }
-        }, Button.LEFT_BUMPER);
-        em.onButtonUp(new Events.Listener() {
-            @Override
-            public void buttonUp(EventManager source, Button button) throws InterruptedException {
-                //intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
-                mineralArm.stopSweeper();
-            }
-        }, Button.LEFT_BUMPER);
+
         em.onTrigger(new Events.Listener() {
             @Override
             public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
@@ -227,7 +214,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
 
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
-        em2.onButtonDown(new Events.Listener() {
+        em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (!source.isPressed(Button.B) && !source.isPressed(Button.X)) {
@@ -271,12 +258,13 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
         }, Button.B);
         em2.onButtonDown(new Events.Listener() {
             @Override
-            public void buttonDown(EventManager source, Button button) {
+            public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 if (source.isPressed(Button.LEFT_BUMPER)) {
                     mineralArm.setArmPosition(MineralArm.ArmMode.DUMP_SHORT);
                     mineralArm.gateClose(); // auto close gate
                 } else if (!source.isPressed(Button.START)) {
                     mineralArm.gateAuto();
+                    // mineralArm.shakeArm();
                 }
             }
         }, Button.X);
