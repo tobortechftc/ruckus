@@ -1,6 +1,7 @@
-package org.firstinspires.ftc.teamcode.opmodes.ruckus;
+package org.firstinspires.ftc.teamcode.opmodes.titan;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 
@@ -9,8 +10,8 @@ import java.math.BigDecimal;
 /**
  * Created by 28761 on 12/22/2018.
  */
-
-@Autonomous(name = "Titan :: potential meter", group = "Titan")
+@Disabled
+@Autonomous(name = "Titan :: potentiometer test", group = "Titan")
 public class CharliePotentialmeterTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

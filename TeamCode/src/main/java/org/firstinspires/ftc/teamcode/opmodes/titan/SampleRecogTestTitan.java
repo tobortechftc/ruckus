@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.hardware.titan.ToboTitan;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
-//@Disabled
+@Disabled
 @Autonomous(name = "Titan :: Sample Recognition Testing", group = "Titan")
 public class SampleRecogTestTitan extends LinearOpMode {
     protected static int LOG_LEVEL = Log.INFO;

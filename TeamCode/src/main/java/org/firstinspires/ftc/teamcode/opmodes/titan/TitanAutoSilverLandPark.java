@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by Nick on 12/30/2018.
  */
 
-@Autonomous(name = "Titan-Silver-Land-Park", group = "Ruckus")
+@Autonomous(name = "Titan-Silver-Land-Park", group = "Titan")
 public class TitanAutoSilverLandPark extends LinearOpMode implements YieldHandler {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
