@@ -32,16 +32,16 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private DigitalChannel liftTouch;
     private double gateClosePos = 0.33;
     private double gateOpenPos = 0.8;
-    private double armInitPos = 0.02;
-    private double armDownPos = 0.06;
-    private double armSafePos = 0.08;
-    private double armDumpPos = 0.82; // actual dump position
-    private double armUpPos = 0.92;   // max arm position
+    private double armInitPos = 0.05;
+    private double armDownPos = 0.09;
+    private double armSafePos = 0.11;
+    private double armDumpPos = 0.85; // actual dump position
+    private double armUpPos = 0.95;   // max arm position
     private double liftPower = .90;
     private double liftDownPower = .40;
     private boolean gateIsOpened = false;
     private final int MAX_LIFT_POS = 1120; // old small spool = 4100;
-    private final int AUTO_LIFT_POS = 1090; // old small spool = 4000;
+    private final int AUTO_LIFT_POS = 1100; // old small spool = 4000;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
