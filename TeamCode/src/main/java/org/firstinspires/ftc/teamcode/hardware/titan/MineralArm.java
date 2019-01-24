@@ -45,15 +45,15 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public static final double SWEEPER_OUT = -1.0;
 
     public static final int SHOULDER_INIT_POS = 0;
-    public static final int SHOULDER_VERTICAL_POS = 1482;
-    public static final int SHOULDER_DUMP_SHORT_POS = 777;
-    public static final int SHOULDER_DUMP_LONG_POS = 677;
-    public static final int SHOULDER_INTAKE_POS = 3524;
-    public static final int SHOULDER_MAX_POS = 3541;
+    public static final int SHOULDER_VERTICAL_POS = 4321;
+    public static final int SHOULDER_DUMP_SHORT_POS = 2931;
+    public static final int SHOULDER_DUMP_LONG_POS = 2331;
+    public static final int SHOULDER_INTAKE_POS = 10894;
+    public static final int SHOULDER_MAX_POS = 11200;
 
     public static final int ARM_SLIDE_MAX_POS = 5050;
     public static final int ARM_SLIDE_DUMP_POS = 5050;
-    public static final int ARM_SLIDE_MIN_INTAKE_POS = 0;
+    public static final int ARM_SLIDE_MIN_INTAKE_POS = 1800;
     public static final int ARM_SLIDE_INIT_POS = 0;
 
     private DcMotor shoulder;
@@ -71,7 +71,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     private int sliderInitOut = 450; // position for initial TeleOp out
     private int sliderAutoPark = 650; // position for Auto Out parking;
     private double sliderPower = 0.8;
-    private double shoulderPower = 0.8;
+    private double shoulderPower = 1.0;
     private int shoulder_init_pos = 0;
     private int shoulder_intake_pos = SHOULDER_INTAKE_POS;
     private int shoulder_dump_short_pos = SHOULDER_DUMP_SHORT_POS;
@@ -186,12 +186,12 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public void mineralDumpCombo()  {
         final String taskName = "armShake";
         if (!TaskManager.isComplete(taskName)) return;
-        gateClose();
+        gateOpen();
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
                 int cur_pos = shoulder.getCurrentPosition();
-                final Progress armProgress = setShoulderPosition(cur_pos+75);;
+                final Progress armProgress = setShoulderPosition(cur_pos+100);;
                 return new Progress() {
                     @Override
                     public boolean isDone() {
@@ -204,7 +204,7 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
             @Override
             public Progress start() {
                 int cur_pos = shoulder.getCurrentPosition();
-                final Progress armProgress = setShoulderPosition(cur_pos-75);;
+                final Progress armProgress = setShoulderPosition(cur_pos-100);;
                 return new Progress() {
                     @Override
                     public boolean isDone() {
@@ -406,10 +406,10 @@ public class MineralArm extends Logger<MineralArm> implements Configurable {
     public void gateClose() { gate.setPosition(GATE_CLOSED);}
     public void gateAuto() {
         if (isGateOpen()) {
-            // gateClose();
-            mineralDumpCombo();
+            gateClose();
         } else {
-            gateOpen();
+            // gateOpen();
+            mineralDumpCombo();
         }
     }
 
