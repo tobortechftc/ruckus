@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.ruckus;
+package org.firstinspires.ftc.teamcode.opmodes.titan;
 
 import android.util.Log;
 
@@ -6,16 +6,18 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
-import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
+import org.firstinspires.ftc.teamcode.hardware.titan.ToboTitan;
 import org.firstinspires.ftc.teamcode.support.Logger;
+import org.firstinspires.ftc.teamcode.support.OpModeTerminationException;
+import org.firstinspires.ftc.teamcode.support.YieldHandler;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
  * Created by Nick on 1/4/2018.
  */
 
-@Autonomous(name = "Auto-Silver-Land-Double", group = "Ruckus")
-public class RuckusAutoSilverLandDouble extends LinearOpMode {
+@Autonomous(name = "Titan-Silver-Land-Double", group = "Titan")
+public class TitanAutoSilverLandDouble extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -31,7 +33,7 @@ public class RuckusAutoSilverLandDouble extends LinearOpMode {
         telemetry.addData("Initializing Robot", "Please Wait ...");
         telemetry.update();
 
-        ToboRuckus robot = new ToboRuckus().configureLogging("ToboRuckus", LOG_LEVEL);
+        ToboTitan robot = new ToboTitan().configureLogging("ToboTitan", LOG_LEVEL);
         configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
 
         try {
@@ -53,7 +55,7 @@ public class RuckusAutoSilverLandDouble extends LinearOpMode {
 
 
         // Step-1: check random sample position
-        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        ToboTitan.MineralDetection.SampleLocation sam_loc = ToboTitan.MineralDetection.SampleLocation.CENTER;
 
         if (opModeIsActive()) {
             sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
@@ -65,18 +67,18 @@ public class RuckusAutoSilverLandDouble extends LinearOpMode {
         }
         // Step-3: sample mission
         if (opModeIsActive()) {
-            robot.retrieveSample(sam_loc);
+            robot.scoreSample(sam_loc);
         }
 
         //Step-4: align with walls
         // go to wall and turn parallel
         if (opModeIsActive()) {
             // go back
-            robot.chassis.driveStraightAuto(power, (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT ? -22.6 : -26.6), 0, timeout);
+            robot.chassis.driveStraightAuto(power, (sam_loc == ToboTitan.MineralDetection.SampleLocation.RIGHT ? -22.6 : -26.6), 0, timeout);
 
-            if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
+            if (sam_loc == ToboTitan.MineralDetection.SampleLocation.LEFT)
                 robot.chassis.driveStraightAuto(power, 45, -90, timeout);
-            else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT)
+            else if (sam_loc == ToboTitan.MineralDetection.SampleLocation.RIGHT)
                 robot.chassis.driveStraightAuto(power, 125, -90, timeout);
             else
                 robot.chassis.driveStraightAuto(power, 85, -90, timeout);
@@ -98,40 +100,65 @@ public class RuckusAutoSilverLandDouble extends LinearOpMode {
             robot.chassis.rotateTo(.2, -45);
             // drop marker
             sleep(200);
-            robot.hanging.markerDown();
+            robot.landing.markerDown();
 
-            // right=(60,117) center=(89,89) left(117,60) wheel = (38,35)
-            double wheelX = 38 + robot.chassis.getDistance(SwerveChassis.Direction.LEFT);
-            double wheelY = 35 + robot.chassis.getDistance(SwerveChassis.Direction.BACK);
-            double deltaX;
-            double deltaY;
-            double distance;
-            double heading;
-            double offset;
-            int outcome = 0;
-            sleep(100);
-            if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT) {
-                deltaX = 117 - wheelX;
-                deltaY = 62 - wheelY;
-            } else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER) {
-                deltaX = 89 - wheelX;
-                deltaY = 89 - wheelY;
-            } else {
-                deltaX = 62 - wheelX;
-                deltaY = 117 - wheelY;
-            }
-            distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY) + 3;
-            offset = 45 + robot.chassis.orientationSensor.getHeading();
-            heading = Math.toDegrees(Math.atan(deltaX / deltaY)) - offset;
-            if (heading > 90)
-                heading -= 180;
-            if (heading < 0) {
-                distance *= -1;
-                outcome = 1;
-            }
-            sleep(300);
-            robot.chassis.driveStraightAuto(power, distance, heading, timeout);
+        // right=(60,117) center=(89,89) left(117,60) wheel = (38,35)
+        double wheelX = 38 + robot.chassis.getDistance(SwerveChassis.Direction.LEFT);
+        double wheelY = 35 + robot.chassis.getDistance(SwerveChassis.Direction.BACK);
+        double deltaX;
+        double deltaY;
+        double distance;
+        double heading;
+        double offset;
+        int outcome = 0;
+        sleep(100);
+        if (sam_loc == ToboTitan.MineralDetection.SampleLocation.LEFT) {
+            deltaX = 117 - wheelX;
+            deltaY = 62 - wheelY;
+        } else if (sam_loc == ToboTitan.MineralDetection.SampleLocation.CENTER) {
+            deltaX = 89 - wheelX;
+            deltaY = 89 - wheelY;
+        } else {
+            deltaX = 62 - wheelX;
+            deltaY = 117 - wheelY;
         }
+        distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) + 3;
+        offset = 45 + robot.chassis.orientationSensor.getHeading();
+        heading = Math.toDegrees(Math.atan(deltaX / deltaY)) - offset;
+        if (heading > 90)
+                heading -= 180;
+        if (heading < 0) {
+            distance *= -1;
+            outcome = 1;
+
+        }
+        telemetry.addData("wheelX", wheelX);
+        telemetry.addData("wheelY", wheelY);
+        telemetry.addData("offset", offset);
+        telemetry.addData("distance", distance);
+        telemetry.addData("heading", heading);
+        telemetry.addData("outcome", outcome);
+        telemetry.update();
+        sleep(400);
+        robot.chassis.driveStraightAuto(power, distance, heading, timeout);
+
+
+//
+//
+//            if (opModeIsActive()) sleep(500);
+//
+//            robot.intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+//
+//            // 10 cm from each wall, parallel to left wall
+//            if (sam_loc == ToboTitan.MineralDetection.SampleLocation.LEFT)
+//                robot.chassis.driveStraightAuto(power, 72, 76, timeout);
+//            else if (sam_loc == ToboTitan.MineralDetection.SampleLocation.CENTER)
+//                robot.chassis.driveStraightAuto(power, 62, 42, timeout);
+//            else
+//                robot.chassis.driveStraightAuto(power, 75, 10, timeout);
+//
+//            robot.intake.stopSweeper();
+    }
 
     }
 
