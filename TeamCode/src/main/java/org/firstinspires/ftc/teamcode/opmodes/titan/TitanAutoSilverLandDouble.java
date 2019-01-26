@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.titan;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
@@ -15,7 +16,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by Nick on 1/4/2018.
  */
-
+@Disabled
 @Autonomous(name = "Titan-Silver-Land-Double", group = "Titan")
 public class TitanAutoSilverLandDouble extends LinearOpMode {
     protected static int LOG_LEVEL = Log.VERBOSE;
