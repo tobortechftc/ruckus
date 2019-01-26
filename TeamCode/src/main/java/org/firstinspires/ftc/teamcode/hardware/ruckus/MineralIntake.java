@@ -204,6 +204,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
         boxGateServo.setPosition(GATE_CLOSED);
         resetMotor(sweeperMotor);
+        sweeperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (auto) {
             resetMotor(sliderMotor);
         }
