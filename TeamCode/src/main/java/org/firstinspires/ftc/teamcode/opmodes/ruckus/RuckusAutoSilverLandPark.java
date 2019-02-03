@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
+import org.firstinspires.ftc.teamcode.support.OpModeTerminationException;
+import org.firstinspires.ftc.teamcode.support.YieldHandler;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
@@ -15,7 +17,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  */
 
 @Autonomous(name = "Auto-Silver-Land-Park", group = "Ruckus")
-public class RuckusAutoSilverLandPark extends LinearOpMode {
+public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandler {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -50,72 +52,70 @@ public class RuckusAutoSilverLandPark extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         resetStartTime();
+        robot.core.set_yield_handler(this); // uses this class as yield handler 
 
         // Step-1: check random sample position
         ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
-        if (opModeIsActive()) {
-            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
-        }
+        sam_loc = robot.cameraMineralDetector.getGoldPositionTF(false);
+
 
         // Step-2: landing mission
-        if (opModeIsActive()) {
-            robot.landAndDetach(null, false);
-        }
+        robot.landAndDetach(null, true);
+
         // Step-3: sample mission
-        if (opModeIsActive()) {
-            robot.retrieveSample(sam_loc);
-        }
+        robot.retrieveSample(sam_loc);
 
-        //Step-4: align with walls
-        // go to wall and turn parallel
-        if (opModeIsActive()) {
-            // go back
-            robot.chassis.driveStraightAuto(power, (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT ? -22.6 : -26.6), 0, timeout);
+        // Step-4: align with walls
+        robot.chassis.driveStraightAuto(power, (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT ? -22.6 : -26.6), 0, timeout);
+        if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
+            robot.chassis.driveStraightAuto(power, 45, -90, timeout);
+        else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT)
+            robot.chassis.driveStraightAuto(power, 125, -90, timeout);
+        else
+            robot.chassis.driveStraightAuto(power, 85, -90, timeout);
 
-            if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
-                robot.chassis.driveStraightAuto(power, 45, -90, timeout);
-            else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT)
-                robot.chassis.driveStraightAuto(power, 125, -90, timeout);
-            else
-                robot.chassis.driveStraightAuto(power, 85, -90, timeout);
+        robot.chassis.driveStraightAuto(.2, 15, -90, timeout);
+        robot.chassis.rotateTo(.2, -43);
 
-            robot.chassis.driveStraightAuto(.2, 15, -90, timeout);
-            robot.chassis.rotateTo(.2, -43);
+        // 5cm away from wall
+        double driveDistance = robot.chassis.distanceToLeft() - 5;
+        robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
 
-            // 5cm away from wall
-            double driveDistance = robot.chassis.distanceToLeft() - 5;
-            robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
-        }
 
-        // stpe-5: marker mission
-        if (opModeIsActive()) {
-            // to depot
-            robot.chassis.driveAlongTheWall(power, -100, 5, SwerveChassis.Wall.LEFT, timeout);
-            // realign
-            if (opModeIsActive()) sleep(200);
+        // Step-5: marker mission
+
+        // to depot
+        robot.chassis.driveAlongTheWall(power, -100, 5, SwerveChassis.Wall.LEFT, timeout);
+        // realign
+        robot.core.yield_for(.2);
 //                robot.chassis.rotateTo(.2, -43);
 //                driveDistance = robot.chassis.distanceToLeft() - 5;
 //                robot.chassis.driveStraightAuto(power, driveDistance, -90, timeout);
 //                sleep(200);
 
-            // drop marker
-            robot.hanging.markerDown();
-            if (opModeIsActive()) sleep(750);
-        }
+        // drop marker
+        robot.hanging.markerDown();
+        robot.core.yield_for(.75);
 
-        // Step-5 park on the rim
-        if (opModeIsActive()) {
-            robot.goParking(ToboRuckus.Side.SILVER);
-        }
+
+        // Step-6: park on the rim
+        robot.goParking(ToboRuckus.Side.SILVER);
+
     }
 
-    protected void handleException(Throwable T) {
-        log.error(T.getMessage(), T);
+    protected void handleException(Throwable t) {
+        log.error(t.getMessage(), t);
         int linesToShow = 5;
-        for (StackTraceElement line : T.getStackTrace()) {
+        for (StackTraceElement line : t.getStackTrace()) {
             telemetry.log().add("%s.%s():%d", line.getClassName(), line.getMethodName(), line.getLineNumber());
             if (--linesToShow == 0) break;
         }
         telemetry.update();
+    }
+
+    @Override
+    public void on_yield() {
+        if (!opModeIsActive())
+            throw new OpModeTerminationException();
     }
 }

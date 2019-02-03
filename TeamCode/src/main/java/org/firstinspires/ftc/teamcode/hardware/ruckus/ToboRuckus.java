@@ -15,6 +15,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
+import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.events.Button;
 import org.firstinspires.ftc.teamcode.support.events.EventManager;
@@ -45,6 +46,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public Hanging hanging;
     public CameraSystem cameraSystem;
     public CameraMineralDetector cameraMineralDetector;
+    public CoreSystem core;
 
 
     @Override
@@ -62,7 +64,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
             cameraMineralDetector.configure(configuration);
         }
-        chassis = new SwerveChassis().configureLogging("Swerve", logLevel); // Log.DEBUG
+        this.core = new CoreSystem();
+        chassis = new SwerveChassis(this.core).configureLogging("Swerve", logLevel); // Log.DEBUG
         chassis.configure(configuration, auto);
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
