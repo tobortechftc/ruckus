@@ -32,9 +32,9 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private DigitalChannel liftTouch;
     private double gateClosePos = 0.33;
     private double gateOpenPos = 0.8;
-    private double armInitPos = 0.03;
-    private double armDownPos = 0.06;
-    private double armSafePos = 0.09;
+    private double armInitPos = 0.067;
+    private double armDownPos = 0.086;
+    private double armSafePos = 0.11;
     private double armDumpPos = 0.85; // actual dump position
     private double armUpPos = 0.99;   // max arm position
     private double liftPower = .50;
@@ -57,7 +57,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     public void reset() {
         lift.setPower(0);
-        gateClose();
+        gateOpen();
         armInit();
     }
 
@@ -197,7 +197,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
             @Override
             public Progress start() {
                 gateClose();
-                final int safePosition = (sliderControl.getSliderInitOut() + sliderControl.getSliderExtended()) / 2 + 200;
+                final int safePosition = (sliderControl.getSliderSafeLiftPos());
                 sliderControl.moveSlider(safePosition);
                 return new Progress() {
                     @Override

@@ -27,9 +27,9 @@
     "minPower": 0.15
   },
   "sv_sw_box": {
-    "center": 0.5,
-    "left": 0.4,
-    "right": 0.75
+    "center": 0.14,
+    "left": 0.001,
+    "right": 0.29
   },
   "sv_box_lift": {
     "center": 0.62,
@@ -41,7 +41,7 @@
     "sweeperOutPower": 0.7,
     "sweeperHalfRotation": 180.0,
     "sliderDump": 300.0,
-    "sliderExtended": 1480.0,
+    "sliderExtended": 2400.0,
     "sliderPower": 0.6
   }
 }

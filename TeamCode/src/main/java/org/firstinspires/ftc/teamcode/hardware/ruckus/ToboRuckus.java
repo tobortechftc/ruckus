@@ -147,7 +147,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (button == Button.DPAD_LEFT) {
+                if (button == Button.DPAD_LEFT) { // slide out
                     if (source.isPressed(Button.BACK)) {
                         intake.adjustSlider(true);
                     } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
@@ -155,7 +155,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     } else {
                         intake.moveSlider(intake.getSliderDump());
                     }
-                } else {
+                }
+                else if (!source.isPressed(Button.BACK) && intake.isBoxDown() && (intake.getSliderCurrent()<intake.getSliderMinSweep())) {
+                    ; // cannot move further when box is down
+                } else if (button == Button.DPAD_RIGHT) { // slide in
                     if (source.isPressed(Button.BACK)) {
                         intake.adjustSlider(false);
                     } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
@@ -177,7 +180,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                intake.moveBox(button == Button.DPAD_UP);
+                if (button == Button.DPAD_UP) {
+                    intake.moveBox(true, false);
+                } else if (source.isPressed(Button.BACK))
+                    intake.moveBox(false, false);
+                else {
+                    intake.boxLiftDownCombo(); // ensure slider extended out before down
+                }
             }
         }, Button.DPAD_UP, Button.DPAD_DOWN);
         em.onButtonDown(new Events.Listener() {
@@ -256,8 +265,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 // intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
-                intake.boxLiftDown();
-                intake.sweeperIn();
+                // intake.boxLiftDownCombo();
+                if (intake.isBoxDown() || source.isPressed(Button.BACK)) {
+                    intake.sweeperIn();
+                }
                 intake.moveGate(false); // auto close the gate when sweeping
             }
         }, Button.LEFT_BUMPER);
@@ -273,7 +284,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (button == Button.DPAD_LEFT) {
+                if (button == Button.DPAD_LEFT) { // slide out
                     if (source.isPressed(Button.BACK)) {
                         intake.adjustSlider(true);
                     } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
@@ -281,7 +292,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     } else {
                         intake.moveSlider(intake.getSliderDump());
                     }
-                } else {
+                }
+                else if (!source.isPressed(Button.BACK) && intake.isBoxDown() && (intake.getSliderCurrent()<intake.getSliderMinSweep())) {
+                    ; // cannot move further when box is down
+                } else if (button == Button.DPAD_RIGHT) { // slide in
                     if (source.isPressed(Button.BACK)) {
                         intake.adjustSlider(false);
                     } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
@@ -303,7 +317,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                intake.moveBox(button == Button.DPAD_UP);
+                if (button == Button.DPAD_UP) {
+                    intake.moveBox(true, false);
+                } else if (source.isPressed(Button.BACK))
+                    intake.moveBox(false, false);
+                else {
+                    intake.boxLiftDownCombo(); // ensure slider extended out before down
+                }
             }
         }, Button.DPAD_UP, Button.DPAD_DOWN);
 
@@ -390,9 +410,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     }
                     return;
                 }
-                if (currentY > 0.9) {
+                if (currentY > 0.95) {
                     mineralDelivery.armDump();
-                } else if (currentY < -0.9) {
+                } else if (currentY < -0.95) {
                     mineralDelivery.armDown();
                 }
             }
@@ -623,11 +643,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     public void initTeleOp() throws InterruptedException {
         // slider out at dump pos
-        intake.moveSlider(intake.getSliderInitOut());
-        if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(500);
+//        intake.moveSlider(intake.getSliderInitOut());
+//        if (!Thread.currentThread().isInterrupted())
+//            Thread.sleep(500);
 
-        // box gate close
+        // box gate open
         intake.moveGate(false);
 
         // dumper gate open
