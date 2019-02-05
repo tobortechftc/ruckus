@@ -27,6 +27,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // down and up positions for the box lift
     // actual servo positions are configured via <code>AdjustableServo</code>
     public static final double LIFT_DOWN = 0.0;
+    public static final double LIFT_CENTER = 0.5;
     public static final double LIFT_UP = 1.0;
 
     // open and closed positions for the box gate
@@ -51,7 +52,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int sliderDump = 300; // position to dump minerals into delivery box
     private int sliderInitOut = 450; // position for initial TeleOp out
     private int sliderAutoPark = 650; // position for Auto Out parking;
-    private double sliderPower = 0.6; // TBD
+    private double sliderPower = 0.4; // TBD
 
     @Override
     public String getUniqueName() {
@@ -71,7 +72,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         } else {
             this.sliderMotor.setPower(0);
             this.sweeperMotor.setPower(0);
-            this.boxLiftServo.setPosition(LIFT_DOWN);
+            this.boxLiftServo.setPosition(LIFT_CENTER);
             this.boxGateServo.setPosition(GATE_CLOSED);
             debug("Adjustment: OFF, lift: %.2f, gate: %.1f, sweeper: %s / %d, slider: %s",
                     boxLiftServo.getPosition(), boxGateServo.getPosition(),
@@ -379,7 +380,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
         this.sliderMotor.setTargetPosition(position);
         this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        this.sliderMotor.setPower(0.9);
+        // this.sliderMotor.setPower(0.9);
+        this.sliderMotor.setPower(this.sliderPower);
         return new Progress() {
             @Override
             public boolean isDone() {
