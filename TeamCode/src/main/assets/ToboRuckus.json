@@ -32,9 +32,9 @@
     "right": 0.75
   },
   "sv_box_lift": {
-    "center": 0.5,
-    "left": 0.086,
-    "right": 0.75
+    "center": 0.62,
+    "left": 0.001,
+    "right": 0.94
   },
   "intake": {
     "sweeperInPower": 0.7,
