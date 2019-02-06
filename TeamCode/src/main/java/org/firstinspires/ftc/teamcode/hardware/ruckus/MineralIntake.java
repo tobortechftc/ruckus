@@ -55,7 +55,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int sliderSafeLiftPos = 967;
     private int sliderMinSweep = 1370; // pos for min sweeping
     private int sliderAutoPark = 1370; // position for Auto Out parking;
-    private double sliderPower = 0.4; // TBD
+    private double sliderPower = 0.6; // TBD
 
     @Override
     public String getUniqueName() {
@@ -210,6 +210,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     public int getSliderInitOut() {
         return sliderInitOut;
     }
+
     public void setSliderAutoPark() {
         moveSlider(sliderAutoPark);
     }

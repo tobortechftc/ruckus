@@ -491,18 +491,18 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void retrieveSample(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
         switch (sam_loc) {
             case CENTER: // center
-                chassis.driveStraightAuto(0.35, 43, 11, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 43, -1, Integer.MAX_VALUE);
                 break;
             case RIGHT:
-                chassis.driveStraightAuto(0.35, 58, 53, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 58, 40, Integer.MAX_VALUE);
                 break;
             case LEFT:
-                chassis.driveStraightAuto(0.35, 55, -38, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 55, -50, Integer.MAX_VALUE);
                 break;
             default: // go straight like center
-                chassis.driveStraightAuto(0.35, 43, 9, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 43, 0, Integer.MAX_VALUE);
         }
-        intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
+//        intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
 //        intake.sweeperOut();
         //if (!Thread.currentThread().isInterrupted())
         //    Thread.sleep(100);
@@ -510,7 +510,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         //if (!Thread.currentThread().isInterrupted())
         //    Thread.sleep(100);
         //intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
-        intake.stopSweeper();
+//        intake.stopSweeper();
     }
 
     public enum Side {
@@ -520,11 +520,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void goParking(Side side) throws InterruptedException {
         if (side == side.GOLD) {
             chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.RIGHT, 4000);
-            chassis.driveStraightAuto(0.4, 10, 10, 1000);
+            chassis.driveStraightAuto(0.3, 20, 10, 1000);
         }
         else {
             chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.LEFT, 4000);
-            chassis.driveStraightAuto(0.4, 10, 0, 1000);
+            chassis.driveStraightAuto(0.3, 20, 0, 1000);
         }
         extendInakeForParking();
     }
@@ -596,11 +596,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 detectedBackDistance = Math.min(50, detectedBackDistance);
         }
 
-        chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance, 0, 3000);
+        chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance, 0, 1500);
         detectedBackDistance = chassis.distanceToBack();
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
-        chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance, 0, 3000);
+        chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance, 0, 1500);
 //        telemetry.addLine(String.format("adjusted distance to back: %.3f",chassis.distanceToBack()));
 //        telemetry.update();
     }
@@ -610,9 +610,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         // chassis.resetOrientation();
         if ((hanging != null) && !skipLanding) {
             chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
-            hanging.latchUpInches(8);
+            hanging.latchUpInches(7.75);
             if (!Thread.currentThread().isInterrupted())
-                Thread.sleep(500);
+                Thread.sleep(100);
         }
         chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
         chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.

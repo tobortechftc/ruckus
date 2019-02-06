@@ -88,7 +88,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             orientationSensor = cos;
             bottomRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "bottom_range");
         }
-        
+
         // register hanging as configurable component
         configuration.register(this);
     }
@@ -189,9 +189,9 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setPower(Math.abs(latch_power));
         while (latch.isBusy() && (runtime.seconds() < 5.0)) {
             cur_pos = latch.getCurrentPosition();
-            if (distanceToGround() < 10.6) {
+            if (distanceToGround() < 11) {
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(250);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
