@@ -56,11 +56,11 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
 
         // Step-1: check random sample position
         ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
-        sam_loc = robot.cameraMineralDetector.getGoldPositionTF(false);
+        sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
 
 
         // Step-2: landing mission
-        robot.landAndDetach(null, true);
+        robot.landAndDetach(null, false);
 
         // Step-3: sample mission
         robot.retrieveSample(sam_loc);
