@@ -47,15 +47,38 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // encoder value for sweeper rotating half circle
     private int sweeperHalfRotation = 180;
 
+
     // slider encoder positions
-    private int sliderContracted = 0; // contracted
-    private int sliderExtended = 2400; // fully extended
-    private int sliderDump = 360; // position to dump minerals into delivery box
-    private int sliderInitOut = 370; // position for initial TeleOp out, lifter just out
-    private int sliderSafeLiftPos = 967;
-    private int sliderMinSweep = 1370; // pos for min sweeping
-    private int sliderAutoPark = 1370; // position for Auto Out parking;
+    private int sliderOffset = 0; // offset will be set to sliderInitOut when manual reset
+    private int iSliderContracted = 0; // contracted
+    private int iSliderExtended = 2300; // fully extended
+    private int iSliderDump = 370; // position to dump minerals into delivery box
+    private int iSliderInitOut = 370; // position for initial TeleOp out, lifter just out
+    private int iSliderSafeLiftPos = 967;
+    private int iSliderMinSweep = 1000; // pos for min sweeping
+    private int iSliderAutoPark = 1000;
+
+    private int sliderContracted = iSliderContracted; // contracted
+    private int sliderExtended = iSliderExtended; // fully extended
+    private int sliderDump = iSliderDump; // position to dump minerals into delivery box
+    private int sliderInitOut = iSliderInitOut; // position for initial TeleOp out, lifter just out
+    private int sliderSafeLiftPos = iSliderSafeLiftPos;
+    private int sliderMinSweep = iSliderMinSweep; // pos for min sweeping
+    private int sliderAutoPark = iSliderAutoPark; // position for Auto Out parking;
     private double sliderPower = 0.6; // TBD
+
+    public void syncSliderEncoder() {
+        sliderMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        sliderOffset = -400; // offset will be set to -sliderInitOut when manual reset
+        sliderContracted = sliderOffset; // contracted
+        sliderExtended = sliderOffset + iSliderExtended; // fully extended
+        sliderDump = sliderOffset + iSliderDump; // position to dump minerals into delivery box
+        sliderInitOut = sliderOffset + iSliderInitOut; // position for initial TeleOp out, lifter just out
+        sliderSafeLiftPos = sliderOffset + iSliderSafeLiftPos;
+        sliderMinSweep = sliderOffset + iSliderMinSweep; // pos for min sweeping
+        sliderAutoPark = sliderOffset + iSliderAutoPark; // position for Auto Out parking;
+    }
 
     @Override
     public String getUniqueName() {
@@ -209,6 +232,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     public int getSliderInitOut() {
         return sliderInitOut;
+    }
+
+    public int getSliderAutoPark() {
+        return sliderAutoPark;
     }
 
     public void setSliderAutoPark() {

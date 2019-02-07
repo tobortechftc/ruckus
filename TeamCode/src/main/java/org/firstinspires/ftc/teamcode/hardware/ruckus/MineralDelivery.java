@@ -31,14 +31,15 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private Servo dumperGate;
     private DigitalChannel liftTouch;
     private double gateClosePos = 0.33;
+    private double gateODumpPos = 0.6;
     private double gateOpenPos = 0.8;
     private double armInitPos = 0.067;
     private double armDownPos = 0.086;
     private double armSafePos = 0.11;
     private double armDumpPos = 0.85; // actual dump position
-    private double armUpPos = 0.99;   // max arm position
-    private double liftPower = .50;
-    private double liftDownPower = .40;
+    private double armUpPos = 0.92;   // max arm position
+    private double liftPower = .90;
+    private double liftDownPower = .50;
     private boolean gateIsOpened = false;
     private final int MAX_LIFT_POS = 1240; // old small spool = 4100;
     private final int AUTO_LIFT_POS = 1200; // old small spool = 4000;
@@ -86,11 +87,15 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         dumperGate.setPosition(gateOpenPos);
         gateIsOpened=true;
     }
+    public void gateDump(){
+        dumperGate.setPosition(gateODumpPos);
+        gateIsOpened=true;
+    }
     public void gateAuto() {
             if (gateIsOpened) {
             gateClose();
         } else {
-            gateOpen();
+            gateDump();
         }
     }
     public void liftUp(boolean force) {
@@ -179,8 +184,8 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void armUpInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armUpPos;
-        if (cur_pos<armUpPos-0.03) {
-            tar_pos = cur_pos + 0.03;
+        if (cur_pos<armUpPos-0.04) {
+            tar_pos = cur_pos + 0.04;
         }
         dumperArm.setPosition(tar_pos);
     }

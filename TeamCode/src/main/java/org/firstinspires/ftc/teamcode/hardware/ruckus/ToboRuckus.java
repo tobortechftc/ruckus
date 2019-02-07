@@ -22,6 +22,9 @@ import org.firstinspires.ftc.teamcode.support.events.EventManager;
 import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
+import org.firstinspires.ftc.teamcode.support.tasks.Progress;
+import org.firstinspires.ftc.teamcode.support.tasks.Task;
+import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -287,10 +290,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (button == Button.DPAD_LEFT) { // slide out
                     if (source.isPressed(Button.BACK)) {
                         intake.adjustSlider(true);
-                    } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
-                        intake.moveSlider(intake.getSliderExtended());
                     } else {
-                        intake.moveSlider(intake.getSliderDump());
+                        intake.moveSlider(intake.getSliderExtended());
                     }
                 }
                 else if (!source.isPressed(Button.BACK) && intake.isBoxDown() && (intake.getSliderCurrent()<intake.getSliderMinSweep())) {
@@ -298,8 +299,6 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 } else if (button == Button.DPAD_RIGHT) { // slide in
                     if (source.isPressed(Button.BACK)) {
                         intake.adjustSlider(false);
-                    } else if (intake.getSliderCurrent() >= intake.getSliderDump()) {
-                        intake.moveSlider(intake.getSliderDump());
                     } else {
                         intake.moveSlider(intake.getSliderContracted());
                     }
@@ -309,7 +308,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonUp(new Events.Listener() {
             @Override
             public void buttonUp(EventManager source, Button button) {
-                if (intake.getSliderCurrent() >= intake.getSliderDump()) intake.stopSlider();
+                intake.stopSlider();
             }
         }, Button.DPAD_LEFT, Button.DPAD_RIGHT);
 
@@ -349,7 +348,14 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Button.B);
-
+        em2.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.BACK)) {
+                    intake.syncSliderEncoder();
+                }
+            }
+        }, Button.A);
         // [X] opens / closes delivery gate
         // [LB] + [X] is delivery combo (move slider out, close gate, arm lift up, arm up)
         em2.onButtonDown(new Events.Listener() {
@@ -410,11 +416,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     }
                     return;
                 }
-                if (currentY > 0.95) {
-                    mineralDelivery.armDump();
-                } else if (currentY < -0.95) {
-                    mineralDelivery.armDown();
-                }
+//                if (currentY > 0.95) {
+//                    mineralDelivery.armDump();
+//                } else if (currentY < -0.95) {
+//                    mineralDelivery.armDown();
+//                }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
 
@@ -502,15 +508,12 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             default: // go straight like center
                 chassis.driveStraightAuto(0.35, 43, 0, Integer.MAX_VALUE);
         }
-//        intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
-//        intake.sweeperOut();
+        sweepSample();
         //if (!Thread.currentThread().isInterrupted())
         //    Thread.sleep(100);
         chassis.driveStraightAuto(0.35, 7, 0, Integer.MAX_VALUE);
         //if (!Thread.currentThread().isInterrupted())
-        //    Thread.sleep(100);
         //intake.rotateSweeper(MineralIntake.SweeperMode.VERTICAL_STOP);
-//        intake.stopSweeper();
     }
 
     public enum Side {
@@ -527,11 +530,6 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             chassis.driveStraightAuto(0.3, 20, 0, 1000);
         }
         extendInakeForParking();
-    }
-
-    public void extendInakeForParking() {
-//        intake.boxLiftUp();
-        intake.setSliderAutoPark();
     }
 
     @MenuEntry(label = "Test Sample", group = "Test Auto")
@@ -640,6 +638,42 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         hanging.landWithIMU();
     }
 
+    @MenuEntry(label = "Test SweepSample", group = "Test Auto")
+    public void testSweepSample(EventManager em) throws InterruptedException {
+        sweepSample();
+    }
+
+    public void sweepSample() throws InterruptedException {
+        intake.sweeperOut();
+        Thread.sleep(50);
+        intake.sweeperIn();
+        Thread.sleep(50);
+        intake.stopSweeper();
+    }
+
+    @MenuEntry(label = "Extend Intake Park", group = "Test Auto")
+    public void testExtendIntakeForParking(EventManager em) throws InterruptedException {
+        extendInakeForParking();
+    }
+
+    public void extendInakeForParking() {
+        final String taskName = "extendIntakeParking";
+        if (!TaskManager.isComplete(taskName)) return;
+
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                intake.setSliderAutoPark();
+                return new Progress() {
+                    @Override
+                    public boolean isDone() {
+                        return (intake.getSliderCurrent() > (intake.getSliderAutoPark() - 10));
+                    }
+                };
+            }
+        }, taskName);
+        intake.stopSlider();
+    }
 
     public void initTeleOp() throws InterruptedException {
         // slider out at dump pos
