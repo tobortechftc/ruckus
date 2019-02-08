@@ -497,7 +497,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void retrieveSample(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
         switch (sam_loc) {
             case CENTER: // center
-                chassis.driveStraightAuto(0.35, 43, -6, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 40, -7, Integer.MAX_VALUE);
                 break;
             case RIGHT:
                 chassis.driveStraightAuto(0.35, 58, 40, Integer.MAX_VALUE);
@@ -506,7 +506,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 chassis.driveStraightAuto(0.35, 55, -50, Integer.MAX_VALUE);
                 break;
             default: // go straight like center
-                chassis.driveStraightAuto(0.35, 43, 0, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 40, -7, Integer.MAX_VALUE);
         }
         sweepSample();
         //if (!Thread.currentThread().isInterrupted())
@@ -523,11 +523,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void goParking(Side side) throws InterruptedException {
         if (side == side.GOLD) {
             chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.RIGHT, 4000);
-            chassis.driveStraightAuto(0.3, 30, 10, 1000);
+            chassis.driveStraightAuto(0.25, 20, 10, 1000);
         }
         else {
             chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.LEFT, 4000);
-            chassis.driveStraightAuto(0.3, 20, 0, 1000);
+            chassis.driveStraightAuto(0.25, 20, -10, 1000);
         }
         extendInakeForParking();
     }
@@ -644,10 +644,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     public void sweepSample() throws InterruptedException {
-        intake.sweeperOut();
-        Thread.sleep(50);
-        intake.sweeperIn();
-        Thread.sleep(50);
+        intake.sweeperOut(0.5);
+        Thread.sleep(100);
+        intake.sweeperIn(0.5);
+        Thread.sleep(100);
         intake.stopSweeper();
     }
 
@@ -657,21 +657,28 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     public void extendInakeForParking() {
-        final String taskName = "extendIntakeParking";
-        if (!TaskManager.isComplete(taskName)) return;
-
-        TaskManager.add(new Task() {
-            @Override
-            public Progress start() {
-                intake.setSliderAutoPark();
-                return new Progress() {
-                    @Override
-                    public boolean isDone() {
-                        return (intake.getSliderCurrent() > (intake.getSliderAutoPark() - 10));
-                    }
-                };
-            }
-        }, taskName);
+//        final String taskName = "extendIntakeParking";
+//        if (!TaskManager.isComplete(taskName)) return;
+        intake.setSliderAutoPark();
+        try {
+            Thread.sleep(750);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }finally {
+            intake.stopSlider();
+        }
+//        TaskManager.add(new Task() {
+//            @Override
+//            public Progress start() {
+//                intake.setSliderAutoPark();
+//                return new Progress() {
+//                    @Override
+//                    public boolean isDone() {
+//                        return (intake.getSliderCurrent() > (intake.getSliderAutoPark() - 10));
+//                    }
+//                };
+//            }
+//        }, taskName);
         intake.stopSlider();
     }
 

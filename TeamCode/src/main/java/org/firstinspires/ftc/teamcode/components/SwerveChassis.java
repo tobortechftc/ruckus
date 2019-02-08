@@ -72,7 +72,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
     private boolean useScalePower = true;//
     private boolean setImuTelemetry = false;//unless debugging, don't set telemetry for imu
-    private boolean setRangeSensorTelemetry = false;//unless debugging, don't set telemetry for range sensor
+    private boolean setRangeSensorTelemetry = true;//unless debugging, don't set telemetry for range sensor
 
     final double TICKS_PER_CM = 16.86;//number of encoder ticks per cm of driving
 
@@ -213,21 +213,20 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             return 0;
         dist = rangeSensor.getDistance(DistanceUnit.CM);
         while (dist > maxRange && (++count) < 5) {
-            try {
-                sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                sleep(10);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             dist = rangeSensor.getDistance(DistanceUnit.CM);
 
             // yield handler
-            this.core.yield();
+//            this.core.yield();
         }
         if (dist > maxRange)
             dist = maxRange;
         return dist;
     }
-
 
     public double distanceToFront() {
         if (frontRangeSensor == null)

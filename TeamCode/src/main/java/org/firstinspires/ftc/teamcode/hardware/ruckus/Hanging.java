@@ -44,6 +44,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private final int MIN_LATCH_POS = 20;
     private final int LATCH_COUNT_PER_INCH = 1198; // version 1 latch system: 1774;
     private boolean markerIsDown = false;
+    private boolean useBottomRange = false;
     private ElapsedTime runtime = new ElapsedTime();
 
     @Override
@@ -88,7 +89,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             orientationSensor = cos;
             bottomRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "bottom_range");
         }
-
+//        bottomRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "bottom_range");//!!!!!!
         // register hanging as configurable component
         configuration.register(this);
     }
@@ -189,9 +190,12 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setPower(Math.abs(latch_power));
         while (latch.isBusy() && (runtime.seconds() < 5.0)) {
             cur_pos = latch.getCurrentPosition();
-            if (distanceToGround() < 11) {
+            if (Math.abs(cur_pos-tar_pos)<10) break;
+            if (!useBottomRange)
+                continue;
+            if (distanceToGround() < 11.9) {
                 try {
-                    Thread.sleep(250);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -202,6 +206,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             }
         }
         latchStop();
+        latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void latchDownInches(double inches) { // encoder going up
