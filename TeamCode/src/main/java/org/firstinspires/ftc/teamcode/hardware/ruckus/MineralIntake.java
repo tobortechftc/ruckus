@@ -51,8 +51,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // slider encoder positions
     private int sliderOffset = 0; // offset will be set to sliderInitOut when manual reset
     private int iSliderContracted = 0; // contracted
-    private int iSliderExtended = 2300; // fully extended
-    private int iSliderDump = 370; // position to dump minerals into delivery box
+    private int iSliderExtended = 2100; // fully extended
+    private int iSliderDump = 400; // position to dump minerals into delivery box
     private int iSliderInitOut = 370; // position for initial TeleOp out, lifter just out
     private int iSliderSafeLiftPos = 967;
     private int iSliderMinSweep = 1000; // pos for min sweeping
@@ -374,16 +374,26 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     public void mineralDumpCombo() {
         final String taskName = "mineralDump";
         if (!TaskManager.isComplete(taskName)) return;
-
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                moveSliderFast(getSliderDump());
                 final Progress boxProgress = moveBox(true, true);
                 return new Progress() {
                     @Override
                     public boolean isDone() {
-                        return boxProgress.isDone() && Math.abs(getSliderCurrent() - getSliderDump()) < 30;
+                        return boxProgress.isDone();
+                    }
+                };
+            }
+        }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                moveSliderFast(getSliderDump());
+                return new Progress() {
+                    @Override
+                    public boolean isDone() {
+                        return Math.abs(getSliderCurrent() - getSliderDump()) < 30;
                     }
                 };
             }
