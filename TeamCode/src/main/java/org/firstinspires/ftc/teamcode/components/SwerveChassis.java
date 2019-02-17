@@ -221,7 +221,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             dist = rangeSensor.getDistance(DistanceUnit.CM);
 
             // yield handler
-//            this.core.yield();
+            this.core.yield();
         }
         if (dist > maxRange)
             dist = maxRange;
