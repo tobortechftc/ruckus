@@ -35,7 +35,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
     private double latch_power = .95;
-    private final double MARKER_UP = 0.42;
+    private final double MARKER_UP = 0.45;
     private final double MARKER_DOWN = 0.05;
     private final int MAX_LATCH_POS = 15050; //Max distance is 8.5 inches
     private final int LATCH_ENDGAME_POS = 9500; // position for end game to latch
