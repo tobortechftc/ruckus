@@ -48,6 +48,7 @@ public class RuckusAutoGoldLandPark extends LinearOpMode implements YieldHandler
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         resetStartTime();
+        robot.core.set_yield_handler(this); // uses this class as yield handler
 
 
         // Step-1: check random sample position
