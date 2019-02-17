@@ -31,7 +31,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private DcMotor latch;
     private Servo marker;
     private DistanceSensor bottomRangeSensor;
-    private DigitalChannel prox = null;
     public CombinedOrientationSensor orientationSensor;
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
@@ -66,11 +65,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
             latch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
-        if (prox != null) {
-            prox.setMode(DigitalChannel.Mode.OUTPUT);
-            prox.setState(true);
-            prox.setMode(DigitalChannel.Mode.INPUT);
-        }
     }
 
     public void configure(Configuration configuration, boolean auto, CombinedOrientationSensor cos) {
@@ -84,8 +78,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         if (auto) {
             marker = configuration.getHardwareMap().servo.get("sv_marker");
             markerUp();
-            prox = configuration.getHardwareMap().get(DigitalChannel.class, "prox");
-            prox.setMode(DigitalChannel.Mode.INPUT);
             orientationSensor = cos;
             bottomRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "bottom_range");
         }
@@ -278,14 +270,6 @@ public class Hanging extends Logger<Hanging> implements Configurable {
                 @Override
                 public Double value() {
                     return marker.getPosition();
-                }
-            });
-        }
-        if (prox != null) {
-            line.addData("prox", "<15cm=%s", new Func<String>() {
-                @Override
-                public String value() {
-                    return (prox.getState() ? "No" : "Yes");
                 }
             });
         }

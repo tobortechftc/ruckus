@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -40,6 +41,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private DcMotor sliderMotor;
     private AdjustableServo boxLiftServo;
     private AdjustableServo boxGateServo;
+    private DigitalChannel prox = null;
     private boolean adjustmentMode = false;
 
     private double sweeperInPower = 0.99;
@@ -278,6 +280,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         sliderMotor = configuration.getHardwareMap().tryGet(DcMotor.class, "sw_slider");
         sliderMotor.setDirection(DcMotor.Direction.REVERSE);
 
+        prox = configuration.getHardwareMap().get(DigitalChannel.class, "prox");
+        prox.setMode(DigitalChannel.Mode.INPUT);
+
         configuration.register(this);
     }
 
@@ -288,6 +293,11 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         sweeperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (auto) {
             resetMotor(sliderMotor);
+        }
+        if (prox != null) {
+            prox.setMode(DigitalChannel.Mode.OUTPUT);
+            prox.setState(true);
+            prox.setMode(DigitalChannel.Mode.INPUT);
         }
         debug("Reset mineral intake, lift: %.2f, gate: %.1f, sweeper: %s / %d, slider: %s / %d",
                 boxLiftServo.getPosition(), boxGateServo.getPosition(),
@@ -568,6 +578,14 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                 return sweeperMotor.getCurrentPosition();
             }
         });
+        if (prox != null) {
+            line.addData("prox", "<15cm=%s", new Func<String>() {
+                @Override
+                public String value() {
+                    return (prox.getState() ? "No" : "Yes");
+                }
+            });
+        }
     }
 
     private void resetMotor(DcMotor motor) {

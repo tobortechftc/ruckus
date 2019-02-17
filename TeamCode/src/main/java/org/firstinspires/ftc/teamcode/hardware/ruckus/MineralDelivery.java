@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.components.AdjustableServo;
 import org.firstinspires.ftc.teamcode.support.tasks.Progress;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
@@ -29,6 +30,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private DcMotor lift;
     private Servo dumperArm;
     private Servo dumperGate;
+    private AdjustableServo dumperWrist;
     private DigitalChannel liftTouch;
     private double gateClosePos = 0.33;
     private double gateODumpPos = 0.6;
@@ -40,6 +42,13 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double armUpPos = 0.92;   // max arm position
     private double liftPower = .90;
     private double liftDownPower = .50;
+    private double wristDown = 0;
+    private double writeCenter = 0.5;
+    private double wristUp = 1.0;
+    private double wristDump = 0.5; // TBD
+    private double wristReadyToDump = 0.5; // TBD
+    private double wristReadyToCollect = 0.5; // TBD
+
     private boolean gateIsOpened = false;
     private final int MAX_LIFT_POS = 1240; // old small spool = 4100;
     private final int AUTO_LIFT_POS = 1200; // old small spool = 4000;
@@ -59,6 +68,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void reset() {
         lift.setPower(0);
         gateOpen();
+        wristDown();
         armInit();
     }
 
@@ -76,6 +86,11 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         // set the digital channel to input.
         liftTouch.setMode(DigitalChannel.Mode.INPUT);
         // register delivery as configurable component
+        dumperWrist = new AdjustableServo(wristDown, wristUp).configureLogging(
+                logTag + ":dumpWrist", logLevel
+        );
+        dumperWrist.configure(configuration.getHardwareMap(), "sv_box_lift");
+        configuration.register(dumperWrist);
         configuration.register(this);
     }
 
@@ -145,6 +160,34 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         lift.setPower(0);
     }
 
+    private Progress moveWrist(double position) {
+        double adjustment = Math.abs(position - dumperWrist.getPosition());
+        dumperWrist.setPosition(position);
+        // 3.3ms per degree of rotation
+        final long doneBy = System.currentTimeMillis() + Math.round(adjustment * 800);
+        return new Progress() {
+            @Override
+            public boolean isDone() {
+                return System.currentTimeMillis() >= doneBy;
+            }
+        };
+    }
+    public Progress wristDown() {
+        return moveWrist(wristDown);
+    }
+    public Progress wristUp() {
+        return moveWrist(wristUp);
+    }
+    public Progress wristDump() {
+        return moveWrist(wristDump);
+    }
+    public Progress wristReadyToDump() {
+        return moveWrist(wristReadyToDump);
+    }
+    public Progress wristReadyToCollect() {
+        return moveWrist(wristReadyToCollect);
+    }
+
     private Progress moveArm(double position) {
         double adjustment = Math.abs(position - dumperArm.getPosition());
         dumperArm.setPosition(position);
@@ -157,7 +200,6 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
             }
         };
     }
-
     public Progress armUp() {
         return moveArm(armUpPos);
     }
@@ -277,6 +319,13 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
                 @Override
                 public Double value() {
                     return dumperArm.getPosition();
+                }});
+        }
+        if (dumperWrist!=null){
+            line.addData("Wrist", "pos=%.2f", new Func<Double>() {
+                @Override
+                public Double value() {
+                    return dumperWrist.getPosition();
                 }});
         }
         if (liftTouch!=null) {
