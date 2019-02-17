@@ -43,7 +43,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     private final int MIN_LATCH_POS = 20;
     private final int LATCH_COUNT_PER_INCH = 1198; // version 1 latch system: 1774;
     private boolean markerIsDown = false;
-    private boolean useBottomRange = false;
+    private boolean useBottomRange = true;
     private ElapsedTime runtime = new ElapsedTime();
 
     @Override
