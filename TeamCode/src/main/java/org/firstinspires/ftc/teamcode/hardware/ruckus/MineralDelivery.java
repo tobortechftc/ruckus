@@ -35,9 +35,9 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double gateClosePos = 0.33;
     private double gateODumpPos = 0.6;
     private double gateOpenPos = 0.8;
-    private double armInitPos = 0.067;
-    private double armDownPos = 0.086;
-    private double armSafePos = 0.11;
+    private double armInitPos = 0.077;
+    private double armDownPos = 0.096;
+    private double armSafePos = 0.12;
     private double armDumpPos = 0.85; // actual dump position
     private double armUpPos = 0.92;   // max arm position
     private double liftPower = .90;
@@ -68,7 +68,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void reset() {
         lift.setPower(0);
         gateOpen();
-        wristDown();
+        wristReadyToCollect();
         armInit();
     }
 
@@ -89,7 +89,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         dumperWrist = new AdjustableServo(wristDown, wristUp).configureLogging(
                 logTag + ":dumpWrist", logLevel
         );
-        dumperWrist.configure(configuration.getHardwareMap(), "sv_box_lift");
+        dumperWrist.configure(configuration.getHardwareMap(), "sv_hp_wrist");
         configuration.register(dumperWrist);
         configuration.register(this);
     }
