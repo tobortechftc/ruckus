@@ -75,7 +75,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
 
         tfodParameters.minimumConfidence = 0.2;
 
-        com.vuforia.CameraDevice.getInstance().setFlashTorchMode(false);
+        com.vuforia.CameraDevice.getInstance().setFlashTorchMode(true);
 //        com.vuforia.CameraDevice.getInstance().setField("iso", "800");
 
         // register CameraMineralDetector as a configurable component
@@ -97,11 +97,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.startTime();
 
-        int minDistanceFromTop;
-        if (isHanging)
-            minDistanceFromTop = 300;
-        else
-            minDistanceFromTop = 150;
+        int minDistanceFromTop = isHanging ? 300 : 150;
 
         ToboRuckus.MineralDetection.SampleLocation sampleLocation = ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
         int goldXCoord = -1;

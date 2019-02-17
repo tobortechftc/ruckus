@@ -97,11 +97,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.startTime();
 
-        int minDistanceFromTop;
-        if (isHanging)
-            minDistanceFromTop = 250;
-        else
-            minDistanceFromTop = 100;
+        int minDistanceFromTop = isHanging ? 250 : 100;
 
         ToboTitan.MineralDetection.SampleLocation sampleLocation = ToboTitan.MineralDetection.SampleLocation.UNKNOWN;
         int goldXCoord = -1;
