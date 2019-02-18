@@ -348,14 +348,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Button.B);
-        em2.onButtonDown(new Events.Listener() {
-            @Override
-            public void buttonDown(EventManager source, Button button) {
-                if (source.isPressed(Button.BACK)) {
-                    intake.syncSliderEncoder();
-                }
-            }
-        }, Button.A);
+
         // [X] opens / closes delivery gate
         // [LB] + [X] is delivery combo (move slider out, close gate, arm lift up, arm up)
         em2.onButtonDown(new Events.Listener() {
@@ -416,11 +409,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     }
                     return;
                 }
-//                if (currentY > 0.95) {
-//                    mineralDelivery.armDump();
-//                } else if (currentY < -0.95) {
-//                    mineralDelivery.armDown();
-//                }
+                if (currentY > 0.95) {
+                    mineralDelivery.armDump();
+                } else if (currentY < -0.95) {
+                    mineralDelivery.armDown();
+                }
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
 
@@ -437,12 +430,25 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (!source.isPressed(Button.LEFT_BUMPER)) return;
+                if (!source.isPressed(Button.LEFT_BUMPER)) {
+                    mineralDelivery.wristUpInc();
+                    return;
+                }
                 mineralDelivery.armDown();
                 mineralDelivery.gateOpen();
                 intake.mineralDumpCombo();
             }
         }, Button.Y);
+        em2.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.BACK)) {
+                    intake.syncSliderEncoder();
+                } else if (!source.isPressed(Button.START)) {
+                    mineralDelivery.wristDownInc();
+                }
+            }
+        }, Button.A);
     }
 
     @MenuEntry(label = "Drive Straight", group = "Test Chassis")

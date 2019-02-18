@@ -32,22 +32,23 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private Servo dumperGate;
     private AdjustableServo dumperWrist;
     private DigitalChannel liftTouch;
-    private double gateClosePos = 0.33;
+    private double gateClosePos = 0.05;
     private double gateODumpPos = 0.6;
     private double gateOpenPos = 0.8;
-    private double armInitPos = 0.077;
-    private double armDownPos = 0.096;
-    private double armSafePos = 0.12;
-    private double armDumpPos = 0.85; // actual dump position
-    private double armUpPos = 0.92;   // max arm position
+    private double armInitPos = 0.923; // 0.077
+    private double armDownPos = 0.904; // 0.096
+    private double armSafePos = 0.88; // 0.12
+    private double armDumpPos = 0.15; // 0.85 actual dump position
+    private double armUpPos = 0.08;   // 0.92 max arm position
     private double liftPower = .90;
     private double liftDownPower = .50;
     private double wristDown = 0;
     private double writeCenter = 0.5;
     private double wristUp = 1.0;
-    private double wristDump = 0.5; // TBD
-    private double wristReadyToDump = 0.5; // TBD
-    private double wristReadyToCollect = 0.5; // TBD
+    private double wristDump = 0.78; // TBD
+    private double wristInit = 0.2;
+    private double wristReadyToDump = 1.0; // TBD
+    private double wristReadyToCollect = 0.356;
 
     private boolean gateIsOpened = false;
     private final int MAX_LIFT_POS = 1240; // old small spool = 4100;
@@ -68,7 +69,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void reset() {
         lift.setPower(0);
         gateOpen();
-        wristReadyToCollect();
+        wristInit();
         armInit();
     }
 
@@ -187,6 +188,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public Progress wristReadyToCollect() {
         return moveWrist(wristReadyToCollect);
     }
+    public Progress wristInit() {return moveWrist(wristInit);}
 
     private Progress moveArm(double position) {
         double adjustment = Math.abs(position - dumperArm.getPosition());
@@ -215,21 +217,37 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public Progress armSafeLift() {
         return moveArm(armSafePos);
     }
-    public void armDownInc() {
-        double cur_pos = dumperArm.getPosition();
-        double tar_pos = armDownPos;
-        if (cur_pos>armDownPos+0.03) {
-            tar_pos = cur_pos - 0.03;
-        }
-        dumperArm.setPosition(tar_pos);
-    }
     public void armUpInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armUpPos;
-        if (cur_pos<armUpPos-0.04) {
-            tar_pos = cur_pos + 0.04;
+        if (cur_pos>armDownPos-0.01) {
+            tar_pos = cur_pos - 0.01;
         }
         dumperArm.setPosition(tar_pos);
+    }
+    public void armDownInc() {
+        double cur_pos = dumperArm.getPosition();
+        double tar_pos = armDownPos;
+        if (cur_pos<armUpPos+0.003) {
+            tar_pos = cur_pos + 0.003;
+        }
+        dumperArm.setPosition(tar_pos);
+    }
+    public void wristUpInc() {
+        double cur_pos = dumperWrist.getPosition();
+        double tar_pos = wristUp;
+        if (cur_pos<wristUp+0.003) {
+            tar_pos = cur_pos + 0.003;
+        }
+        dumperWrist.setPosition(tar_pos);
+    }
+    public void wristDownInc() {
+        double cur_pos = dumperWrist.getPosition();
+        double tar_pos = wristDown;
+        if (cur_pos>wristDown-0.01) {
+            tar_pos = cur_pos - 0.01;
+        }
+        dumperWrist.setPosition(tar_pos);
     }
     public void armStop() {
         double cur_pos = dumperArm.getPosition();
