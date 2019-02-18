@@ -1,13 +1,13 @@
 {
   "servoBackLeft": {
-    "center": 0.469,
-    "left": 0.153,
-    "right": 0.787
+    "center": 0.508,
+    "left": 0.192,
+    "right": 0.823
   },
   "servoFrontLeft": {
-    "center": 0.452,
-    "left": 0.138,
-    "right": 0.768
+    "center": 0.486,
+    "left": 0.167,
+    "right": 0.801
   },
   "servoBackRight": {
     "center": 0.471,
