@@ -54,7 +54,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int sliderOffset = 0; // offset will be set to sliderInitOut when manual reset
     private int iSliderContracted = 0; // contracted
     private int iSliderExtended = 2100; // fully extended
-    private int iSliderDump = 400; // position to dump minerals into delivery box
+    private int iSliderDump = 300; // position to dump minerals into delivery box
     private int iSliderInitOut = 370; // position for initial TeleOp out, lifter just out
     private int iSliderSafeLiftPos = 967;
     private int iSliderMinSweep = 1000; // pos for min sweeping

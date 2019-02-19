@@ -426,7 +426,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (!source.isPressed(Button.LEFT_BUMPER)) return;
-                mineralDelivery.armDown();
+                mineralDelivery.armCollectPos();
                 mineralDelivery.gateOpen();
                 intake.mineralDumpCombo();
             }
@@ -437,7 +437,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (!source.isPressed(Button.LEFT_BUMPER)) {
                     mineralDelivery.wristUpInc();
                 } else {
-                    mineralDelivery.armDown();
+                    mineralDelivery.armCollectPos();
                     mineralDelivery.gateOpen();
                     intake.mineralDumpCombo();
                 }
