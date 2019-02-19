@@ -436,11 +436,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             public void buttonDown(EventManager source, Button button) {
                 if (!source.isPressed(Button.LEFT_BUMPER)) {
                     mineralDelivery.wristUpInc();
-                    return;
+                } else {
+                    mineralDelivery.armDown();
+                    mineralDelivery.gateOpen();
+                    intake.mineralDumpCombo();
                 }
-                mineralDelivery.armDown();
-                mineralDelivery.gateOpen();
-                intake.mineralDumpCombo();
             }
         }, Button.Y);
         em2.onButtonDown(new Events.Listener() {

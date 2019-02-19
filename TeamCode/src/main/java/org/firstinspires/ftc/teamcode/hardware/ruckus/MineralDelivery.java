@@ -32,9 +32,9 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private Servo dumperGate;
     private AdjustableServo dumperWrist;
     private DigitalChannel liftTouch;
-    private double gateClosePos = 0.05;
-    private double gateODumpPos = 0.6;
-    private double gateOpenPos = 0.8;
+    private double gateClosePos = 0.8;
+    private double gateODumpPos = 0.05;
+    private double gateOpenPos = 0.05;
     private double armInitPos = 0.923; // 0.077
     private double armDownPos = 0.904; // 0.096
     private double armSafePos = 0.88; // 0.12
@@ -45,14 +45,14 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double wristDown = 0;
     private double writeCenter = 0.5;
     private double wristUp = 1.0;
-    private double wristDump = 0.78; // TBD
+    private double wristDump = 0.78;
     private double wristInit = 0.2;
-    private double wristReadyToDump = 1.0; // TBD
+    private double wristReadyToDump = 1.0;
     private double wristReadyToCollect = 0.356;
 
     private boolean gateIsOpened = false;
-    private final int MAX_LIFT_POS = 1240; // old small spool = 4100;
-    private final int AUTO_LIFT_POS = 1200; // old small spool = 4000;
+    private final int MAX_LIFT_POS = 770; // 1240 for neverrest 20 motor; old small spool = 4100;
+    private final int AUTO_LIFT_POS = 750; //1220 for neverest 20 motor; old small spool = 4000;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
@@ -108,7 +108,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         gateIsOpened=true;
     }
     public void gateAuto() {
-            if (gateIsOpened) {
+        if (gateIsOpened) {
             gateClose();
         } else {
             gateDump();
@@ -220,31 +220,31 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void armUpInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armUpPos;
-        if (cur_pos>armDownPos-0.01) {
-            tar_pos = cur_pos - 0.01;
+        if (cur_pos>armDownPos+0.001) {
+            tar_pos = cur_pos - 0.001;
         }
         dumperArm.setPosition(tar_pos);
     }
     public void armDownInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armDownPos;
-        if (cur_pos<armUpPos+0.003) {
-            tar_pos = cur_pos + 0.003;
+        if (cur_pos<armUpPos-0.001) {
+            tar_pos = cur_pos + 0.001;
         }
         dumperArm.setPosition(tar_pos);
     }
     public void wristUpInc() {
         double cur_pos = dumperWrist.getPosition();
         double tar_pos = wristUp;
-        if (cur_pos<wristUp+0.003) {
-            tar_pos = cur_pos + 0.003;
+        if (cur_pos<wristUp-0.01) {
+            tar_pos = cur_pos + 0.01;
         }
         dumperWrist.setPosition(tar_pos);
     }
     public void wristDownInc() {
         double cur_pos = dumperWrist.getPosition();
         double tar_pos = wristDown;
-        if (cur_pos>wristDown-0.01) {
+        if (cur_pos>wristDown+0.01) {
             tar_pos = cur_pos - 0.01;
         }
         dumperWrist.setPosition(tar_pos);
@@ -290,12 +290,23 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
                 return armDump();
             }
         }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return wristReadyToDump();
+            }
+        }, taskName);
     }
 
     public void returnCombo() {
         final String taskName = "returnCombo";
         if (!TaskManager.isComplete(taskName)) return;
-
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return wristReadyToCollect();
+            }
+        }, taskName);
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
