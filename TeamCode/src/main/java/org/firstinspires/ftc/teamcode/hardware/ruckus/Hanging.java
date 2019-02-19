@@ -167,8 +167,9 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     }
 
     public void latchStop() {
-        if (!latch.isBusy())
-            latch.setPower(0);
+//        if (!latch.isBusy())
+//            latch.setPower(0);
+        resetLatch();
     }
 
     public void latchUpInches(double inches) { // encoder going down
@@ -182,7 +183,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setPower(Math.abs(latch_power));
         while (latch.isBusy() && (runtime.seconds() < 5.0)) {
             cur_pos = latch.getCurrentPosition();
-            if (Math.abs(cur_pos-tar_pos)<10) break;
+            if (Math.abs(tar_pos-cur_pos)<10) break;
             if (!useBottomRange)
                 continue;
             if (distanceToGround() < 11.9) {
@@ -192,13 +193,11 @@ public class Hanging extends Logger<Hanging> implements Configurable {
                     e.printStackTrace();
                 }
                 //force stop
-                latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                latch.setPower(0.0);
-                break;
+                resetLatch();
+                return;
             }
         }
         latchStop();
-        latch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void latchDownInches(double inches) { // encoder going up
