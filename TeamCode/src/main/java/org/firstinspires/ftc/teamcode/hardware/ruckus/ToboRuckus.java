@@ -269,6 +269,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 // intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
                 // intake.boxLiftDownCombo();
+                if (intake.getSliderCurrent()>intake.getSliderInitOut()) {
+                    // automatically down
+                    intake.boxDown();
+                }
                 if (intake.isBoxDown() || source.isPressed(Button.BACK)) {
                     intake.sweeperIn();
                 }
