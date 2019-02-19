@@ -75,7 +75,7 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
             robot.chassis.driveStraightAuto(power, 85, -90, timeout);
 
         robot.chassis.driveStraightAuto(.2, 15, -90, timeout);
-        robot.chassis.rotateTo(.2, -43);
+        robot.chassis.rotateTo(.3, -43);
 
         // 5cm away from wall
         double driveDistance = robot.chassis.distanceToLeft() - 5;
