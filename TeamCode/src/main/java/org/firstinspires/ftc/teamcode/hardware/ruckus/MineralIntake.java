@@ -53,8 +53,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // slider encoder positions
     private int sliderOffset = 0; // offset will be set to sliderInitOut when manual reset
     private int iSliderContracted = 0; // contracted
-    private int iSliderExtended = 2100; // fully extended
-    private int iSliderDump = 300; // position to dump minerals into delivery box
+    private int iSliderExtended = 2150; // fully extended
+    private int iSliderDump = 225; // position to dump minerals into delivery box
     private int iSliderInitOut = 370; // position for initial TeleOp out, lifter just out
     private int iSliderSafeLiftPos = 967;
     private int iSliderMinSweep = 1000; // pos for min sweeping
@@ -69,10 +69,10 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int sliderAutoPark = iSliderAutoPark; // position for Auto Out parking;
     private double sliderPower = 0.6; // TBD
 
-    public void syncSliderEncoder() {
+    public void syncSliderEncoder(int offset) {
         sliderMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        sliderOffset = -400; // offset will be set to -sliderInitOut when manual reset
+        sliderOffset = -offset; // offset will be set to -sliderInitOut when manual reset
         sliderContracted = sliderOffset; // contracted
         sliderExtended = sliderOffset + iSliderExtended; // fully extended
         sliderDump = sliderOffset + iSliderDump; // position to dump minerals into delivery box
@@ -130,7 +130,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             @Override
             public Progress start() {
                 if (sliderMotor.getCurrentPosition() < sliderMinSweep) {
-                    moveSliderFast(sliderMinSweep);
+                    moveSliderFast(sliderMinSweep, false);
                 }
                 return new Progress() {
                     @Override
@@ -286,6 +286,12 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         configuration.register(this);
     }
 
+    public boolean proxDetect15cm() {
+        if (prox==null)
+            return false;
+        return !prox.getState();
+    }
+
     public void reset(boolean auto) {
         boxLiftServo.setPosition(LIFT_CENTER);
         boxGateServo.setPosition(GATE_CLOSED);
@@ -399,7 +405,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                moveSliderFast(getSliderDump());
+                moveSliderFast(getSliderDump(), true);
                 return new Progress() {
                     @Override
                     public boolean isDone() {
@@ -508,7 +514,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         };
     }
 
-    public Progress moveSliderFast(int position) {
+    public Progress moveSliderFast(int position, boolean useProx) {
 //        if (position < this.sliderContracted) {
 //            throw new IllegalArgumentException("Slider position cannot be less than [sliderContracted]");
 //        }
@@ -520,6 +526,14 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         // this.sliderMotor.setPower(0.9);
         this.sliderMotor.setPower(this.sliderPower);
+        if (useProx && proxDetect15cm()) {
+            this.sliderMotor.setPower(0);
+            this.sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            int cur_pos = this.sliderMotor.getCurrentPosition();
+            if (Math.abs(cur_pos-position)>50) { // re-sync encoder values
+                syncSliderEncoder(position-10);
+            }
+        }
         return new Progress() {
             @Override
             public boolean isDone() {

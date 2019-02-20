@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -33,14 +32,15 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private AdjustableServo dumperWrist;
     private DigitalChannel liftTouch;
     private double gateClosePos = 0.7;
-    private double gateODumpPos = 0.05;
+    private double gateODumpPos = 0.1;
     private double gateOpenPos = 0.05;
     private double armInitPos = 0.923; // 0.077
     private double armDownPos = 0.904; // 0.096
     private double armSafePos = 0.88; // 0.12
     private double armCollectPos = 0.84;
+    private double armBarPos = 0.5;
     private double armDumpPos = 0.15; // 0.85 actual dump position
-    private double armUpPos = 0.08;   // 0.92 max arm position
+    private double armUpPos = 0.05;   // 0.92 max arm position
     private double liftPower = .90;
     private double liftDownPower = .50;
     private double wristDown = 0;
@@ -79,7 +79,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         // set up motors / sensors as wheel assemblies
         lift = configuration.getHardwareMap().dcMotor.get("lift_slider");
         lift.setPower(0);
-        lift.setDirection(DcMotorSimple.Direction.REVERSE);
+        lift.setDirection(DcMotorSimple.Direction.FORWARD);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -154,8 +154,10 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
                 public boolean isDone() {
                     return true;
                 }};
-        } else {
+        } else if (up) {
             lift.setPower(liftPower);
+        } else {
+            lift.setPower(liftDownPower);
         }
         return new Progress() {
             @Override
@@ -216,18 +218,30 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     }
     public Progress armInit() {
         armReadyToScore = false;
+        wristInit();
         return moveArm(armInitPos);
     }
     public Progress armDown() {
         armReadyToScore = false;
+        wristInit();
         return moveArm(armDownPos);
     }
-    public Progress armDump() {
+    public Progress armDumpAuto() {
+        // arm at dump position + wrist readyToDumpPos
         armReadyToScore = true;
+        wristReadyToDump();
         return moveArm(armDumpPos);
     }
     public Progress armSafeLift() {
+        // arm at safe collect pos + wrist at ready to collect pos
         armReadyToScore = false;
+        wristReadyToCollect();
+        return moveArm(armSafePos);
+    }
+    public Progress armSafeDown() {
+        // arm at safe collect pos + wrist at ready to collect pos
+        armReadyToScore = false;
+        wristInit();
         return moveArm(armSafePos);
     }
     public Progress armCollectPos() {
@@ -310,13 +324,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                return armDump();
-            }
-        }, taskName);
-        TaskManager.add(new Task() {
-            @Override
-            public Progress start() {
-                return wristReadyToDump();
+                return armDumpAuto();
             }
         }, taskName);
     }
@@ -324,16 +332,17 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void returnCombo() {
         final String taskName = "returnCombo";
         if (!TaskManager.isComplete(taskName)) return;
+
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                return wristReadyToCollect();
+                return moveArm(armBarPos);
             }
         }, taskName);
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                return armSafeLift();
+                return armSafeDown();
             }
         }, taskName);
         TaskManager.add(new Task() {

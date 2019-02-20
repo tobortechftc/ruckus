@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -22,9 +21,6 @@ import org.firstinspires.ftc.teamcode.support.events.EventManager;
 import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
-import org.firstinspires.ftc.teamcode.support.tasks.Progress;
-import org.firstinspires.ftc.teamcode.support.tasks.Task;
-import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -414,7 +410,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     return;
                 }
                 if (currentY > 0.95) {
-                    mineralDelivery.armDump();
+                    mineralDelivery.armDumpAuto();
                 } else if (currentY < -0.95) {
                     mineralDelivery.armDown();
                 }
@@ -447,7 +443,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (source.isPressed(Button.BACK)) {
-                    intake.syncSliderEncoder();
+                    intake.syncSliderEncoder(400);
                 } else if (!source.isPressed(Button.START)) {
                     mineralDelivery.wristDownInc();
                 }
