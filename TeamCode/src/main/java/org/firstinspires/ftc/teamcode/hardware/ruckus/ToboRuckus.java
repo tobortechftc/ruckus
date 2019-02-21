@@ -503,16 +503,16 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void retrieveSample(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
         switch (sam_loc) {
             case CENTER: // center
-                chassis.driveStraightAuto(0.35, 40, -7, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 40, -2, Integer.MAX_VALUE);
                 break;
             case RIGHT:
-                chassis.driveStraightAuto(0.35, 58, 40, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 58, 45, Integer.MAX_VALUE);
                 break;
             case LEFT:
                 chassis.driveStraightAuto(0.35, 55, -50, Integer.MAX_VALUE);
                 break;
             default: // go straight like center
-                chassis.driveStraightAuto(0.35, 40, -7, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 40, -2, Integer.MAX_VALUE);
         }
         sweepSample();
         //if (!Thread.currentThread().isInterrupted())
@@ -569,11 +569,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             default: // go straight like center
                 detectedRightDistance = Math.min(60, detectedRightDistance);
         }
-        chassis.driveStraightAuto(0.30, detectedRightDistance - 15, +90, 2000);
+        chassis.driveStraightAuto(0.35, detectedRightDistance - 12, +90, 2000);
         detectedRightDistance = chassis.distanceToRight();
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
-        chassis.driveStraightAuto(0.18, detectedRightDistance - 15, +90, 2000);
+        chassis.driveStraightAuto(0.22, detectedRightDistance - 12, +90, 2000);
 //        telemetry.addLine(String.format("adjusted distance to right: %.3f",chassis.distanceToRight()));
 //        telemetry.update();
 
@@ -619,10 +619,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 Thread.sleep(100);
         }
         chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
-        chassis.driveStraightAuto(0.25, 12.5, -90, 3000); //Strafe left ~4 in.
+        chassis.driveStraightAuto(0.25, 10, -90, 3000); //Strafe left ~4 in.
         chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
 
-        chassis.rotateTo(0.3, -90); //Turn 90 degrees left
+        chassis.rotateTo(0.35, -90); //Turn 90 degrees left
 //        if (!Thread.currentThread().isInterrupted())
 //            Thread.sleep(200);
 //        chassis.rotateTo(0.18, -90);

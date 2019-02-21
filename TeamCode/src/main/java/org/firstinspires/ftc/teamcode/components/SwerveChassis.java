@@ -739,7 +739,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     public void rotateTo(double power, double finalHeading) throws InterruptedException {
         rawRotateTo(power, finalHeading);
         sleep(200);
-        rawRotateTo(0.18, finalHeading);
+        rawRotateTo(0.22, finalHeading);
     }
 
     //final heading needs to be with in range(-180,180]
