@@ -72,7 +72,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
 
     private boolean useScalePower = true;//
     private boolean setImuTelemetry = false;//unless debugging, don't set telemetry for imu
-    private boolean setRangeSensorTelemetry = true;//unless debugging, don't set telemetry for range sensor
+    private boolean setRangeSensorTelemetry = false;//unless debugging, don't set telemetry for range sensor
 
     final double TICKS_PER_CM = 16.86;//number of encoder ticks per cm of driving
 
