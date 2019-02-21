@@ -53,8 +53,8 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     private boolean gateIsOpened = false;
     private boolean armReadyToScore = false;
-    private final int MAX_LIFT_POS = 1050; // 1240 for neverrest 20 motor; old small spool = 4100;
-    private final int AUTO_LIFT_POS = 900; //1220 for neverest 20 motor; old small spool = 4000;
+    private final int MAX_LIFT_POS = 1450; // 1240 for neverrest 20 motor; old small spool = 4100;
+    private final int AUTO_LIFT_POS = 1300; //1220 for neverest 20 motor; old small spool = 4000;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
