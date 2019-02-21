@@ -601,12 +601,15 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }
 
         chassis.driveStraightAuto(0.30, 30.0 - detectedBackDistance, 0, 1500);
-        detectedBackDistance = chassis.distanceToBack();
+
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(100);
+        detectedBackDistance = chassis.distanceToBack();
+        telemetry.addLine(String.format("distance to back: %.3f",detectedBackDistance));
+        telemetry.update();
+        Thread.sleep(1000);
         chassis.driveStraightAuto(0.18, 30.0 - detectedBackDistance, 0, 1500);
-//        telemetry.addLine(String.format("adjusted distance to back: %.3f",chassis.distanceToBack()));
-//        telemetry.update();
+
     }
 
     @MenuEntry(label = "Test Land", group = "Test Auto")
