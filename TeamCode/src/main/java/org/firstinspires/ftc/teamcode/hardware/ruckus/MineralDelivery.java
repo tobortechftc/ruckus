@@ -36,7 +36,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double gateOpenPos = 0.05;
     private double armInitPos = 0.923; // 0.077
     private double armDownPos = 0.904; // 0.096
-    private double armSafePos = 0.88; // 0.12
+    private double armSafePos = 0.899; // 0.12
     private double armCollectPos = 0.84;
     private double armBarPos = 0.5;
     private double armDumpPos = 0.15; // 0.85 actual dump position
@@ -47,9 +47,10 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double writeCenter = 0.5;
     private double wristUp = 1.0;
     private double wristDump = 0.66;
+    private double wristDumpUp = 0.85;
     private double wristInit = 0.2;
     private double wristReadyToDump = 1.0;
-    private double wristReadyToCollect = 0.26;
+    private double wristReadyToCollect = 0.22;
 
     private boolean gateIsOpened = false;
     private boolean armReadyToScore = false;
@@ -108,7 +109,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void gateDump(){
         dumperGate.setPosition(gateODumpPos);
         if (isArmReadyToScore()) { // move wrist to dump
-            wristDump();
+            wristDumpAuto();
         }
         gateIsOpened=true;
     }
@@ -189,8 +190,18 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public Progress wristUp() {
         return moveWrist(wristUp);
     }
+    public Progress wristDumpAuto() {
+        if (isArmUp()) {
+            return moveWrist(wristDumpUp);
+        } else {
+            return moveWrist(wristDump);
+        }
+    }
     public Progress wristDump() {
         return moveWrist(wristDump);
+    }
+    public Progress wristDumpUp() {
+        return moveWrist(wristDumpUp);
     }
     public Progress wristReadyToDump() {
         return moveWrist(wristReadyToDump);
@@ -218,7 +229,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     }
 
     public boolean isArmUp() {
-        return Math.abs(dumperArm.getPortNumber()-armUpPos)<0.05;
+        return Math.abs(dumperArm.getPosition()-armUpPos)<0.05;
     }
 
     public Progress armInit() {
@@ -239,8 +250,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
             return moveArm(armDumpPos);
         } else {
             armReadyToScore = true;
-            return moveArm(armDumpPos);
-            // return moveArm(armUpPos);
+            return moveArm(armUpPos);
         }
     }
     public Progress armSafeLift() {
