@@ -524,8 +524,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
         this.sliderMotor.setTargetPosition(position);
         this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        // this.sliderMotor.setPower(0.9);
-        this.sliderMotor.setPower(this.sliderPower);
+        this.sliderMotor.setPower(0.9);
+        // this.sliderMotor.setPower(this.sliderPower);
         if (useProx && proxDetect15cm()) {
             this.sliderMotor.setPower(0);
             this.sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

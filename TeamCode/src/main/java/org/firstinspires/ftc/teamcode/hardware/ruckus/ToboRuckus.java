@@ -180,9 +180,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (button == Button.DPAD_UP) {
-                    intake.moveBox(true, false);
+                    intake.moveBox(true, true);
                 } else if (source.isPressed(Button.BACK))
-                    intake.moveBox(false, false);
+                    intake.moveBox(true, false);
                 else {
                     intake.boxLiftDownCombo(); // ensure slider extended out before down
                 }
@@ -317,9 +317,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (button == Button.DPAD_UP) {
-                    intake.moveBox(true, false);
+                    intake.moveBox(true, true);
                 } else if (source.isPressed(Button.BACK))
-                    intake.moveBox(false, false);
+                    intake.moveBox(true, false);
                 else {
                     intake.boxLiftDownCombo(); // ensure slider extended out before down
                 }

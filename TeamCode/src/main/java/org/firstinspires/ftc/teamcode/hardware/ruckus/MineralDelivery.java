@@ -36,7 +36,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double gateOpenPos = 0.05;
     private double armInitPos = 0.923; // 0.077
     private double armDownPos = 0.904; // 0.096
-    private double armSafePos = 0.899; // 0.12
+    private double armSafePos = 0.88; // 0.12
     private double armCollectPos = 0.84;
     private double armBarPos = 0.5;
     private double armDumpPos = 0.15; // 0.85 actual dump position
@@ -163,7 +163,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         return new Progress() {
             @Override
             public boolean isDone() {
-                return !lift.isBusy();
+                return !lift.isBusy() || Math.abs(lift.getTargetPosition()-lift.getCurrentPosition())<AUTO_LIFT_POS-300;
             }
         };
     }
@@ -259,11 +259,12 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         wristReadyToCollect();
         return moveArm(armSafePos);
     }
-    public Progress armSafeDown() {
+    public Progress armSafeDown(boolean init) {
         // arm at safe collect pos + wrist at ready to collect pos
         armReadyToScore = false;
-        wristInit();
-        return moveArm(armSafePos);
+        // wristInit();
+        wristReadyToCollect();
+        return moveArm((init?armCollectPos:armSafePos));
     }
     public Progress armCollectPos() {
         armReadyToScore = false;
@@ -321,24 +322,25 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
             public Progress start() {
                 gateClose();
                 final int safePosition = (sliderControl.getSliderSafeLiftPos());
-                sliderControl.moveSlider(safePosition);
+                sliderControl.moveSliderFast(safePosition, false);
                 return new Progress() {
                     @Override
                     public boolean isDone() {
-                        return Math.abs(sliderControl.getSliderCurrent() - safePosition) < 5;
+                        return Math.abs(sliderControl.getSliderCurrent() - safePosition) < 500;
                     }
                 };
             }
         }, taskName);
+//        TaskManager.add(new Task() {
+//            @Override
+//            public Progress start() {
+//                return armSafeLift();
+//            }
+//        }, taskName);
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                return armSafeLift();
-            }
-        }, taskName);
-        TaskManager.add(new Task() {
-            @Override
-            public Progress start() {
+                armSafeLift();
                 return liftAuto(true);
             }
         }, taskName);
@@ -363,13 +365,19 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                return armSafeDown();
+                return armSafeDown(true);
             }
         }, taskName);
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
                 return liftAuto(false);
+            }
+        }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return armSafeDown(false);
             }
         }, taskName);
     }
