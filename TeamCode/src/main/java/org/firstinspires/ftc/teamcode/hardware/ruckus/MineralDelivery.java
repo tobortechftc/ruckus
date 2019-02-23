@@ -54,7 +54,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private boolean gateIsOpened = false;
     private boolean armReadyToScore = false;
     private final int MAX_LIFT_POS = 1450; // 1240 for neverrest 20 motor; old small spool = 4100;
-    private final int AUTO_LIFT_POS = 1300; //1220 for neverest 20 motor; old small spool = 4000;
+    private final int AUTO_LIFT_POS = 1390; //1220 for neverest 20 motor; old small spool = 4000;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
@@ -216,6 +216,11 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         armReadyToScore = true;
         return moveArm(armUpPos);
     }
+
+    public boolean isArmUp() {
+        return Math.abs(dumperArm.getPortNumber()-armUpPos)<0.05;
+    }
+
     public Progress armInit() {
         armReadyToScore = false;
         wristInit();
@@ -228,9 +233,15 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     }
     public Progress armDumpAuto() {
         // arm at dump position + wrist readyToDumpPos
-        armReadyToScore = true;
         wristReadyToDump();
-        return moveArm(armDumpPos);
+        if (armReadyToScore) {
+            armReadyToScore = true;
+            return moveArm(armDumpPos);
+        } else {
+            armReadyToScore = true;
+            return moveArm(armDumpPos);
+            // return moveArm(armUpPos);
+        }
     }
     public Progress armSafeLift() {
         // arm at safe collect pos + wrist at ready to collect pos
@@ -251,8 +262,8 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void armUpInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armUpPos;
-        if (cur_pos>armUpPos+0.001) {
-            tar_pos = cur_pos - 0.001;
+        if (cur_pos>armUpPos+0.003) {
+            tar_pos = cur_pos - 0.003;
         }
         if (tar_pos<=armDumpPos+0.1) {
             armReadyToScore = true;
@@ -262,8 +273,8 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void armDownInc() {
         double cur_pos = dumperArm.getPosition();
         double tar_pos = armDownPos;
-        if (cur_pos<armDownPos-0.001) {
-            tar_pos = cur_pos + 0.001;
+        if (cur_pos<armDownPos-0.003) {
+            tar_pos = cur_pos + 0.003;
         }
         if (tar_pos>=armDumpPos+0.2) {
             armReadyToScore = false;
