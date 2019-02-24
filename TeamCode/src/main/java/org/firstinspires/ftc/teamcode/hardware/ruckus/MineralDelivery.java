@@ -27,20 +27,24 @@ import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 public class MineralDelivery extends Logger<MineralDelivery> implements Configurable {
 
     private DcMotor lift;
-    private Servo dumperArm;
     private Servo dumperGate;
+    private AdjustableServo dumperArm;
     private AdjustableServo dumperWrist;
     private DigitalChannel liftTouch;
     private double gateClosePos = 0.7;
     private double gateODumpPos = 0.1;
     private double gateOpenPos = 0.05;
-    private double armInitPos = 0.923; // 0.077
-    private double armDownPos = 0.904; // 0.096
-    private double armSafePos = 0.88; // 0.12
-    private double armCollectPos = 0.84;
-    private double armBarPos = 0.5;
-    private double armDumpPos = 0.15; // 0.85 actual dump position
-    private double armUpPos = 0.05;   // 0.92 max arm position
+
+    private double armLowest = 0.001; // for configuration left most
+    private double armHighest = 0.999; // for configuration right most
+    private double armInitPos = 0.883; // 0.077;
+    private double armDownPos = 0.856; // 0.096;
+    private double armSafePos = 0.838; // 0.12; // Safe for lift up/down
+    private double armCollectPos = 0.814; // 0.16; // ready to collect mineral
+    private double armBarPos = 0.583; // arm at the top bar position
+    private double armDumpPos = 0.163; // 0.85; // Actual dump position
+    private double armUpPos = 0.1; // 0.95;   // Max arm up position
+
     private double liftPower = .90;
     private double liftDownPower = .50;
     private double wristDown = 0;
@@ -85,11 +89,15 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         dumperGate = configuration.getHardwareMap().servo.get("sv_hp_gate");
-        dumperArm = configuration.getHardwareMap().servo.get("sv_hp_dump");
         liftTouch = configuration.getHardwareMap().get(DigitalChannel.class, "lift_touch");
         // set the digital channel to input.
         liftTouch.setMode(DigitalChannel.Mode.INPUT);
         // register delivery as configurable component
+        dumperArm = new AdjustableServo(armLowest, armHighest).configureLogging(
+                logTag + ":dumpArm", logLevel
+        );
+        dumperArm.configure(configuration.getHardwareMap(), "sv_hp_dump");
+        configuration.register(dumperArm);
         dumperWrist = new AdjustableServo(wristDown, wristUp).configureLogging(
                 logTag + ":dumpWrist", logLevel
         );
@@ -405,7 +413,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
                 }});
         }
         if(dumperArm!=null){
-            line.addData("Arm", "pos=%.2f", new Func<Double>() {
+            line.addData("Arm", "pos=%.3f", new Func<Double>() {
                 @Override
                 public Double value() {
                     return dumperArm.getPosition();
