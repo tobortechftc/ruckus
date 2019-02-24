@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.support.tasks;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class TaskManager {
@@ -18,6 +19,17 @@ public class TaskManager {
     }
 
     public static void add(Task task, String name) {
+        if (name==null) throw new NullPointerException("Task name is required");
+        for (Iterator<Task> it = taskQueue.iterator(); it.hasNext(); ) {
+            Task scheduledTask = it.next();
+            if (scheduledTask.getName() != null && !scheduledTask.getName().equals(name)) {
+                it.remove();
+            }
+        }
+        if (currentTask!=null && currentTask.getName()!=null && !currentTask.getName().equals(name)) {
+            currentTask = null;
+            currentTaskProgress = null;
+        }
         task.setName(name);
         taskQueue.add(task);
     }

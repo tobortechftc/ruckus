@@ -636,16 +636,26 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                     }
                 }
                 Arrays.fill(newServoPositions, heading);
-            } else if (power > 0) { // driving forward
-                // front left and right
-                newServoPositions[0] = newServoPositions[1] = heading / 2;
-                // back left and right
-                newServoPositions[2] = newServoPositions[3] = -1 * heading / 2;
-            } else if (power < 0) { // driving backward
-                // back left and right
-                newServoPositions[2] = newServoPositions[3] = heading / 2;
-                // front left and right
-                newServoPositions[0] = newServoPositions[1] = -1 * heading / 2;
+            } else {
+                // complement to angle between Y axis and line from the center of chassis,
+                //  which is assumed to be at (0, 0) to the center of the front right wheel
+                double maxTurnAngle = 90 - Math.atan2(track, wheelBase) / Math.PI * 180;
+                // ensure actual turn angle does not exceed max. value so wheels don't slide sideways
+                double turnAngle = heading / 2;
+                if (Math.abs(turnAngle) > maxTurnAngle) {
+                    turnAngle = Math.signum(turnAngle) * maxTurnAngle;
+                }
+                if (power > 0) { // driving forward
+                    // front left and right
+                    newServoPositions[0] = newServoPositions[1] = turnAngle;
+                    // back left and right
+                    newServoPositions[2] = newServoPositions[3] = -1 * turnAngle;
+                } else if (power < 0) { // driving backward
+                    // back left and right
+                    newServoPositions[2] = newServoPositions[3] = turnAngle;
+                    // front left and right
+                    newServoPositions[0] = newServoPositions[1] = -1 * turnAngle;
+                }
             }
             changeServoPositions(newServoPositions);
         }
