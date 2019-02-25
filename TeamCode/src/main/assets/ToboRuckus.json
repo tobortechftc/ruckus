@@ -28,8 +28,8 @@
   },
   "sv_sw_box": {
     "center": 0.11,
-    "left": 0.001,
-    "right": 0.29
+    "left": 0.000,
+    "right": 0.45
   },
   "sv_box_lift": {
     "center": 0.65,

@@ -660,6 +660,19 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         intake.stopSweeper();
     }
 
+    @MenuEntry(label = "Test Collect", group = "Test Auto")
+    public void testAutoCollect(EventManager em) throws InterruptedException {
+        autoCollect();
+    }
+
+    public void autoCollect() {
+        intake.boxLiftDownCombo();
+        intake.sweeperIn();
+        intake.sliderOut(0.4, 2);
+        intake.stopSweeper();
+        intake.stopSlider();
+    }
+
     @MenuEntry(label = "Extend Intake Park", group = "Test Auto")
     public void testExtendIntakeForParking(EventManager em) throws InterruptedException {
         extendInakeForParking();
@@ -698,7 +711,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 //            Thread.sleep(500);
 
         // box gate open
-        intake.moveGate(false);
+        intake.moveGate(true);
 
         // dumper gate open
         mineralDelivery.gateOpen();

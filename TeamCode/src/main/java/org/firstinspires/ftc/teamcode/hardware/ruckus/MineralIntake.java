@@ -59,6 +59,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int iSliderSafeLiftPos = 967;
     private int iSliderMinSweep = 1000; // pos for min sweeping
     private int iSliderAutoPark = 1000;
+    private double slideer_count_per_inch = iSliderExtended / 28;
 
     private int sliderContracted = iSliderContracted; // contracted
     private int sliderExtended = iSliderExtended; // fully extended
@@ -221,6 +222,17 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
     }
 
+    public void sliderOut(double power, double dist_inches) {
+        int cur_pos = this.sliderMotor.getCurrentPosition();
+        int tar_pos = cur_pos + (int)(dist_inches * slideer_count_per_inch);
+        if (tar_pos>this.sliderExtended)
+            tar_pos = this.sliderExtended;
+
+        this.sliderMotor.setTargetPosition(this.sliderExtended);
+            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            this.sliderMotor.setPower(this.sliderPower);
+    }
+
     @Adjustable(min = 0.0, max = 8000.0, step = 1.0)
     public int getSliderDump() {
         return sliderDump;
@@ -294,7 +306,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     public void reset(boolean auto) {
         boxLiftServo.setPosition(LIFT_CENTER);
-        boxGateServo.setPosition(GATE_CLOSED);
+        boxGateServo.setPosition(GATE_OPEN);
         resetMotor(sweeperMotor);
         sweeperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (auto) {
