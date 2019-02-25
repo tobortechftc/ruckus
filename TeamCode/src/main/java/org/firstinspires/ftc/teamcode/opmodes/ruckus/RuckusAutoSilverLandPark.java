@@ -83,9 +83,8 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
 
 
         // Step-5: marker mission
-
         // to depot
-        robot.chassis.driveAlongTheWall(power, -100, 5, SwerveChassis.Wall.LEFT, timeout);
+        robot.chassis.driveAlongTheWall(power, -70, 5, SwerveChassis.Wall.LEFT, timeout);
         // realign
         robot.core.yield_for(.2);
 //                robot.chassis.rotateTo(.2, -43);
@@ -100,6 +99,9 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
 
         // Step-6: park on the rim
         robot.goParking(ToboRuckus.Side.SILVER);
+
+//        robot.core.yield_for(1);
+//        robot.hanging.latchDownInches(7.75);
 
     }
 

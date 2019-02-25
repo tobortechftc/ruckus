@@ -503,7 +503,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void retrieveSample(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
         switch (sam_loc) {
             case CENTER: // center
-                chassis.driveStraightAuto(0.35, 40, -2, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.35, 40, -4, Integer.MAX_VALUE);
                 break;
             case RIGHT:
                 chassis.driveStraightAuto(0.35, 58, 45, Integer.MAX_VALUE);
@@ -532,7 +532,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             chassis.driveStraightAuto(0.25, 20, 10, 1000);
         }
         else {
-            chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.LEFT, 4000);
+            chassis.driveAlongTheWall(0.4, 115, 5, SwerveChassis.Wall.LEFT, 4000);
             chassis.driveStraightAuto(0.25, 20, -10, 1000);
         }
         extendInakeForParking();
@@ -621,9 +621,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             if (!Thread.currentThread().isInterrupted())
                 Thread.sleep(100);
         }
-        chassis.driveStraightAuto(0.25, -5, 0, 3000); //Drive back ~2 in.
+        chassis.driveStraightAuto(0.25, -4, 0, 3000); //Drive back ~2 in.
         chassis.driveStraightAuto(0.25, 10, -90, 3000); //Strafe left ~4 in.
-        chassis.driveStraightAuto(0.25, 5, 0, 3000); //Drive forward ~2 in.
+        chassis.driveStraightAuto(0.25, 4, 0, 3000); //Drive forward ~2 in.
 
         chassis.rotateTo(0.35, -90); //Turn 90 degrees left
 //        if (!Thread.currentThread().isInterrupted())
@@ -655,8 +655,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void sweepSample() throws InterruptedException {
         intake.sweeperOut(0.5);
         Thread.sleep(100);
-        intake.sweeperIn(0.5);
-        Thread.sleep(100);
+//        intake.sweeperIn(0.5);
+//        Thread.sleep(100);
         intake.stopSweeper();
     }
 
