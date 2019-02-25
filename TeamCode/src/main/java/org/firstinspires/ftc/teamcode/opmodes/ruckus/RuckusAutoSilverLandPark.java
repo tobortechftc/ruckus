@@ -25,6 +25,9 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
 
     int timeout = 10000; // timeout time
     double power = .4; // motor power
+
+    double midTime = 0;
+    boolean doTime = false;
     ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
 
 
@@ -81,27 +84,26 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
         double driveDistance = robot.chassis.distanceToLeft() - 5;
         robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
 
+        midTime = getRuntime();
+        doTime = true;
+
 
         // Step-5: marker mission
         // to depot
-        robot.chassis.driveAlongTheWall(power, -70, 5, SwerveChassis.Wall.LEFT, timeout);
-        // realign
-        robot.core.yield_for(.2);
-//                robot.chassis.rotateTo(.2, -43);
-//                driveDistance = robot.chassis.distanceToLeft() - 5;
-//                robot.chassis.driveStraightAuto(power, driveDistance, -90, timeout);
-//                sleep(200);
+        robot.chassis.driveAlongTheWall(power, (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT ? -80 : -70),
+                5, SwerveChassis.Wall.LEFT, timeout);
 
         // drop marker
         robot.hanging.markerDown();
-        robot.core.yield_for(.75);
+        robot.core.yield_for(.5);
 
 
         // Step-6: park on the rim
         robot.goParking(ToboRuckus.Side.SILVER);
+        robot.chassis.driveStraightAuto(.4, 10, 5, timeout);
 
-//        robot.core.yield_for(1);
-//        robot.hanging.latchDownInches(7.75);
+        robot.core.yield_for(1);
+        robot.hanging.latchDownInches(7.75);
 
     }
 
@@ -117,6 +119,8 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
 
     @Override
     public void on_yield() {
+        telemetry.addData("Time", getRuntime());
+        if (doTime) telemetry.addData("MidTime", getRuntime() - midTime);
         if (!opModeIsActive())
             throw new OpModeTerminationException();
     }
