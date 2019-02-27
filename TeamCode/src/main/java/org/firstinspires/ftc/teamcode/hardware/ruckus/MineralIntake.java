@@ -29,7 +29,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // down and up positions for the box lift
     // actual servo positions are configured via <code>AdjustableServo</code>
     public static final double LIFT_DOWN = 0.0;
-    public static final double LIFT_CENTER = 0.45;
+    public static final double LIFT_CENTER = 0.6;
     public static final double LIFT_UP = 1.0;
 
     // open and closed positions for the box gate
@@ -53,7 +53,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // slider encoder positions
     private int sliderOffset = 0; // offset will be set to sliderInitOut when manual reset
     private int iSliderContracted = 0; // contracted
-    private int iSliderExtended = 2150; // fully extended
+    private int iSliderExtended = 2240; // fully extended
     private int iSliderDump = 225; // position to dump minerals into delivery box
     private int iSliderInitOut = 370; // position for initial TeleOp out, lifter just out
     private int iSliderSafeLiftPos = 967;
@@ -534,14 +534,19 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         };
     }
 
-    public Progress moveSliderFast(int position, boolean useProx) {
-//        if (position < this.sliderContracted) {
-//            throw new IllegalArgumentException("Slider position cannot be less than [sliderContracted]");
-//        }
-//        if (position > this.sliderExtended) {
-//            throw new IllegalArgumentException("Slider position cannot be greater than [sliderExtended]");
-//        }
+    public void moveSliderAuto(int position, double power, long timeout) {
+        long iniTime = System.currentTimeMillis();
+        this.sliderMotor.setTargetPosition(position);
+        this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.sliderMotor.setPower(power);
+        while (this.sliderMotor.isBusy()) {
+            if (System.currentTimeMillis()-iniTime>timeout)
+                break;
+        }
+        stopSlider();
+    }
 
+    public Progress moveSliderFast(int position, boolean useProx) {
         this.sliderMotor.setTargetPosition(position);
         this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.sliderMotor.setPower((useProx?this.sliderPower:0.9));

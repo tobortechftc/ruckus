@@ -772,12 +772,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         // mineralDelivery.armCollectPos();
         mineralDelivery.gateOpen();
         intake.moveBox(true,true);
-        Thread.sleep(500);
+        // Thread.sleep(500);
         // intake.mineralDumpCombo();
         // intake.stopSlider();
-        intake.moveSliderFast(intake.getSliderContracted()+100,false);
-        Thread.sleep(1000);
-        intake.stopSlider();
+        intake.moveSliderAuto(intake.getSliderContracted()+100, 0.9, 1000);
+        // intake.moveGate(true);
     }
 
     @MenuEntry(label = "Auto Collect", group = "Test Auto")
@@ -787,68 +786,24 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     @MenuEntry(label = "Auto CollectLeft", group = "Test Auto")
     public void testAutoCollectLeft(EventManager em) throws InterruptedException {
-        autoCollect(28);
+        autoCollect(27.5);
     }
 
     public void autoCollect(double dist) throws InterruptedException {
         long iniTime = System.currentTimeMillis();
-        intake.moveSliderFast(intake.getSliderMinSweep(), false);
-        Thread.sleep(1000);
+        intake.moveSliderAuto(intake.getSliderMinSweep(), 1.0, 1000);
+        // Thread.sleep(800);
         intake.moveBox(false, false);
-        Thread.sleep(200);
-        double tar_pos = (dist-11.5)*intake.slideer_count_per_inch+intake.getSliderMinSweep();
-        if (tar_pos<intake.getSliderMinSweep()+300)
-            tar_pos = intake.getSliderMinSweep() + 300;
         intake.moveGate(false); // close gate
+        int tar_pos = (int) (intake.getSliderMinSweep() + (dist-12)*intake.slideer_count_per_inch);
+        intake.moveSliderAuto(tar_pos, 1.0, 1000);
+        tar_pos += 200;
         intake.sweeperIn();
-        double orig_pw = intake.getSliderPower();
-        // intake.setSliderPower(0.8);
-        intake.moveSlider((int) tar_pos);
-        Thread.sleep((long) (50*dist));
+        intake.moveSliderAuto(tar_pos, 0.6, 1000);
         // intake.setSliderPower(orig_pw);
         intake.stopSweeper();
         intake.stopSlider();
     }
-
-//    public void autoCollect(final double dist, final int timeout) {
-//        final long iniTime = System.currentTimeMillis();
-//        final String taskName = "autoCollect";
-//        // if (!TaskManager.isComplete(taskName)) return;
-//
-//        TaskManager.add(new Task() {
-//            @Override
-//            public Progress start() {
-//                intake.boxLiftDownCombo();
-//                return new Progress() {
-//                    @Override
-//                    public boolean isDone() {
-//                        return (intake.getSliderCurrent() > (intake.getSliderMinSweep()));
-//                    }
-//                };
-//            }
-//        }, taskName);
-//        TaskManager.add(new Task() {
-//            @Override
-//            public Progress start() {
-//                intake.sweeperIn();
-//                intake.sliderOut(0.4, dist, false);
-//                while (intake.isSliderBusy()) {
-//                    intake.sweeperIn();
-//                    if (System.currentTimeMillis() - iniTime > timeout) {
-//                        break;
-//                    }
-//                }
-//                intake.stopSweeper();
-//                intake.stopSlider();
-//                return new Progress() {
-//                    @Override
-//                    public boolean isDone() {
-//                        return true;
-//                    }
-//                };
-//            }
-//        }, taskName);
-//    }
 
     @MenuEntry(label = "Extend Intake Park", group = "Test Auto")
     public void testExtendIntakeForParking(EventManager em) throws InterruptedException {

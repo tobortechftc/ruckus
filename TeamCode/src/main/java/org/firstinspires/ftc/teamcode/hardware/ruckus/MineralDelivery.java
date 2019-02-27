@@ -28,23 +28,24 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     private DcMotor lift;
     private Servo dumperGate;
-    private AdjustableServo dumperArm;
+    // private AdjustableServo dumperArm;
+    private Servo dumperArm;
     private AdjustableServo dumperWrist;
     private DigitalChannel liftTouch;
     private double gateClosePos = 0.1;
     private double gateODumpPos = 0.7;
     private double gateOpenPos = 0.75;
 
-    private double armLowest = 0.001; // for configuration left most
-    private double armHighest = 0.999; // for configuration right most
-    private double armInitPos = 0.883; // 0.077;
-    private double armDownPos = 0.856; // 0.096;
-    private double armSafePos = 0.838; // 0.12; // Safe for lift up/down
-    private double armCollectPos = 0.812; // 0.16; // ready to collect mineral
-    private double armSafeDown = 0.8; // arm down not hitting lift
-    private double armBarPos = 0.2; // arm at the top bar position
-    private double armDumpPos = 0.163; // 0.85; // Actual dump position
-    private double armUpPos = 0.1; // 0.95;   // Max arm up position
+    private double armLowest = 0.000; // for configuration left most
+    private double armHighest = 1.000; // for configuration right most
+    private double armInitPos = 0.040;
+    private double armDownPos = 0.088;
+    private double armSafePos = 0.12; // Safe for lift up/down
+    private double armCollectPos = 0.16; // ready to collect mineral
+    private double armBarPos = 0.3; // arm at the top bar position
+    private double armLowBarPos = 0.25; // arm at the bottom bar position
+    private double armDumpPos = 0.85; // Actual dump position
+    private double armUpPos = 0.95;   // Max arm up position
 
     private double liftPower = .90;
     private double liftDownPower = .50;
@@ -53,9 +54,10 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double wristUp = 1.0;
     private double wristDump = 0.66;
     private double wristDumpUp = 0.85;
-    private double wristInit = 0.2;
+    private double wristInit = 0.12;
+    private double wristBar = 0.55;
     private double wristReadyToDump = 1.0;
-    private double wristReadyToCollect = 0.22;
+    private double wristReadyToCollect = 0.25;
 
     private boolean gateIsOpened = false;
     private boolean armReadyToScore = false;
@@ -94,11 +96,13 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         // set the digital channel to input.
         liftTouch.setMode(DigitalChannel.Mode.INPUT);
         // register delivery as configurable component
-        dumperArm = new AdjustableServo(armLowest, armHighest).configureLogging(
-                logTag + ":dumpArm", logLevel
-        );
-        dumperArm.configure(configuration.getHardwareMap(), "sv_hp_dump");
-        configuration.register(dumperArm);
+//        dumperArm = new AdjustableServo(armLowest, armHighest).configureLogging(
+//                logTag + ":dumpArm", logLevel
+//        );
+//        dumperArm.configure(configuration.getHardwareMap(), "sv_hp_dump");
+//        configuration.register(dumperArm);
+        dumperArm = configuration.getHardwareMap().servo.get("sv_hp_dump");
+        dumperArm.setDirection(Servo.Direction.REVERSE);
         dumperWrist = new AdjustableServo(wristDown, wristUp).configureLogging(
                 logTag + ":dumpWrist", logLevel
         );
@@ -232,6 +236,9 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public Progress wristReadyToCollect() {
         return moveWrist(wristReadyToCollect);
     }
+    public Progress wristBar() {
+        return moveWrist(wristBar);
+    }
     public Progress wristInit() {return moveWrist(wristInit);}
 
     private Progress moveArm(double position) {
@@ -286,31 +293,35 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         // arm at safe collect pos + wrist at ready to collect pos
         armReadyToScore = false;
         // wristInit();
-        wristReadyToCollect();
-        return moveArm((init?armSafeDown:armSafePos));
+        if (init)
+            wristBar();
+        else
+            wristReadyToCollect();
+        return moveArm((init?armBarPos:armSafePos));
     }
     public Progress armCollectPos() {
         armReadyToScore = false;
+        wristReadyToCollect();
         return moveArm(armCollectPos);
     }
     public void armUpInc() {
         double cur_pos = dumperArm.getPosition();
-        double tar_pos = armUpPos;
-        if (cur_pos>armUpPos+0.003) {
-            tar_pos = cur_pos - 0.003;
+        double tar_pos = armHighest;
+        if (cur_pos<armHighest-0.003) {
+            tar_pos = cur_pos + 0.003;
         }
-        if (tar_pos<=armDumpPos+0.1) {
+        if (tar_pos>=armDumpPos-0.1) {
             armReadyToScore = true;
         }
         dumperArm.setPosition(tar_pos);
     }
     public void armDownInc() {
         double cur_pos = dumperArm.getPosition();
-        double tar_pos = armDownPos;
-        if (cur_pos<armDownPos-0.003) {
-            tar_pos = cur_pos + 0.003;
+        double tar_pos = armLowest;
+        if (cur_pos>armLowest+0.003) {
+            tar_pos = cur_pos - 0.003;
         }
-        if (tar_pos>=armDumpPos+0.2) {
+        if (tar_pos<=armDumpPos-0.2) {
             armReadyToScore = false;
         }
         dumperArm.setPosition(tar_pos);
@@ -394,8 +405,8 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                return liftDownSafe();
-                //return liftAuto(false);
+                // return liftDownSafe();
+                return liftAuto(false);
             }
         }, taskName);
         TaskManager.add(new Task() {
@@ -404,12 +415,12 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
                 return armSafeDown(false);
             }
         }, taskName);
-        TaskManager.add(new Task() {
-            @Override
-            public Progress start() {
-                return liftAuto(false);
-            }
-        }, taskName);
+//        TaskManager.add(new Task() {
+//            @Override
+//            public Progress start() {
+//                return liftAuto(false);
+//            }
+//        }, taskName);
 
     }
 
