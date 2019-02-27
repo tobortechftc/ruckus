@@ -669,12 +669,14 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     public void autoTransfer() throws InterruptedException {
-        mineralDelivery.armCollectPos();
+        // mineralDelivery.armCollectPos();
         mineralDelivery.gateOpen();
-        intake.mineralDumpCombo();
-        intake.stopSlider();
-        intake.moveSliderFast(intake.getSliderContracted()+100,false);
+        intake.moveBox(true,true);
         Thread.sleep(500);
+        // intake.mineralDumpCombo();
+        // intake.stopSlider();
+        intake.moveSliderFast(intake.getSliderContracted()+100,false);
+        Thread.sleep(1000);
         intake.stopSlider();
     }
 
