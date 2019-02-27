@@ -57,24 +57,39 @@ public class RuckusHopefullyTheFinalGoldAutonomousForState extends LinearOpMode 
         // Step-2: landing mission
         robot.hopefullyTheLastLandAndDetachForState(null, false);
 
+        //step-3: retrieve sample
         switch (sam_loc) {
             case CENTER: // center
                 robot.chassis.rotateTo(0.4, -90);
+                robot.autoCollect(20);
                 break;
             case RIGHT:
                 robot.chassis.rotateTo(0.4, -60);
+                robot.autoCollect(28);
                 break;
             case LEFT:
                 robot.chassis.rotateTo(0.4, -125);
+                robot.autoCollect(28);
                 break;
             default: // go straight like center
                 robot.chassis.rotateTo(0.4, -90);
+                robot.autoCollect(20);
         }
+        robot.autoTransfer();
         if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
             robot.chassis.rotateTo(0.4, -90);
-        robot.chassis.driveStraightAuto(0.4, 75, -60, 3000);
-        robot.chassis.rotateTo(0.4, -135);
 
+        //step-4: deliver marker
+        robot.chassis.driveStraightAuto(0.4, 90, -60, 3000);
+        Thread.sleep(200);
+        robot.chassis.rotateTo(0.4, +135);
+        Thread.sleep(200);
+        robot.chassis.driveStraightAuto(0.4, -90, 0, 3000);
+        robot.hanging.markerDown();
+        Thread.sleep(200);
+        //step-5: go parking
+        robot.chassis.driveStraightAuto(0.3, 20, 20, 3000);
+        robot.goParking(ToboRuckus.Side.GOLD);
     }
 
     protected void handleException(Throwable T) {
