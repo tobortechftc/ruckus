@@ -21,6 +21,9 @@ import org.firstinspires.ftc.teamcode.support.events.EventManager;
 import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
+import org.firstinspires.ftc.teamcode.support.tasks.Progress;
+import org.firstinspires.ftc.teamcode.support.tasks.Task;
+import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -660,18 +663,90 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         intake.stopSweeper();
     }
 
-    @MenuEntry(label = "Test Collect", group = "Test Auto")
-    public void testAutoCollect(EventManager em) throws InterruptedException {
-        autoCollect();
+    @MenuEntry(label = "Auto Transfer", group = "Test Auto")
+    public void testAutoTransfer(EventManager em) throws InterruptedException {
+        autoTransfer();
     }
 
-    public void autoCollect() {
-        intake.boxLiftDownCombo();
+    public void autoTransfer() throws InterruptedException {
+        mineralDelivery.armCollectPos();
+        mineralDelivery.gateOpen();
+        intake.mineralDumpCombo();
+        intake.stopSlider();
+        intake.moveSliderFast(intake.getSliderContracted()+100,false);
+        Thread.sleep(500);
+        intake.stopSlider();
+    }
+
+    @MenuEntry(label = "Auto Collect", group = "Test Auto")
+    public void testAutoCollect(EventManager em) throws InterruptedException {
+        autoCollect(20);
+    }
+
+    @MenuEntry(label = "Auto CollectLeft", group = "Test Auto")
+    public void testAutoCollectLeft(EventManager em) throws InterruptedException {
+        autoCollect(28);
+    }
+
+    public void autoCollect(double dist) throws InterruptedException {
+        long iniTime = System.currentTimeMillis();
+        intake.moveSliderFast(intake.getSliderMinSweep(), false);
+        Thread.sleep(1000);
+        intake.moveBox(false, false);
+        Thread.sleep(200);
+        double tar_pos = (dist-11.5)*intake.slideer_count_per_inch+intake.getSliderMinSweep();
+        if (tar_pos<intake.getSliderMinSweep()+300)
+            tar_pos = intake.getSliderMinSweep() + 300;
+        intake.moveGate(false); // close gate
         intake.sweeperIn();
-        intake.sliderOut(0.4, 2);
+        double orig_pw = intake.getSliderPower();
+        // intake.setSliderPower(0.8);
+        intake.moveSlider((int) tar_pos);
+        Thread.sleep((long) (50*dist));
+        // intake.setSliderPower(orig_pw);
         intake.stopSweeper();
         intake.stopSlider();
     }
+
+//    public void autoCollect(final double dist, final int timeout) {
+//        final long iniTime = System.currentTimeMillis();
+//        final String taskName = "autoCollect";
+//        // if (!TaskManager.isComplete(taskName)) return;
+//
+//        TaskManager.add(new Task() {
+//            @Override
+//            public Progress start() {
+//                intake.boxLiftDownCombo();
+//                return new Progress() {
+//                    @Override
+//                    public boolean isDone() {
+//                        return (intake.getSliderCurrent() > (intake.getSliderMinSweep()));
+//                    }
+//                };
+//            }
+//        }, taskName);
+//        TaskManager.add(new Task() {
+//            @Override
+//            public Progress start() {
+//                intake.sweeperIn();
+//                intake.sliderOut(0.4, dist, false);
+//                while (intake.isSliderBusy()) {
+//                    intake.sweeperIn();
+//                    if (System.currentTimeMillis() - iniTime > timeout) {
+//                        break;
+//                    }
+//                }
+//                intake.stopSweeper();
+//                intake.stopSlider();
+//                return new Progress() {
+//                    @Override
+//                    public boolean isDone() {
+//                        return true;
+//                    }
+//                };
+//            }
+//        }, taskName);
+//    }
 
     @MenuEntry(label = "Extend Intake Park", group = "Test Auto")
     public void testExtendIntakeForParking(EventManager em) throws InterruptedException {

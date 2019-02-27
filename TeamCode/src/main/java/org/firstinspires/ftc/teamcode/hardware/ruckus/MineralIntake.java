@@ -59,7 +59,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int iSliderSafeLiftPos = 967;
     private int iSliderMinSweep = 1000; // pos for min sweeping
     private int iSliderAutoPark = 1000;
-    private double slideer_count_per_inch = iSliderExtended / 28;
+    public final double slideer_count_per_inch = iSliderExtended / 28;
 
     private int sliderContracted = iSliderContracted; // contracted
     private int sliderExtended = iSliderExtended; // fully extended
@@ -222,15 +222,20 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         }
     }
 
-    public void sliderOut(double power, double dist_inches) {
+    public boolean isSliderBusy() {
+        return this.sliderMotor.isBusy();
+    }
+
+    public void sliderOut(double power, double dist_inches, boolean safeSweeping) {
         int cur_pos = this.sliderMotor.getCurrentPosition();
         int tar_pos = cur_pos + (int)(dist_inches * slideer_count_per_inch);
         if (tar_pos>this.sliderExtended)
             tar_pos = this.sliderExtended;
-
+        if (safeSweeping && (tar_pos<this.sliderMinSweep))
+            tar_pos = this.sliderMinSweep;
         this.sliderMotor.setTargetPosition(this.sliderExtended);
-            this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            this.sliderMotor.setPower(this.sliderPower);
+        this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.sliderMotor.setPower(power);
     }
 
     @Adjustable(min = 0.0, max = 8000.0, step = 1.0)
@@ -399,6 +404,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         return Math.abs(boxGateServo.getPosition() - GATE_OPEN) < 0.01;
     }
 
+    public void test() {
+
+    }
     public void mineralDumpCombo() {
         final String taskName = "mineralDump";
         if (!TaskManager.isComplete(taskName)) return;
@@ -536,7 +544,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
         this.sliderMotor.setTargetPosition(position);
         this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        this.sliderMotor.setPower(0.9);
+        this.sliderMotor.setPower((useProx?this.sliderPower:0.9));
+        boolean is_done = false;
+
         // this.sliderMotor.setPower(this.sliderPower);
         if (useProx && proxDetect15cm()) {
             this.sliderMotor.setPower(0);
@@ -545,11 +555,13 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             if (Math.abs(cur_pos-position)>50) { // re-sync encoder values
                 syncSliderEncoder(position-10);
             }
+            is_done = true;
         }
+        final boolean finalIs_done = is_done;
         return new Progress() {
             @Override
             public boolean isDone() {
-                return sliderMotor.isBusy();
+                return sliderMotor.isBusy() && !finalIs_done;
             }
         };
     }
