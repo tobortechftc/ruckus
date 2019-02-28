@@ -182,10 +182,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (button == Button.DPAD_UP) {
-                    intake.moveBox(true, true);
-                } else if (source.isPressed(Button.BACK))
-                    intake.moveBox(true, false);
-                else {
+                    // disable box up for driver-1
+//                    if (source.isPressed(Button.BACK))
+//                        intake.moveBox(true, false);
+//                    else
+//                        intake.moveBox(true, true);
+
+                } else {
                     intake.boxLiftDownCombo(); // ensure slider extended out before down
                 }
             }
@@ -193,7 +196,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (source.isPressed(Button.LEFT_BUMPER)) {
+                if (source.isPressed(Button.RIGHT_BUMPER)) {
                     mineralDelivery.returnCombo();
                     intake.moveGate(false); // auto close gate when arm down
                 } else if (!source.isPressed(Button.START)) {
@@ -203,11 +206,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }, Button.B);
 
         // [X] opens / closes delivery gate
-        // [LB] + [X] is delivery combo (move slider out, close gate, arm lift up, arm up)
+        // [RB] + [X] is delivery combo (move slider out, close gate, arm lift up, arm up)
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (source.isPressed(Button.LEFT_BUMPER)) {
+                if (source.isPressed(Button.RIGHT_BUMPER)) {
                     mineralDelivery.deliveryCombo(intake);
                 } else {
                     mineralDelivery.gateAuto();
@@ -318,10 +321,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (button == Button.DPAD_UP) {
-                    intake.moveBox(true, true);
-                } else if (source.isPressed(Button.BACK))
-                    intake.moveBox(true, false);
-                else {
+                    if (source.isPressed(Button.BACK))
+                        intake.moveBox(true, false);
+                    else
+                        intake.moveBox(true, true);
+                } else {
                     intake.boxLiftDownCombo(); // ensure slider extended out before down
                 }
             }
@@ -418,16 +422,29 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             }
         }, Events.Axis.Y_ONLY, Events.Side.RIGHT);
 
-        // [LB] + [Y] for mineral dump combo (move slider to dump, intake box up, open box gate)
+        // em: [RB] + [Y] for mineral dump combo (move slider to dump, intake box up, open box gate)
         em.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (!source.isPressed(Button.LEFT_BUMPER)) return;
+                if (source.isPressed(Button.BACK)) { // default scale up
+                    chassis.setDefaultScale(0.8);
+                    return;
+                }
+                if (!source.isPressed(Button.RIGHT_BUMPER)) return;
                 mineralDelivery.armCollectPos();
                 mineralDelivery.gateOpen();
                 intake.mineralDumpCombo();
             }
         }, Button.Y);
+        em.onButtonDown(new Events.Listener() {
+            @Override
+            public void buttonDown(EventManager source, Button button) {
+                if (source.isPressed(Button.BACK)) { // default scale back to 0.5
+                    chassis.setDefaultScale(0.5);
+                }
+            }
+        }, Button.A);
+        // em2: [LB] + [Y] for mineral dump combo (move slider to dump, intake box up, open box gate)
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
@@ -444,7 +461,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (source.isPressed(Button.BACK)) {
-                    intake.syncSliderEncoder(400);
+                    intake.syncSliderEncoder(100);
                 } else if (!source.isPressed(Button.START)) {
                     mineralDelivery.wristDownInc();
                 }
@@ -869,7 +886,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
      * Left trigger down = turbo mode (up to 100%) power
      */
     private double powerAdjustment(EventManager source) {
-        double adjustment = 0.5;
+        double adjustment = chassis.getDefaultScale();  // default adjustment
         double trig_num = 0.0;
         if (source.isPressed(Button.RIGHT_BUMPER)) {
             // slow mode uses 30% of power

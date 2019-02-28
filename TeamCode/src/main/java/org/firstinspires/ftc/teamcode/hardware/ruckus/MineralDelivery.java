@@ -44,7 +44,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double armCollectPos = 0.16; // ready to collect mineral
     private double armBarPos = 0.3; // arm at the top bar position
     private double armLowBarPos = 0.25; // arm at the bottom bar position
-    private double armDumpPos = 0.85; // Actual dump position
+    private double armDumpPos = 0.95; // Actual dump position
     private double armUpPos = 0.95;   // Max arm up position
 
     private double liftPower = .90;

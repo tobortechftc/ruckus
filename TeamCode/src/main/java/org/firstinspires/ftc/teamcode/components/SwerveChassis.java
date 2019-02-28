@@ -69,7 +69,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private double targetHeading;     // intended heading for DriveMode.STRAIGHT as reported by orientation sensor
     private double headingDeviation;  // current heading deviation for DriveMode.STRAIGHT as reported by orientation sensor
     private double servoCorrection;   // latest correction applied to leading wheels' servos to correct heading deviation
-
+    private double defaultScale = 0.5;
     private boolean useScalePower = true;//
     private boolean setImuTelemetry = false;//unless debugging, don't set telemetry for imu
     private boolean setRangeSensorTelemetry = false;//unless debugging, don't set telemetry for range sensor
@@ -84,6 +84,12 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         setImuTelemetry = true;
     }
 
+    public double getDefaultScale() {
+        return defaultScale;
+    }
+    public void setDefaultScale(double val) {
+        defaultScale = val;
+    }
     @Adjustable(min = 8.0, max = 18.0, step = 0.02)
     public double getTrack() {
         return track;
@@ -640,6 +646,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 // complement to angle between Y axis and line from the center of chassis,
                 //  which is assumed to be at (0, 0) to the center of the front right wheel
                 double maxTurnAngle = 90 - Math.atan2(track, wheelBase) / Math.PI * 180;
+                maxTurnAngle = Math.min(30, maxTurnAngle); // cap to 30 degree
                 // ensure actual turn angle does not exceed max. value so wheels don't slide sideways
                 double turnAngle = heading / 2;
                 if (Math.abs(turnAngle) > maxTurnAngle) {
@@ -842,10 +849,10 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
      */
     public void setupTelemetry(Telemetry telemetry) {
         Telemetry.Line line = telemetry.addLine();
-        line.addData("Pwr", "%.2f", new Func<Double>() {
+        line.addData("Pwr/Scale", new Func<String>() {
             @Override
-            public Double value() {
-                return frontLeft.motor.getPower();
+            public String value() {
+                return String.format("%.2f / %.1f", frontLeft.motor.getPower(), getDefaultScale());
             }
         });
 
