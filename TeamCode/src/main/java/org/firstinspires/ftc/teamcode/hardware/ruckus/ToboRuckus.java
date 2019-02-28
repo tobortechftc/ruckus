@@ -244,7 +244,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     intake.rotateSweeper(MineralIntake.SweeperMode.HORIZONTAL_STOP);
                 }*/
                 if (current > 0.2) {
-                    intake.sweeperOut();
+                    if (intake.isBoxDown() || source.isPressed(Button.BACK))
+                        intake.sweeperOut();
                 } else if (current == 0) {
                     intake.stopSweeper();
                 }
