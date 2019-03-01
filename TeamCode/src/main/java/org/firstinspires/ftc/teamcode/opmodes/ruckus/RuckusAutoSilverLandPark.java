@@ -104,8 +104,8 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
 
 
         // Only for testing
-        robot.core.yield_for(1);
-        robot.hanging.latchDownInches(7.75);
+//        robot.core.yield_for(1);
+//        robot.hanging.latchDownInches(7.75);
 
     }
 
