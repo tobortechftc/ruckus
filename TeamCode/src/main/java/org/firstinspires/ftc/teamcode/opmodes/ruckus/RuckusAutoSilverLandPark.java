@@ -90,7 +90,7 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
 
         // Step-5: marker mission
         // to depot
-        robot.chassis.driveAlongTheWall(power, (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT ? -81 : -71),
+        robot.chassis.driveAlongTheWall(power, (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT ? -83 : -73),
                 5, SwerveChassis.Wall.LEFT, timeout);
 
         // drop marker
