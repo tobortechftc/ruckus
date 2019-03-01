@@ -13,11 +13,11 @@ import org.firstinspires.ftc.teamcode.support.YieldHandler;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 /**
- * Created by 28761 on 10/13/2018.
+ * Created by Nick on 2/28/2019.
  */
 
-@Autonomous(name = "Auto-Silver-Land-Park", group = "Ruckus")
-public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandler {
+@Autonomous(name = "Auto-Silver-Short", group = "Ruckus")
+public class RuckusAutoSilverShort extends LinearOpMode implements YieldHandler {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -26,8 +26,6 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
     int timeout = 10000; // timeout time
     double power = .4; // motor power
 
-    double midTime = 0;
-    boolean doTime = false;
     ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
 
 
@@ -68,44 +66,13 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
         // Step-3: sample mission
         robot.retrieveSample(sam_loc);
 
-        // Step-4: align with walls
-        robot.chassis.driveStraightAuto(.3, (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT ? -22.6 : -24.6), 0, timeout);
-        if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.LEFT)
-            robot.chassis.driveStraightAuto(power, 45, -90, timeout);
-        else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT)
-            robot.chassis.driveStraightAuto(power, 125, -90, timeout);
-        else
-            robot.chassis.driveStraightAuto(power, 85, -90, timeout);
-
-        robot.chassis.driveStraightAuto(.2, 15, -90, timeout);
-        robot.chassis.rotateTo(.3, -43);
-
-        // 5cm away from wall
-        double driveDistance = robot.chassis.distanceToLeft() - 5;
-        robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
-
-        midTime = getRuntime();
-        doTime = true;
-
-
-        // Step-5: marker mission
-        // to depot
-        robot.chassis.driveAlongTheWall(power, (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT ? -81 : -71),
-                5, SwerveChassis.Wall.LEFT, timeout);
-
-        // drop marker
-        robot.hanging.markerDown();
-        robot.core.yield_for(.5);
-
-
-        // Step-6: park on the rim
-        robot.goParking(ToboRuckus.Side.SILVER);
-        robot.chassis.driveStraightAuto(.4, 10, 5, timeout);
-
+        // Step-4: parking mission
+        robot.chassis.driveStraightAuto(power, 5, 0, timeout);
+        robot.extendInakeForParking();
 
         // Only for testing
-        robot.core.yield_for(1);
-        robot.hanging.latchDownInches(7.75);
+//        robot.core.yield_for(1);
+//        robot.hanging.latchDownInches(7.75);
 
     }
 
@@ -121,8 +88,6 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
 
     @Override
     public void on_yield() {
-        telemetry.addData("Time", getRuntime());
-        if (doTime) telemetry.addData("MidTime", getRuntime() - midTime);
         if (!opModeIsActive())
             throw new OpModeTerminationException();
     }

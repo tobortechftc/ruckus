@@ -521,7 +521,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     @MenuEntry(label = "Test Sample", group = "Test Auto")
     public void retrieveSample(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
         switch (sam_loc) {
-            case CENTER: // center
+            case CENTER:
                 chassis.driveStraightAuto(0.4, 40, -4, Integer.MAX_VALUE);
                 break;
             case RIGHT:
@@ -531,7 +531,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 chassis.driveStraightAuto(0.4, 55, -50, Integer.MAX_VALUE);
                 break;
             default: // go straight like center
-                chassis.driveStraightAuto(0.4, 40, -2, Integer.MAX_VALUE);
+                chassis.driveStraightAuto(0.4, 40, -4, Integer.MAX_VALUE);
         }
         sweepSample();
         //if (!Thread.currentThread().isInterrupted())
