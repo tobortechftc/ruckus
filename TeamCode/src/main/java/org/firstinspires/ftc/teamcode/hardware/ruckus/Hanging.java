@@ -182,12 +182,13 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         latch.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         latch.setPower(Math.abs(latch_power));
         long initime = System.currentTimeMillis();
+        double distToG = 20;
         while (latch.isBusy() && (runtime.seconds() < 5.0)) {
             if (System.currentTimeMillis() - initime < 4000) continue;//not enough time lapsed
-            if (Math.abs(tar_pos - latch.getCurrentPosition()) < 10) break;//finish by reaching the target
+            if (Math.abs(tar_pos - latch.getCurrentPosition()) < 30) break;//finish by reaching the target
             if (!useBottomRange) continue;
-            if (distanceToGround() < 10.5) continue;//false range sensor reading
-            if (distanceToGround() < 11.9) {
+            if ((distToG=distanceToGround()) < 10.5) continue;//false range sensor reading
+            if (distToG < 11.9) {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {

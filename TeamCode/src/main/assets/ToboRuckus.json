@@ -10,9 +10,9 @@
     "right": 0.801
   },
   "servoBackRight": {
-    "center": 0.471,
-    "left": 0.153,
-    "right": 0.792
+    "center": 0.526,
+    "left": 0.205,
+    "right": 0.844
   },
   "servoFrontRight": {
     "center": 0.495,

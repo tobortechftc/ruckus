@@ -724,14 +724,14 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException {
         // chassis.resetOrientation();
         if ((hanging != null) && !skipLanding) {
-            chassis.driveStraightAuto(0.1, 0.1, 90, 1000);
+            chassis.driveStraightAuto(0.1, 0.1, 90, 100);
             hanging.latchUpInches(7.75);
             if (!Thread.currentThread().isInterrupted())
-                Thread.sleep(100);
+                Thread.sleep(30);
         }
-        chassis.driveStraightAuto(0.25, -4, 0, 3000); //Drive back ~2 in.
-        chassis.driveStraightAuto(0.25, 10, -90, 3000); //Strafe left ~4 in.
-        chassis.driveStraightAuto(0.25, 4, 0, 3000); //Drive forward ~2 in.
+        chassis.driveStraightAuto(0.25, -4, 0, 500); //Drive back ~2 in.
+        chassis.driveStraightAuto(0.25, 10, -90, 00); //Strafe left ~4 in.
+        chassis.driveStraightAuto(0.25, 4, 0, 500); //Drive forward ~2 in.
 
         chassis.rotateTo(0.4, -90); //Turn 90 degrees left
 //        if (!Thread.currentThread().isInterrupted())

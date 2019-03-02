@@ -54,7 +54,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int sliderOffset = 0; // offset will be set to sliderInitOut when manual reset
     private int iSliderContracted = 0; // contracted
     private int iSliderExtended = 2240; // fully extended
-    private int iSliderDump = 225; // position to dump minerals into delivery box
+    private int iSliderDump = 300; // position to dump minerals into delivery box
     private int iSliderInitOut = 370; // position for initial TeleOp out, lifter just out
     private int iSliderSafeLiftPos = 967;
     private int iSliderMinSweep = 1000; // pos for min sweeping
@@ -345,7 +345,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         double adjustment = Math.abs(boxLiftServo.getPosition() - target);
         debug("moveBox(): target=%.2f, adjustment=%.2f", target, adjustment);
         // entire move from up to down takes 2 seconds
-        final long doneBy = System.currentTimeMillis() + Math.round(600 * adjustment);
+        final long doneBy = System.currentTimeMillis() + Math.round(1200 * adjustment);
         boxLiftServo.setPosition(target);
         return new Progress() {
             @Override

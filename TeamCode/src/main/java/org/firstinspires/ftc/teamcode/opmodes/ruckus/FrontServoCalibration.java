@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.ruckus;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -7,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * Created by 28761 on 2/24/2019.
  */
-
+@Disabled
 @TeleOp(name="front marker calibration", group="Ruckus")
 public class FrontServoCalibration extends LinearOpMode {
 

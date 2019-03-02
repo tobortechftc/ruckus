@@ -53,11 +53,11 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double writeCenter = 0.5;
     private double wristUp = 1.0;
     private double wristDump = 0.66;
-    private double wristDumpUp = 0.85;
-    private double wristInit = 0.12;
+    private double wristDumpUp = 0.75;
+    private double wristInit = 0.08;
     private double wristBar = 0.55;
     private double wristReadyToDump = 1.0;
-    private double wristReadyToCollect = 0.25;
+    private double wristReadyToCollect = 0.21;
 
     private boolean gateIsOpened = false;
     private boolean armReadyToScore = false;
