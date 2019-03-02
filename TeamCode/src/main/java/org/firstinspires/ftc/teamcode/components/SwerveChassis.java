@@ -801,7 +801,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             //if overshoot, terminate
             if (deltaD > 0 && currentHeading - finalHeading > 0) break;
             if (deltaD < 0 && currentHeading - finalHeading < 0) break;
-            //timeout, break
+            //timeout, break. default timeout: 3s
             if (System.currentTimeMillis() - iniTime > 3000) break;
             //stop pressed, break
             if (Thread.currentThread().isInterrupted()) break;

@@ -1,10 +1,8 @@
 package org.firstinspires.ftc.teamcode.opmodes.ruckus;
 
 import android.util.Log;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.OpModeTerminationException;
@@ -80,7 +78,7 @@ public class RuckusHopefullyTheFinalGoldAutonomousForState extends LinearOpMode 
             robot.chassis.rotateTo(0.4, -90);
 
         //step-4: deliver marker
-        robot.chassis.driveStraightAuto(0.4, 90, -60, 3000);
+        robot.chassis.driveStraightAuto(0.4, 90, -64, 3000);
         Thread.sleep(200);
         robot.chassis.rotateTo(0.4, +135);
         Thread.sleep(200);
