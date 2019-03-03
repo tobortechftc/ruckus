@@ -311,11 +311,13 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     public void reset(boolean auto) {
         boxLiftServo.setPosition(LIFT_CENTER);
-        boxGateServo.setPosition(GATE_OPEN);
         resetMotor(sweeperMotor);
         sweeperMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         if (auto) {
+            boxGateServo.setPosition(GATE_OPEN);
             resetMotor(sliderMotor);
+        } else {
+            boxGateServo.setPosition(GATE_CLOSED);
         }
         if (prox != null) {
             prox.setMode(DigitalChannel.Mode.OUTPUT);
