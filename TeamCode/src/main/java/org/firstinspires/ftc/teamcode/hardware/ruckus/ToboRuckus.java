@@ -182,12 +182,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (button == Button.DPAD_UP) {
-                    // disable box up for driver-1
-//                    if (source.isPressed(Button.BACK))
-//                        intake.moveBox(true, false);
-//                    else
-//                        intake.moveBox(true, true);
-
+                    if (source.isPressed(Button.BACK))
+                        intake.moveBox(true, false);
+                    else
+                        intake.moveBox(true, true);
                 } else {
                     intake.boxLiftDownCombo(); // ensure slider extended out before down
                 }
@@ -843,8 +841,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         intake.moveSliderAuto(tar_pos, 1.0, 1000);
         tar_pos += 200;
         intake.sweeperIn();
-        intake.moveSliderAuto(tar_pos, 0.6, 1000);
+        intake.moveSliderAuto(tar_pos, 0.65, 1000);
         // intake.setSliderPower(orig_pw);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(100);
         intake.stopSweeper();
         intake.stopSlider();
     }
