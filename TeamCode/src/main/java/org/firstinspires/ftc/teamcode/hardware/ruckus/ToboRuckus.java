@@ -720,6 +720,33 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     }
 
+    public void collectSampleAndGoToWall(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
+        switch (sam_loc) {
+            case CENTER: // center
+                chassis.rotateTo(0.4, -90);
+                autoCollect(20);
+                break;
+            case RIGHT:
+                chassis.rotateTo(0.4, -60);
+                autoCollect(28);
+                break;
+            case LEFT:
+                chassis.rotateTo(0.4, -125);
+                autoCollect(28);
+                break;
+            default: // go straight like center
+                chassis.rotateTo(0.4, -90);
+                autoCollect(20);
+        }
+        autoTransfer();
+        if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
+            chassis.rotateTo(0.4, -90);
+
+        //step-4: deliver marker
+        chassis.driveStraightAuto(0.4, 90, -64, 3000);
+        Thread.sleep(200);
+    }
+
     @MenuEntry(label = "Test Land", group = "Test Auto")
     public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException {
         // chassis.resetOrientation();
