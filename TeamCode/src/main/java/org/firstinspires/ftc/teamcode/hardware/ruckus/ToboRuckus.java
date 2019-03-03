@@ -887,7 +887,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 //            Thread.sleep(500);
 
         // box gate open
-        intake.moveGate(true);
+        intake.moveGate(false);
 
         // dumper gate open
         mineralDelivery.gateOpen();
