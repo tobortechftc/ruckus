@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 /**
  * Created by 28761 on 2/24/2019.
  */
-@Autonomous(name = "Auto-New-Gold", group = "Ruckus")
+@Autonomous(name = "Gold-Collect", group = "Ruckus")
 public class RuckusHopefullyTheFinalGoldAutonomousForState extends LinearOpMode implements YieldHandler {
     protected static int LOG_LEVEL = Log.VERBOSE;
 

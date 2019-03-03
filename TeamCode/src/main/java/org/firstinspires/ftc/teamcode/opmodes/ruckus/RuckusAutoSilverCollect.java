@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "Auto-Silver-Collect", group = "Ruckus")
+@Autonomous(name = "Silver-Collect", group = "Ruckus")
 public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandler {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
@@ -93,8 +93,8 @@ public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandle
 
 
         // Only for testing
-        robot.core.yield_for(1);
-        robot.hanging.latchDownInches(7.75);
+//        robot.core.yield_for(1);
+//        robot.hanging.latchDownInches(7.75);
 
     }
 
