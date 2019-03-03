@@ -71,8 +71,8 @@ public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandle
         robot.chassis.rotateTo(power, -43);
 
         // 5cm away from wall
-        double driveDistance = robot.chassis.distanceToLeft() - 5;
-        robot.chassis.driveStraightAuto(.2, driveDistance, -90, timeout);
+        double driveDistance = robot.chassis.getDistance(SwerveChassis.Direction.LEFT) - 5;
+        robot.chassis.driveStraightAuto(.2, driveDistance, -90, 500);
 
         midTime = getRuntime();
         doTime = true;
@@ -80,7 +80,7 @@ public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandle
 
         // Step-4: marker mission
         // to depot
-        robot.chassis.driveAlongTheWall(power, -104, 5, SwerveChassis.Wall.LEFT, timeout);
+        robot.chassis.driveAlongTheWall(power, -104, 5, SwerveChassis.Wall.LEFT, 5000);
 
         // drop marker
         robot.hanging.markerDown();
@@ -89,7 +89,7 @@ public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandle
 
         // Step-5: park on the rim
         robot.goParking(ToboRuckus.Side.SILVER);
-        robot.chassis.driveStraightAuto(.4, 10, 5, timeout);
+        robot.chassis.driveStraightAuto(.2, 10, 5, 500);
 
 
         // Only for testing

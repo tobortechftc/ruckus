@@ -234,6 +234,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
+    @Deprecated
     public double distanceToFront() {
         if (frontRangeSensor == null)
             return 0;
@@ -255,6 +256,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
+    @Deprecated
     public double distanceToBack() {
         if (backRangeSensor == null)
             return 0;
@@ -276,6 +278,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
+    @Deprecated
     public double distanceToLeft() {
         if (leftRangeSensor == null)
             return 0;
@@ -297,6 +300,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         return dist;
     }
 
+    @Deprecated
     public double distanceToRight() {
         if (rightRangeSensor == null)
             return 0;
