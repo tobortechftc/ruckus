@@ -38,14 +38,14 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     private double armLowest = 0.000; // for configuration left most
     private double armHighest = 1.000; // for configuration right most
-    private double armInitPos = 0.040;
-    private double armDownPos = 0.088;
-    private double armSafePos = 0.12; // Safe for lift up/down
-    private double armCollectPos = 0.16; // ready to collect mineral
+    private double armInitPos = 0.048;
+    private double armDownPos = 0.011;
+    private double armSafePos = 0.142; // Safe for lift up/down
+    private double armCollectPos = 0.18; // ready to collect mineral
     private double armBarPos = 0.3; // arm at the top bar position
     private double armLowBarPos = 0.25; // arm at the bottom bar position
-    private double armDumpPos = 0.95; // Actual dump position
-    private double armUpPos = 0.95;   // Max arm up position
+    private double armDumpPos = 0.98; // Actual dump position
+    private double armUpPos = 0.98;   // Max arm up position
 
     private double liftPower = .90;
     private double liftDownPower = .50;
@@ -54,7 +54,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double wristUp = 1.0;
     private double wristDump = 0.66;
     private double wristDumpUp = 0.75;
-    private double wristInit = 0.08;
+    private double wristInit = 0.02;
     private double wristBar = 0.55;
     private double wristReadyToDump = 1.0;
     private double wristReadyToCollect = 0.21;
