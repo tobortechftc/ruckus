@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmodes.ruckus;
 
 import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.OpModeTerminationException;
@@ -82,7 +84,10 @@ public class RuckusHopefullyTheFinalGoldAutonomousForState extends LinearOpMode 
         Thread.sleep(200);
         robot.chassis.rotateTo(0.4, +135);
         Thread.sleep(200);
-        robot.chassis.driveStraightAuto(0.4, -85, 0, 3000);
+        if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)
+            robot.chassis.driveStraightAuto(0.4, -75, 0, 3000);
+        else
+            robot.chassis.driveStraightAuto(0.4, -85, 0, 3000);
         robot.hanging.markerDown();
         Thread.sleep(200);
         //step-5: go parking
