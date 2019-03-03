@@ -730,7 +730,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 Thread.sleep(30);
         }
         chassis.driveStraightAuto(0.25, -4, 0, 500); //Drive back ~2 in.
-        chassis.driveStraightAuto(0.25, 10, -90, 00); //Strafe left ~4 in.
+        chassis.driveStraightAuto(0.25, 10, -90, 1000); //Strafe left ~4 in.
         chassis.driveStraightAuto(0.25, 4, 0, 500); //Drive forward ~2 in.
 
         chassis.rotateTo(0.4, -90); //Turn 90 degrees left
