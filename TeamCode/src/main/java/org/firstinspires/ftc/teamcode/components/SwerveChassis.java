@@ -564,11 +564,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             if (Math.abs(deviation) > 1) {
                 //if there's deviation
                 if (driveCm < 0) {
-                    backLeft.servo.setPosition(-multiplier * Math.min(30, deviation / 2.0));
-                    backRight.servo.setPosition(-multiplier * Math.min(30, deviation / 2.0));
+                    backLeft.servo.setPosition(-multiplier * Math.min(15, deviation / 2.0));
+                    backRight.servo.setPosition(-multiplier * Math.min(15, deviation / 2.0));
                 } else {
-                    frontLeft.servo.setPosition(multiplier * Math.min(30, deviation / 2.0));
-                    frontRight.servo.setPosition(multiplier * Math.min(30, deviation / 2.0));
+                    frontLeft.servo.setPosition(multiplier * Math.min(15, deviation / 2.0));
+                    frontRight.servo.setPosition(multiplier * Math.min(15, deviation / 2.0));
                 }
             } else {
                 servoCorrection = 0;

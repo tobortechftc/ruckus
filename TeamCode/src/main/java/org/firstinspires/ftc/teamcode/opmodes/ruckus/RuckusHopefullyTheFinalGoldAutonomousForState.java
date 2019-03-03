@@ -64,7 +64,7 @@ public class RuckusHopefullyTheFinalGoldAutonomousForState extends LinearOpMode 
                 robot.autoCollect(20);
                 break;
             case RIGHT:
-                robot.chassis.rotateTo(0.4, -60);
+                robot.chassis.rotateTo(0.4, -59);
                 robot.autoCollect(28);
                 break;
             case LEFT:
