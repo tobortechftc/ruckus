@@ -29,7 +29,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // down and up positions for the box lift
     // actual servo positions are configured via <code>AdjustableServo</code>
     public static final double LIFT_DOWN = 0.0;
-    public static final double LIFT_CENTER = 0.58;
+    public static final double LIFT_CENTER = 0.6;
     public static final double LIFT_UP = 1.0;
 
     // open and closed positions for the box gate
@@ -54,9 +54,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int sliderOffset = 0; // offset will be set to sliderInitOut when manual reset
     private int iSliderContracted = 0; // contracted
     private int iSliderExtended = 2240; // fully extended
-    private int iSliderDump = 300; // position to dump minerals into delivery box
+    private int iSliderDump = 50; // position to dump minerals into delivery box
     private int iSliderInitOut = 370; // position for initial TeleOp out, lifter just out
-    private int iSliderSafeLiftPos = 967;
+    private int iSliderSafeLiftPos = 997; // safe pos to lift arm up/down
     private int iSliderMinSweep = 1000; // pos for min sweeping
     private int iSliderAutoPark = 1000;
     public final double slideer_count_per_inch = iSliderExtended / 28;
@@ -68,7 +68,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private int sliderSafeLiftPos = iSliderSafeLiftPos;
     private int sliderMinSweep = iSliderMinSweep; // pos for min sweeping
     private int sliderAutoPark = iSliderAutoPark; // position for Auto Out parking;
-    private double sliderPower = 0.6; // TBD
+    private double sliderPower = 0.7;
 
     public void syncSliderEncoder(int offset) {
         sliderMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -559,7 +559,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             this.sliderMotor.setPower(0);
             this.sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             int cur_pos = this.sliderMotor.getCurrentPosition();
-            if (Math.abs(cur_pos-position)>50) { // re-sync encoder values
+            if (Math.abs(cur_pos-position)>30) { // re-sync encoder values
                 syncSliderEncoder(position-10);
             }
             is_done = true;

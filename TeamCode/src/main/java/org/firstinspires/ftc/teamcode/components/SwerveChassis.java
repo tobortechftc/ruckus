@@ -69,7 +69,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     private double targetHeading;     // intended heading for DriveMode.STRAIGHT as reported by orientation sensor
     private double headingDeviation;  // current heading deviation for DriveMode.STRAIGHT as reported by orientation sensor
     private double servoCorrection;   // latest correction applied to leading wheels' servos to correct heading deviation
-    private double defaultScale = 0.5;
+    private double defaultScale = 0.8;
     private boolean useScalePower = true;//
     private boolean setImuTelemetry = false;//unless debugging, don't set telemetry for imu
     private boolean setRangeSensorTelemetry = false;//unless debugging, don't set telemetry for range sensor

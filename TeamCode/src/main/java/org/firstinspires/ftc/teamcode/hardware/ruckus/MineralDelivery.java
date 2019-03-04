@@ -38,11 +38,11 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     private double armLowest = 0.000; // for configuration left most
     private double armHighest = 1.000; // for configuration right most
-    private double armInitPos = 0.048;
-    private double armDownPos = 0.011;
-    private double armSafePos = 0.142; // Safe for lift up/down
-    private double armCollectPos = 0.18; // ready to collect mineral
-    private double armBarPos = 0.3; // arm at the top bar position
+    private double armInitPos = 0.075;
+    private double armDownPos = 0.095;
+    private double armSafePos = 0.127; // Safe for lift up/down
+    private double armCollectPos = 0.08; // 0.175; // ready to collect mineral
+    private double armBarPos = 0.45; // arm at the top bar position
     private double armLowBarPos = 0.25; // arm at the bottom bar position
     private double armDumpPos = 0.98; // Actual dump position
     private double armUpPos = 0.98;   // Max arm up position
@@ -55,14 +55,15 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double wristDump = 0.66;
     private double wristDumpUp = 0.75;
     private double wristInit = 0.02;
-    private double wristBar = 0.55;
+    private double wristBar = 0.43;
     private double wristReadyToDump = 1.0;
-    private double wristReadyToCollect = 0.21;
+    private double wristReadyToCollect = 0.06; // 0.09;
 
     private boolean gateIsOpened = false;
     private boolean armReadyToScore = false;
     private final int MAX_LIFT_POS = 1450; // 1240 for neverrest 20 motor; old small spool = 4100;
     private final int AUTO_LIFT_POS = 1390; //1220 for neverest 20 motor; old small spool = 4000;
+    private final int LIFT_DOWN_BAR = 450; // lift down below bar for safe wrist down
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
@@ -159,7 +160,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public Progress liftDownSafe() {
         lift.setPower(0);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        lift.setTargetPosition(400);
+        lift.setTargetPosition(LIFT_DOWN_BAR);
         lift.setPower(liftDownPower);
         return new Progress() {
             @Override
@@ -172,7 +173,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public Progress liftAuto(boolean up) {
         lift.setPower(0);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        lift.setTargetPosition(up ? AUTO_LIFT_POS : 20);
+        lift.setTargetPosition(up ? AUTO_LIFT_POS : 1);
         if (up==true && liftTouch!=null && liftTouch.getState()==false) {
             // hardware limit hit
             lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -185,7 +186,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         } else if (up) {
             lift.setPower(liftPower);
         } else {
-            lift.setPower(liftDownPower/1.7);
+            lift.setPower(liftDownPower/1.2);
         }
         return new Progress() {
             @Override
@@ -203,7 +204,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         double adjustment = Math.abs(position - dumperWrist.getPosition());
         dumperWrist.setPosition(position);
         // 3.3ms per degree of rotation
-        final long doneBy = System.currentTimeMillis() + Math.round(adjustment * 800);
+        final long doneBy = System.currentTimeMillis() + Math.round(adjustment * 900);
         return new Progress() {
             @Override
             public boolean isDone() {
@@ -393,7 +394,14 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
+                liftDownSafe();
                 return moveArm(armBarPos);
+            }
+        }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
+                return wristBar();
             }
         }, taskName);
         TaskManager.add(new Task() {
@@ -415,12 +423,6 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
                 return armSafeDown(false);
             }
         }, taskName);
-//        TaskManager.add(new Task() {
-//            @Override
-//            public Progress start() {
-//                return liftAuto(false);
-//            }
-//        }, taskName);
 
     }
 
