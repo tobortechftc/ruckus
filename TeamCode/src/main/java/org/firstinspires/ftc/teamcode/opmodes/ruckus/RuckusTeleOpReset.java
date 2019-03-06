@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
 @TeleOp(name="Ruckus-TeleOp-Reset", group="Ruckus")
 public class RuckusTeleOpReset extends LinearOpMode {
-    protected static int LOG_LEVEL = Log.ERROR;
+    protected static int LOG_LEVEL = Log.INFO;
 
     private Configuration configuration;
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
@@ -23,12 +23,14 @@ public class RuckusTeleOpReset extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        log.info("RoboRuck TeleOp runOpMode() starts (CPU_time = %.2f sec)", getRuntime());
         telemetry.addData("Initializing Robot", "Please Wait ...");
         telemetry.update();
 
         ToboRuckus robot = new ToboRuckus();
         robot.configureLogging(robot.getName(),LOG_LEVEL);
         configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
+        log.info("RoboRuck TeleOp finished configuration (CPU_time = %.2f sec)", getRuntime());
 
         try {
             // configure robot and reset all hardware
@@ -48,6 +50,7 @@ public class RuckusTeleOpReset extends LinearOpMode {
             telemetry.addData("Init Failed", E.getMessage());
             handleException(E);
         }
+        log.info("RoboRuck TeleOp finished initialization (CPU_time = %.2f sec)", getRuntime());
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();

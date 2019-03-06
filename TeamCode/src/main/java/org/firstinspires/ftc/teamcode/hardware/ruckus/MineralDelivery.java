@@ -426,6 +426,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
+                liftStop();
                 return armDown();
             }
         }, taskName);

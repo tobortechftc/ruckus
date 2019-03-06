@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -49,7 +50,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public CameraSystem cameraSystem;
     public CameraMineralDetector cameraMineralDetector;
     public CoreSystem core;
-
+    public ElapsedTime runtime = new ElapsedTime();
 
     @Override
     public String getName() {
@@ -58,6 +59,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     @Override
     public void configure(Configuration configuration, Telemetry telemetry, boolean auto) {
+        runtime.reset();
+        double ini_time = runtime.seconds();
         this.telemetry = telemetry;
 
 //        cameraSystem = new CameraSystem(null);
@@ -67,14 +70,19 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             cameraMineralDetector.configure(configuration);
         }
         this.core = new CoreSystem();
+        info("RoboRuck configure() after new CoreSystem()(run time = %.2f sec)", (runtime.seconds()-ini_time));
         chassis = new SwerveChassis(this.core).configureLogging("Swerve", logLevel); // Log.DEBUG
         chassis.configure(configuration, auto);
+        info("RoboRuck configure() after init Chassis (run time = %.2f sec)", (runtime.seconds()-ini_time));
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
+        info("RoboRuck configure() after init Intake (run time = %.2f sec)", (runtime.seconds()-ini_time));
         hanging = new Hanging().configureLogging("Hanging", logLevel);
         hanging.configure(configuration, auto, chassis.orientationSensor);
+        info("RoboRuck configure() after init Hanging (run time = %.2f sec)", (runtime.seconds()-ini_time));
         mineralDelivery = new MineralDelivery().configureLogging("Delivery", logLevel);
         mineralDelivery.configure(configuration);
+        info("RoboRuck configure() after init Delivery (run time = %.2f sec)", (runtime.seconds()-ini_time));
     }
 
     public void AutoRoutineTest() throws InterruptedException {
@@ -103,9 +111,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         hanging.setupTelemetry(telemetry);
         mineralDelivery.setupTelemetry(telemetry);
         em.updateTelemetry(telemetry, 100);
-        if (!hanging.latchIsBusy()) {
-            hanging.resetLatch();
-        }
+//        if (!hanging.latchIsBusy()) {
+//            hanging.resetLatch();
+//        }
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
