@@ -5,6 +5,7 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.components.SwerveChassis;
 import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.OpModeTerminationException;
@@ -58,32 +59,33 @@ public class RuckusHopefullyTheFinalGoldAutonomousForState extends LinearOpMode 
         robot.hopefullyTheLastLandAndDetachForState(null, false);
 
         //step-3: retrieve sample
-        switch (sam_loc) {
-            case CENTER: // center
-                robot.chassis.rotateTo(0.4, -90);
-                robot.autoCollect(20);
-                break;
-            case RIGHT:
-                robot.chassis.rotateTo(0.4, -59);
-                robot.autoCollect(28);
-                break;
-            case LEFT:
-                robot.chassis.rotateTo(0.4, -125);
-                robot.autoCollect(28);
-                break;
-            default: // go straight like center
-                robot.chassis.rotateTo(0.4, -90);
-                robot.autoCollect(20);
-        }
-        robot.autoTransfer();
-        if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
-            robot.chassis.rotateTo(0.4, -90);
-
+//        switch (sam_loc) {
+//            case CENTER: // center
+//                robot.chassis.rotateTo(0.4, -90);
+//                robot.autoCollect(20);
+//                break;
+//            case RIGHT:
+//                robot.chassis.rotateTo(0.4, -59);
+//                robot.autoCollect(28);
+//                break;
+//            case LEFT:
+//                robot.chassis.rotateTo(0.4, -125);
+//                robot.autoCollect(28);
+//                break;
+//            default: // go straight like center
+//                robot.chassis.rotateTo(0.4, -90);
+//                robot.autoCollect(20);
+//        }
+//        robot.autoTransfer();
+//        if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
+//            robot.chassis.rotateTo(0.4, -90);
+        robot.collectSampleAndGoToWall(sam_loc);
         //step-4: deliver marker
-        robot.chassis.driveStraightAuto(0.4, 90, -64, 3000);
+//        robot.chassis.driveStraightAuto(0.4, 90, -64, 3000);
         Thread.sleep(200);
         robot.chassis.rotateTo(0.4, +135);
         Thread.sleep(200);
+        robot.chassis.driveStraightAuto(0.2, robot.chassis.getDistance(SwerveChassis.Direction.RIGHT) - 6, +90, 1000);
         if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)
             robot.chassis.driveStraightAuto(0.4, -75, 0, 3000);
         else
