@@ -748,6 +748,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
             chassis.rotateTo(0.4, -90);
 
+        chassis.driveStraightAuto(.4, 5, 0, 3000);
         chassis.driveStraightAuto(0.4, 90, -64, 3000);
         Thread.sleep(200);
     }
