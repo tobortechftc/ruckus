@@ -842,9 +842,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     public void autoCollect(double dist) throws InterruptedException {
         long iniTime = System.currentTimeMillis();
-        intake.moveSliderAuto(intake.getSliderMinSweep(), 1.0, 1000);
-        // Thread.sleep(800);
+        intake.moveSliderAuto(intake.getSliderMinSweep()-50, 1.0, 1000);
         intake.moveBox(false, false);
+        Thread.sleep(500);
         intake.moveGate(false); // close gate
         int tar_pos = (int) (intake.getSliderMinSweep() + (dist-12)*intake.slideer_count_per_inch);
         intake.moveSliderAuto(tar_pos, 1.0, 1000);

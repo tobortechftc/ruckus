@@ -859,6 +859,39 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 return String.format("%.2f / %.1f", frontLeft.motor.getPower(), getDefaultScale());
             }
         });
+        if (frontLeft.motor!=null) {
+            line.addData("FL", "%d", new Func<Integer>() {
+                @Override
+                public Integer value() {
+                    return frontLeft.motor.getCurrentPosition();
+                }
+            });
+        }
+        if (frontRight.motor!=null) {
+            line.addData("FR", "%d", new Func<Integer>() {
+                @Override
+                public Integer value() {
+                    return frontRight.motor.getCurrentPosition();
+                }
+            });
+        }
+        if (backLeft.motor!=null) {
+            line.addData("BL", "%d", new Func<Integer>() {
+                @Override
+                public Integer value() {
+                    return backLeft.motor.getCurrentPosition();
+                }
+            });
+        }
+        if (backRight.motor!=null) {
+            line.addData("BR", "%d", new Func<Integer>() {
+                @Override
+                public Integer value() {
+                    return backRight.motor.getCurrentPosition();
+                }
+            });
+        }
+
 
         //set up imu telemetry
         if (orientationSensor != null && setImuTelemetry) {
