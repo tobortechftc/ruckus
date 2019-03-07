@@ -29,7 +29,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // down and up positions for the box lift
     // actual servo positions are configured via <code>AdjustableServo</code>
     public static final double LIFT_DOWN = 0.0;
-    public static final double LIFT_CENTER = 0.6;
+    public static final double LIFT_CENTER = 0.57;
     public static final double LIFT_UP = 1.0;
 
     // open and closed positions for the box gate
@@ -43,6 +43,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private AdjustableServo boxGateServo;
     private DigitalChannel prox = null;
     private boolean adjustmentMode = false;
+    private boolean mineralTransfering = false;
 
     private double sweeperInPower = 1.0;
     private double sweeperOutPower = 0.7;
@@ -406,12 +407,17 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         return Math.abs(boxGateServo.getPosition() - GATE_OPEN) < 0.01;
     }
 
-    public void test() {
-
+    public boolean isMineralTransfering() {
+        return mineralTransfering;
     }
+    public void setMineralTransfterDone() {
+        mineralTransfering = false;
+    }
+
     public void mineralDumpCombo() {
         final String taskName = "mineralDump";
         if (!TaskManager.isComplete(taskName)) return;
+        mineralTransfering = true;
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
@@ -559,7 +565,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             this.sliderMotor.setPower(0);
             this.sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             int cur_pos = this.sliderMotor.getCurrentPosition();
-            if (Math.abs(cur_pos-position)>30) { // re-sync encoder values
+            if (isMineralTransfering() && (Math.abs(cur_pos-position)>30)) { // re-sync encoder values
                 syncSliderEncoder(position-10);
             }
             is_done = true;

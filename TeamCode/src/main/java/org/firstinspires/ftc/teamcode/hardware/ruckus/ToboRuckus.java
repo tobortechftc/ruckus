@@ -114,6 +114,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 //        if (!hanging.latchIsBusy()) {
 //            hanging.resetLatch();
 //        }
+
         em.onStick(new Events.Listener() {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
@@ -124,10 +125,14 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     power *= power; // square power to stick
                     double heading = toDegrees(currentX, currentY);
                     // invert headings less than -90 / more than 90
+                    if (Math.abs(chassis.getCurHeading()-heading)<15 || Math.abs(currentX)+Math.abs(currentY)<0.15) { // keep original heading
+                        heading = chassis.getCurHeading();
+                    }
                     if (Math.abs(heading) > 90) {
                         heading -= Math.signum(heading) * 180;
                         power = -1 * power;
                     }
+
                     debug("sticksOnly(): straight, pwr: %.2f, head: %.2f", power, heading);
                     chassis.driveAndSteer(power * powerAdjustment(source), heading, true);
                 } else {
@@ -205,6 +210,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (source.isPressed(Button.RIGHT_BUMPER)) {
                     mineralDelivery.returnCombo();
                     intake.moveGate(false); // auto close gate when arm down
+                    mineralDelivery.liftStop();
                 } else if (!source.isPressed(Button.START)) {
                     intake.moveGate(!intake.isGateOpen());
                 }
@@ -277,6 +283,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 // intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
                 // intake.boxLiftDownCombo();
+                if (!TaskManager.isComplete("mineralDump") && !source.isPressed(Button.BACK)) return;
                 if (intake.getSliderCurrent() > intake.getSliderInitOut()) {
                     // automatically down
                     intake.boxDown();

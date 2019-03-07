@@ -38,32 +38,33 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     private double armLowest = 0.000; // for configuration left most
     private double armHighest = 1.000; // for configuration right most
-    private double armInitPos = 0.075;
-    private double armDownPos = 0.095;
-    private double armSafePos = 0.137; // Safe for lift up/down
+    private double armInitPos = 0.07;
+    private double armDownPos = 0.081;
+    private double armSafePos = 0.11; // Safe for lift up/down
     private double armCollectPos = 0.08; // 0.175; // ready to collect mineral
-    private double armBarPos = 0.386; // arm at the top bar position
+    private double armBarPos = 0.3; // arm at the top bar position
     private double armLowBarPos = 0.25; // arm at the bottom bar position
-    private double armDumpPos = 0.98; // Actual dump position
-    private double armUpPos = 0.98;   // Max arm up position
+    private double armDumpPos = 0.92; // Actual dump position
+    private double armUpPos = 0.92;   // Max arm up position
 
     private double liftPower = .90;
     private double liftDownPower = .50;
     private double wristDown = 0;
     private double writeCenter = 0.5;
     private double wristUp = 1.0;
-    private double wristDump = 0.66;
-    private double wristDumpUp = 0.75;
+    private double wristDump = 0.68;
+    private double wristDumpUp = 0.68;
     private double wristInit = 0.02;
     private double wristBar = 0.52;
-    private double wristReadyToDump = 1.0;
+    private double wristReadyToDump = 0.85;
     private double wristReadyToCollect = 0.06; // 0.09;
 
     private boolean gateIsOpened = false;
     private boolean armReadyToScore = false;
     private final int MAX_LIFT_POS = 1450; // 1240 for neverrest 20 motor; old small spool = 4100;
-    private final int AUTO_LIFT_POS = 1390; //1220 for neverest 20 motor; old small spool = 4000;
+    private final int AUTO_LIFT_POS = 1420; //1220 for neverest 20 motor; old small spool = 4000;
     private final int LIFT_DOWN_BAR = 980; // lift down below bar for safe wrist down
+    private final int LIFT_DOWN_BOX_SAFE = 300;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
@@ -173,7 +174,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public Progress liftAuto(boolean up) {
         lift.setPower(0);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        lift.setTargetPosition(up ? AUTO_LIFT_POS : 1);
+        lift.setTargetPosition(up ? AUTO_LIFT_POS : LIFT_DOWN_BOX_SAFE);
         if (up==true && liftTouch!=null && liftTouch.getState()==false) {
             // hardware limit hit
             lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -191,7 +192,20 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         return new Progress() {
             @Override
             public boolean isDone() {
-                return !lift.isBusy() || Math.abs(lift.getTargetPosition()-lift.getCurrentPosition())<AUTO_LIFT_POS-300;
+                return !lift.isBusy() || Math.abs(lift.getTargetPosition()-lift.getCurrentPosition())<20;
+            }
+        };
+    }
+
+    public Progress liftDownFinal() {
+        lift.setPower(0);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        lift.setTargetPosition(1);
+        lift.setPower(liftDownPower/1.5);
+        return new Progress() {
+            @Override
+            public boolean isDone() {
+                return !lift.isBusy() || Math.abs(lift.getTargetPosition()-lift.getCurrentPosition())<10;
             }
         };
     }
@@ -413,7 +427,6 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                // return liftDownSafe();
                 return liftAuto(false);
             }
         }, taskName);
@@ -426,7 +439,12 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         TaskManager.add(new Task() {
             @Override
             public Progress start() {
-                liftStop();
+                return liftDownFinal();
+            }
+        }, taskName);
+        TaskManager.add(new Task() {
+            @Override
+            public Progress start() {
                 return armDown();
             }
         }, taskName);
