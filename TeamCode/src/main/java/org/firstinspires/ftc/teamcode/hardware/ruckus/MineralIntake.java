@@ -403,8 +403,28 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         };
     }
 
+    public Progress OpenGate() {
+        boxGateServo.setPosition(GATE_OPEN);
+        return new Progress() {
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+        };
+    }
+
+    public Progress CloseGate() {
+        boxGateServo.setPosition(GATE_CLOSED);
+        return new Progress() {
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+        };
+    }
+
     public boolean isGateOpen() {
-        return Math.abs(boxGateServo.getPosition() - GATE_OPEN) < 0.01;
+        return Math.abs(boxGateServo.getPosition() - GATE_OPEN) < 0.02;
     }
 
     public boolean isMineralTransfering() {
@@ -437,7 +457,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                 return new Progress() {
                     @Override
                     public boolean isDone() {
-                        return Math.abs(getSliderCurrent() - getSliderDump()) < 30;
+                        return Math.abs(getSliderCurrent() - getSliderDump()) < 50;
                     }
                 };
             }
@@ -565,9 +585,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             this.sliderMotor.setPower(0);
             this.sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             int cur_pos = this.sliderMotor.getCurrentPosition();
-            if (isMineralTransfering() && (Math.abs(cur_pos-position)>30)) { // re-sync encoder values
-                syncSliderEncoder(position-10);
-            }
+//            if (isMineralTransfering() && (Math.abs(cur_pos-position)>30)) { // re-sync encoder values
+//                syncSliderEncoder(position-10);
+//            }
             is_done = true;
         }
         final boolean finalIs_done = is_done;

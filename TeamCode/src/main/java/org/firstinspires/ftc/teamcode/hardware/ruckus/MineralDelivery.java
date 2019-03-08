@@ -40,7 +40,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double armHighest = 1.000; // for configuration right most
     private double armInitPos = 0.07;
     private double armDownPos = 0.081;
-    private double armSafePos = 0.11; // Safe for lift up/down
+    private double armSafePos = 0.10; // Safe for lift up/down
     private double armCollectPos = 0.08; // 0.175; // ready to collect mineral
     private double armBarPos = 0.3; // arm at the top bar position
     private double armLowBarPos = 0.25; // arm at the bottom bar position
@@ -64,7 +64,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private final int MAX_LIFT_POS = 1450; // 1240 for neverrest 20 motor; old small spool = 4100;
     private final int AUTO_LIFT_POS = 1420; //1220 for neverest 20 motor; old small spool = 4000;
     private final int LIFT_DOWN_BAR = 980; // lift down below bar for safe wrist down
-    private final int LIFT_DOWN_BOX_SAFE = 300;
+    private final int LIFT_DOWN_BOX_SAFE = 400;
     private final int LIFT_COUNT_PER_INCH = 410;
 
     @Override
@@ -187,7 +187,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         } else if (up) {
             lift.setPower(liftPower);
         } else {
-            lift.setPower(liftDownPower/1.2);
+            lift.setPower(liftDownPower/1.1);
         }
         return new Progress() {
             @Override
@@ -201,7 +201,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         lift.setPower(0);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setTargetPosition(1);
-        lift.setPower(liftDownPower/1.5);
+        lift.setPower(liftDownPower/1.2);
         return new Progress() {
             @Override
             public boolean isDone() {
