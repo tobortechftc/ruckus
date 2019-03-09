@@ -41,7 +41,9 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
                 warn("%s is not available", deviceName);
                 continue;
             }
-            sensors.put(deviceName, sensor);
+            if (sensor.getSystemStatus() != BNO055IMU.SystemStatus.SYSTEM_ERROR) {
+                sensors.put(deviceName, sensor);
+            }
         }
         if (sensors.isEmpty()) {
             warn("No orientation sensors were found!");
@@ -64,7 +66,7 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
             parameters.loggingTag = entry.getKey();
             entry.getValue().initialize(parameters);
         }
-        for(int i = 0; i<rollLog.length; i++){ //Initialize roll log
+        for (int i = 0; i < rollLog.length; i++) { //Initialize roll log
             rollLog[i] = 0.0;
         }
     }
@@ -98,7 +100,14 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
 
         double reading1 = hardwareReading(sensors.get("imu"));
         double reading2 = hardwareReading(sensors.get("imu2"));
-        return reading1 * reading2 < -100 ? reading1 : (reading1 + reading2) / 2;
+        if (reading2 > 361) {
+            return reading1;
+        } else if (reading1 > 361) {
+            return reading2;
+        } else {
+            return reading1 * reading2 < -100 ? reading1 : (reading1 + reading2) / 2;
+        }
+
 
 //        return hardwareReading(sensors.get("imu2"));
 
@@ -162,16 +171,15 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
      * @return If roll values have stabalized, meaning that for X iterations with a 50Hz frequence
      * , the difference between the current and previous values is less than Y
      */
-    public boolean hasRollStabalized(int inputIndex, double minDiff){
-        inputIndex = inputIndex%rollLog.length;
+    public boolean hasRollStabalized(int inputIndex, double minDiff) {
+        inputIndex = inputIndex % rollLog.length;
         rollLog[inputIndex] = getRoll();
-        if(rollLog[rollLog.length-1] != 0){
-            for(int i = rollLog.length; i >= 1; i--){
-                if(rollLog[i] - rollLog[i-1] >= minDiff) return false;
+        if (rollLog[rollLog.length - 1] != 0) {
+            for (int i = rollLog.length; i >= 1; i--) {
+                if (rollLog[i] - rollLog[i - 1] >= minDiff) return false;
             }
             return true;
-        }
-        else return false;
+        } else return false;
     }
 
     public double getPitch() {
@@ -217,6 +225,9 @@ public class CombinedOrientationSensor extends Logger<CombinedOrientationSensor>
     }
 
     private double hardwareReading(BNO055IMU sensor) { // heading
+        if (sensor == null) {
+            return 1024;
+        }
         Orientation orientation = sensor.getAngularOrientation(
                 AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES
         );

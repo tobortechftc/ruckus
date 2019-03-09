@@ -35,68 +35,70 @@ public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandle
     public void runOpMode() throws InterruptedException {
         ToboRuckus robot = null;
 
-        if (opModeIsActive()) {
-            telemetry.addData("Initializing Robot", "Please Wait ...");
+
+        telemetry.addData("Initializing Robot", "Please Wait ...");
+        telemetry.update();
+
+        robot = new ToboRuckus().configureLogging("ToboRuckus", LOG_LEVEL);
+        configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
+
+        try {
+            // configure robot and reset all hardware
+            robot.configure(configuration, telemetry, true);
+            configuration.apply();
+            robot.reset(true);
+
+            telemetry.addData("Robot is ready", "Press Play");
             telemetry.update();
-
-            robot = new ToboRuckus().configureLogging("ToboRuckus", LOG_LEVEL);
-            configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
-
-            try {
-                // configure robot and reset all hardware
-                robot.configure(configuration, telemetry, true);
-                configuration.apply();
-                robot.reset(true);
-
-                telemetry.addData("Robot is ready", "Press Play");
-                telemetry.update();
-            } catch (Exception e) {
-                telemetry.addData("Init Failed", e.getMessage());
-                handleException(e);
-            }
+        } catch (Exception e) {
+            telemetry.addData("Init Failed", e.getMessage());
+            handleException(e);
         }
+
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        if (opModeIsActive()) {
-
-            resetStartTime();
-            robot.core.set_yield_handler(this); // uses this class as yield handler
-
-            // Step-1: check random sample position
-            ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
-            sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
-
-
-            // Step-2: landing mission
-            robot.landAndDetach(null, false);
-
-
-            // Step-3: collect and go to wall
-            robot.collectSampleAndGoToWall(sam_loc);
-            robot.chassis.rotateTo(power, -43);
-
-            // 5cm away from wall
-            double driveDistance = robot.chassis.getDistance(SwerveChassis.Direction.LEFT) - 5;
-            robot.chassis.driveStraightAuto(.2, driveDistance, -90, 500);
-
-            midTime = getRuntime();
-            doTime = true;
-
-
-            // Step-4: marker mission
-            // to depot
-            robot.chassis.driveAlongTheWall(power, -104, 5, SwerveChassis.Wall.LEFT, 5000);
-
-            // drop marker
-            robot.hanging.markerDown();
-            robot.core.yield_for(.5);
-
-
-            // Step-5: park on the rim
-            robot.goParking(ToboRuckus.Side.SILVER);
-            robot.chassis.driveStraightAuto(.2, 10, 5, 500);
+        if (!opModeIsActive()) {
+            return;
         }
+
+        resetStartTime();
+        robot.core.set_yield_handler(this); // uses this class as yield handler
+
+        // Step-1: check random sample position
+        ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
+        sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
+
+
+        // Step-2: landing mission
+        robot.hopefullyTheLastLandAndDetachForState(null, false);
+
+
+        // Step-3: collect and go to wall
+        robot.collectSampleAndGoToWall(sam_loc, ToboRuckus.Side.SILVER);
+        robot.chassis.rotateTo(power, -43);
+
+        // 5cm away from wall
+        double driveDistance = robot.chassis.getDistance(SwerveChassis.Direction.LEFT) - 5;
+        robot.chassis.driveStraightAuto(.2, driveDistance, -90, 500);
+
+        midTime = getRuntime();
+        doTime = true;
+
+
+        // Step-4: marker mission
+        // to depot
+        robot.chassis.driveAlongTheWall(power, -104, 5, SwerveChassis.Wall.LEFT, 5000);
+
+        // drop marker
+        robot.hanging.markerDown();
+        robot.core.yield_for(.5);
+
+
+        // Step-5: park on the rim
+        robot.goParking(ToboRuckus.Side.SILVER);
+        robot.chassis.driveStraightAuto(.2, 10, 5, 500);
+
 
         // Only for testing
 //        robot.core.yield_for(1);

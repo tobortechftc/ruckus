@@ -70,19 +70,19 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             cameraMineralDetector.configure(configuration);
         }
         this.core = new CoreSystem();
-        info("RoboRuck configure() after new CoreSystem()(run time = %.2f sec)", (runtime.seconds()-ini_time));
+        info("RoboRuck configure() after new CoreSystem()(run time = %.2f sec)", (runtime.seconds() - ini_time));
         chassis = new SwerveChassis(this.core).configureLogging("Swerve", logLevel); // Log.DEBUG
         chassis.configure(configuration, auto);
-        info("RoboRuck configure() after init Chassis (run time = %.2f sec)", (runtime.seconds()-ini_time));
+        info("RoboRuck configure() after init Chassis (run time = %.2f sec)", (runtime.seconds() - ini_time));
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
-        info("RoboRuck configure() after init Intake (run time = %.2f sec)", (runtime.seconds()-ini_time));
+        info("RoboRuck configure() after init Intake (run time = %.2f sec)", (runtime.seconds() - ini_time));
         hanging = new Hanging().configureLogging("Hanging", logLevel);
         hanging.configure(configuration, auto, chassis.orientationSensor);
-        info("RoboRuck configure() after init Hanging (run time = %.2f sec)", (runtime.seconds()-ini_time));
+        info("RoboRuck configure() after init Hanging (run time = %.2f sec)", (runtime.seconds() - ini_time));
         mineralDelivery = new MineralDelivery().configureLogging("Delivery", logLevel);
         mineralDelivery.configure(configuration);
-        info("RoboRuck configure() after init Delivery (run time = %.2f sec)", (runtime.seconds()-ini_time));
+        info("RoboRuck configure() after init Delivery (run time = %.2f sec)", (runtime.seconds() - ini_time));
     }
 
     public void AutoRoutineTest() throws InterruptedException {
@@ -125,7 +125,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     power *= power; // square power to stick
                     double heading = toDegrees(currentX, currentY);
                     // invert headings less than -90 / more than 90
-                    if (Math.abs(chassis.getCurHeading()-heading)<15 || Math.abs(currentX)+Math.abs(currentY)<0.15) { // keep original heading
+                    if (Math.abs(chassis.getCurHeading() - heading) < 15 || Math.abs(currentX) + Math.abs(currentY) < 0.15) { // keep original heading
                         heading = chassis.getCurHeading();
                     }
                     if (Math.abs(heading) > 90) {
@@ -283,7 +283,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             public void buttonDown(EventManager source, Button button) throws InterruptedException {
                 // intake.rotateSweeper(MineralIntake.SweeperMode.INTAKE);
                 // intake.boxLiftDownCombo();
-                if (!TaskManager.isComplete("mineralDump") && !source.isPressed(Button.BACK)) return;
+                if (!TaskManager.isComplete("mineralDump") && !source.isPressed(Button.BACK))
+                    return;
                 if (intake.getSliderCurrent() > intake.getSliderInitOut()) {
                     // automatically down
                     intake.boxDown();
@@ -561,10 +562,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void goParking(Side side) throws InterruptedException {
         if (side == side.GOLD) {
             chassis.driveAlongTheWall(0.4, 145, 5, SwerveChassis.Wall.RIGHT, 4000);
-            chassis.driveStraightAuto(0.20, 20, 10, 1000);
+            chassis.driveStraightAuto(0.175, 20, 10, 1000);
         } else {
             chassis.driveAlongTheWall(0.4, 115, 5, SwerveChassis.Wall.LEFT, 4000);
-            chassis.driveStraightAuto(0.20, 20, -10, 1000);
+            chassis.driveStraightAuto(0.175, 20, -10, 1000);
         }
         extendInakeForParking();
     }
@@ -733,22 +734,22 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     }
 
-    public void collectSampleAndGoToWall(ToboRuckus.MineralDetection.SampleLocation sam_loc) throws InterruptedException {
-        switch (sam_loc) {
+    public void collectSampleAndGoToWall(ToboRuckus.MineralDetection.SampleLocation sam_loc, Side side) throws InterruptedException {
+        switch (sam_loc) {//Gold:Silver
             case CENTER: // center
-                chassis.rotateTo(0.4, -90);
+                chassis.rotateTo(0.4, side == Side.GOLD ? -90 : -91);
                 autoCollect(20);
                 break;
             case RIGHT:
-                chassis.rotateTo(0.4, -60);
+                chassis.rotateTo(0.4, side == Side.GOLD ? -61 : -62);
                 autoCollect(28);
                 break;
             case LEFT:
-                chassis.rotateTo(0.4, -125);
+                chassis.rotateTo(0.4, side == Side.GOLD ? -125 : -126);
                 autoCollect(28);
                 break;
             default: // go straight like center
-                chassis.rotateTo(0.4, -90);
+                chassis.rotateTo(0.4, side == Side.GOLD ? -90 : -91);
                 autoCollect(20);
         }
         autoTransfer();
@@ -760,6 +761,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         Thread.sleep(200);
     }
 
+    @Deprecated
     @MenuEntry(label = "Test Land", group = "Test Auto")
     public void landAndDetach(EventManager em, boolean skipLanding) throws InterruptedException {
         // chassis.resetOrientation();
@@ -829,11 +831,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void autoTransfer() throws InterruptedException {
         // mineralDelivery.armCollectPos();
         mineralDelivery.gateOpen();
-        intake.moveBox(true,true);
+        intake.moveBox(true, true);
         // Thread.sleep(500);
         // intake.mineralDumpCombo();
         // intake.stopSlider();
-        intake.moveSliderAuto(intake.getSliderContracted()+100, 0.9, 1000);
+        intake.moveSliderAuto(intake.getSliderContracted() + 50, 0.9, 1500);
         // intake.moveGate(true);
     }
 
@@ -849,11 +851,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     public void autoCollect(double dist) throws InterruptedException {
         long iniTime = System.currentTimeMillis();
-        intake.moveSliderAuto(intake.getSliderMinSweep()-50, 1.0, 1000);
+        intake.moveSliderAuto(intake.getSliderMinSweep() - 50, 1.0, 1000);
         intake.moveBox(false, false);
         Thread.sleep(500);
         intake.moveGate(false); // close gate
-        int tar_pos = (int) (intake.getSliderMinSweep() + (dist-12)*intake.slideer_count_per_inch);
+        int tar_pos = (int) (intake.getSliderMinSweep() + (dist - 12) * intake.slideer_count_per_inch);
         intake.moveSliderAuto(tar_pos, 1.0, 1000);
         tar_pos += 200;
         intake.sweeperIn();
