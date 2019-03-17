@@ -34,7 +34,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     public CombinedOrientationSensor orientationSensor;
     private double minLatchPos = 0;    // minimum power that should be applied to the wheel motors for robot to start moving
     private double maxLatchPos = 11200;    // maximum power that should be applied to the wheel motors
-    private double latch_power = .95;
+    private double latch_power = 1.00;
     private final double MARKER_UP = 0.45;
     private final double MARKER_DOWN = 0.05;
     private final int MAX_LATCH_POS = 15050; //Max distance is 8.5 inches
@@ -185,7 +185,7 @@ public class Hanging extends Logger<Hanging> implements Configurable {
         double distToG = 20;
         while (latch.isBusy() && (runtime.seconds() < 5.0)) {
             if (System.currentTimeMillis() - initime < 4000) continue;//not enough time lapsed
-            if (Math.abs(tar_pos - latch.getCurrentPosition()) < 30) break;//finish by reaching the target
+            if (Math.abs(tar_pos - latch.getCurrentPosition()) < 60) break;//finish by reaching the target
             if (!useBottomRange) continue;
             if ((distToG=distanceToGround()) < 10.5) continue;//false range sensor reading
             if (distToG < 11.9) {

@@ -11,12 +11,13 @@ import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.OpModeTerminationException;
 import org.firstinspires.ftc.teamcode.support.YieldHandler;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
+import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
 
 /**
- * Created by 28761 on 2/24/2019.
+ * Created by 28761 on 3/15/2019.
  */
-@Autonomous(name = "Gold-Collect", group = "Ruckus")
-public class RuckusHopefullyTheFinalGoldAutonomousForState extends LinearOpMode implements YieldHandler {
+@Autonomous(name = "Gold-Delivery", group = "Ruckus")
+public class RuckusAutoGoldDelivery extends LinearOpMode implements YieldHandler {
     protected static int LOG_LEVEL = Log.VERBOSE;
 
     private Configuration configuration;
@@ -65,21 +66,59 @@ public class RuckusHopefullyTheFinalGoldAutonomousForState extends LinearOpMode 
         robot.hopefullyTheLastLandAndDetachForState(null, false);
 
         //step-3: retrieve sample
-        robot.collectSampleAndGoToWall(sam_loc, ToboRuckus.Side.GOLD);
+        switch (sam_loc) {//Gold:Silver
+            case CENTER: // center
+                robot.chassis.rotateTo(0.4, -90);
+                robot.autoCollect(20);
+                break;
+            case RIGHT:
+                robot.chassis.rotateTo(0.4, -61);
+                robot.autoCollect(28);
+                break;
+            case LEFT:
+                robot.chassis.rotateTo(0.4, -125);
+                robot.autoCollect(28);
+                break;
+            default: // go straight like center
+                robot.chassis.rotateTo(0.4, -90);
+                robot.autoCollect(20);
+        }
+        robot.autoTransfer();
+        //add sensor to detect if mineral is indeed collected
+        if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
+            robot.chassis.rotateTo(0.4, -90);
+        //**********
+        robot.mineralDelivery.deliveryCombo(robot.intake);
+        while (TaskManager.isComplete("deliveryCombo")){
+            TaskManager.processTasks();
+        }
+        robot.mineralDelivery.gateOpen();
+        sleep(500);
+        robot.mineralDelivery.returnCombo();
+        while (TaskManager.isComplete("returnCombo")){
+            TaskManager.processTasks();
+        }
+        robot.intake.moveSliderAuto(robot.intake.getSliderContracted() + 50, 0.9, 1500);
+        robot.intake.moveGate(true);
+
+        //
+        robot.chassis.driveStraightAuto(.4, 5, 0, 1000);
+        robot.chassis.driveStraightAuto(0.4, 90, -70, 3000);
+        Thread.sleep(100);
         //step-4: deliver marker
 //        robot.chassis.driveStraightAuto(0.4, 90, -64, 3000);
-        // Thread.sleep(200);
+        Thread.sleep(200);
         robot.chassis.rotateTo(0.4, +135);
-        Thread.sleep(100);
-        robot.chassis.driveStraightAuto(0.25, robot.chassis.getDistance(SwerveChassis.Direction.RIGHT) - 6, +90, 1000);
+        Thread.sleep(200);
+        robot.chassis.driveStraightAuto(0.2, robot.chassis.getDistance(SwerveChassis.Direction.RIGHT) - 6, +90, 1000);
         if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)
-            robot.chassis.driveStraightAuto(0.5, -75, 0, 2000);
+            robot.chassis.driveStraightAuto(0.4, -75, 0, 3000);
         else
-            robot.chassis.driveStraightAuto(0.5, -85, 0, 2000);
+            robot.chassis.driveStraightAuto(0.4, -85, 0, 3000);
         robot.hanging.markerDown();
-        Thread.sleep(100);
+        Thread.sleep(200);
         //step-5: go parking
-        robot.chassis.driveStraightAuto(0.4, 20, 5, 500);
+        robot.chassis.driveStraightAuto(0.3, 20, 5, 500);
         robot.goParking(ToboRuckus.Side.GOLD);
 
     }

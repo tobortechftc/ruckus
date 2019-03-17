@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware.ruckus;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 import org.firstinspires.ftc.robotcore.external.Func;
@@ -29,7 +28,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // down and up positions for the box lift
     // actual servo positions are configured via <code>AdjustableServo</code>
     public static final double LIFT_DOWN = 0.0;
-    public static final double LIFT_CENTER = 0.57;
+    public static final double LIFT_CENTER = 0.6;
     public static final double LIFT_UP = 1.0;
 
     // open and closed positions for the box gate
@@ -54,13 +53,13 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // slider encoder positions
     private int sliderOffset = 0; // offset will be set to sliderInitOut when manual reset
     private int iSliderContracted = 0; // contracted
-    private int iSliderExtended = 2240; // fully extended
+    private int iSliderExtended = 1830; // fully extended
     private int iSliderDump = 50; // position to dump minerals into delivery box
-    private int iSliderInitOut = 370; // position for initial TeleOp out, lifter just out
-    private int iSliderSafeLiftPos = 997; // safe pos to lift arm up/down
-    private int iSliderMinSweep = 1000; // pos for min sweeping
-    private int iSliderAutoPark = 1000;
-    public final double slideer_count_per_inch = iSliderExtended / 28;
+    private int iSliderInitOut = 250; // position for initial TeleOp out, lifter just out
+    private int iSliderSafeLiftPos = 680; // safe pos to lift arm up/down
+    private int iSliderMinSweep = 680; // pos for min sweeping
+    private int iSliderAutoPark = 680;
+    public final double slider_count_per_inch = iSliderExtended / 28.5;
 
     private int sliderContracted = iSliderContracted; // contracted
     private int sliderExtended = iSliderExtended; // fully extended
@@ -229,7 +228,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     public void sliderOut(double power, double dist_inches, boolean safeSweeping) {
         int cur_pos = this.sliderMotor.getCurrentPosition();
-        int tar_pos = cur_pos + (int)(dist_inches * slideer_count_per_inch);
+        int tar_pos = cur_pos + (int)(dist_inches * slider_count_per_inch);
         if (tar_pos>this.sliderExtended)
             tar_pos = this.sliderExtended;
         if (safeSweeping && (tar_pos<this.sliderMinSweep))
