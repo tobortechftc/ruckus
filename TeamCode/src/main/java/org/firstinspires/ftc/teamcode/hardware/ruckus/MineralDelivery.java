@@ -52,7 +52,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double wristDown = 0;
     private double writeCenter = 0.5;
     private double wristUp = 1.0;
-    private double wristDump = 0.65;
+    private double wristDump = 0.6;
     private double wristDumpUp = 0.65;
     private double wristInit = 0.02;
     private double wristBar = 0.52;
@@ -380,12 +380,6 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
                 };
             }
         }, taskName);
-//        TaskManager.add(new Task() {
-//            @Override
-//            public Progress start() {
-//                return armSafeLift();
-//            }
-//        }, taskName);
         TaskManager.add(new Task() {
             @Override
             public Progress start() {

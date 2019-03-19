@@ -446,7 +446,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 if (!source.isPressed(Button.RIGHT_BUMPER)) return;
                 mineralDelivery.armCollectPos();
                 mineralDelivery.gateOpen();
-                intake.mineralDumpCombo();
+                intake.mineralDumpCombo(mineralDelivery, false);
             }
         }, Button.Y);
         em.onButtonDown(new Events.Listener() {
@@ -461,12 +461,16 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         em2.onButtonDown(new Events.Listener() {
             @Override
             public void buttonDown(EventManager source, Button button) {
-                if (!source.isPressed(Button.LEFT_BUMPER)) {
+                if (source.isPressed(Button.BACK)) { // transfer + delivery
+                    mineralDelivery.armCollectPos();
+                    mineralDelivery.gateOpen();
+                    intake.mineralDumpCombo(mineralDelivery, true);
+                } else if (!source.isPressed(Button.LEFT_BUMPER)) {
                     mineralDelivery.wristUpInc();
                 } else {
                     mineralDelivery.armCollectPos();
                     mineralDelivery.gateOpen();
-                    intake.mineralDumpCombo();
+                    intake.mineralDumpCombo(mineralDelivery, false);
                 }
             }
         }, Button.Y);
