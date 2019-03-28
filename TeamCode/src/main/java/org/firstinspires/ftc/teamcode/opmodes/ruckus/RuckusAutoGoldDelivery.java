@@ -84,41 +84,43 @@ public class RuckusAutoGoldDelivery extends LinearOpMode implements YieldHandler
                 robot.autoCollect(20);
         }
         robot.autoTransfer();
+        sleep(500);//for mineral to drop
         //add sensor to detect if mineral is indeed collected
         if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
             robot.chassis.rotateTo(0.4, -90);
         //**********
         robot.mineralDelivery.deliveryCombo(robot.intake);
-        while (TaskManager.isComplete("deliveryCombo")){
+        while (!TaskManager.isComplete("deliveryCombo")){
             TaskManager.processTasks();
         }
-        robot.mineralDelivery.gateOpen();
-        sleep(500);
+//        robot.mineralDelivery.gateOpen();
+        robot.mineralDelivery.gateDump();
+        sleep(800);//for mineral to drop
         robot.mineralDelivery.returnCombo();
-        while (TaskManager.isComplete("returnCombo")){
+        while (!TaskManager.isComplete("returnCombo")){
             TaskManager.processTasks();
         }
-        robot.intake.moveSliderAuto(robot.intake.getSliderContracted() + 50, 0.9, 1500);
+        robot.intake.moveSliderAuto(robot.intake.getSliderContracted() + 50, 0.99, 600);
         robot.intake.moveGate(true);
 
         //
-        robot.chassis.driveStraightAuto(.4, 5, 0, 1000);
-        robot.chassis.driveStraightAuto(0.4, 90, -70, 3000);
-        Thread.sleep(100);
+        robot.chassis.driveStraightAuto(0.4, 5, 0, 1000);
+        robot.chassis.driveStraightAuto(0.5, 90, -70, 3000);//power was 0.4
+//        Thread.sleep(100);
         //step-4: deliver marker
 //        robot.chassis.driveStraightAuto(0.4, 90, -64, 3000);
-        Thread.sleep(200);
-        robot.chassis.rotateTo(0.4, +135);
+        Thread.sleep(100);
+        robot.chassis.rotateTo(0.45, +135);//power was 0.4
         Thread.sleep(200);
         robot.chassis.driveStraightAuto(0.2, robot.chassis.getDistance(SwerveChassis.Direction.RIGHT) - 6, +90, 1000);
         if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)
-            robot.chassis.driveStraightAuto(0.4, -75, 0, 3000);
+            robot.chassis.driveStraightAuto(0.5, -75, 0, 3000);//power was 0.4
         else
-            robot.chassis.driveStraightAuto(0.4, -85, 0, 3000);
+            robot.chassis.driveStraightAuto(0.5, -85, 0, 3000);//power was 0.4
         robot.hanging.markerDown();
         Thread.sleep(200);
         //step-5: go parking
-        robot.chassis.driveStraightAuto(0.3, 20, 5, 500);
+        robot.chassis.driveStraightAuto(0.4, 20, 5, 500);//power was 0.3
         robot.goParking(ToboRuckus.Side.GOLD);
 
     }

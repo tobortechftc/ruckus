@@ -75,7 +75,7 @@ public class RuckusAutoSilverShort extends LinearOpMode implements YieldHandler 
 
         // Step-4: parking mission
         robot.chassis.driveStraightAuto(power, 5, 0, timeout);
-        robot.extendInakeForParking();
+        robot.extendInakeForParking(750);
 
         // Only for testing
 //        robot.core.yield_for(1);

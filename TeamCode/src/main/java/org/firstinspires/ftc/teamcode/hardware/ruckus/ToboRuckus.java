@@ -564,12 +564,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public void goParking(Side side) throws InterruptedException {
         if (side == side.GOLD) {
             chassis.driveAlongTheWall(0.5, 145, 5, SwerveChassis.Wall.RIGHT, 4000);
+            extendInakeForParking(750);
             chassis.driveStraightAuto(0.17, 10, 10, 500);
         } else {
             chassis.driveAlongTheWall(0.5, 115, 5, SwerveChassis.Wall.LEFT, 4000);
+            extendInakeForParking(750);
             chassis.driveStraightAuto(0.17, 10, -10, 500);
         }
-        extendInakeForParking();
     }
 
     public void goStateParking(Side side) throws InterruptedException {
@@ -861,6 +862,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         // mineralDelivery.armCollectPos();
         mineralDelivery.gateOpen();
         intake.moveBox(true, true);
+        mineralDelivery.wristReadyToCollect();
         // Thread.sleep(500);
         // intake.mineralDumpCombo();
         // intake.stopSlider();
@@ -881,33 +883,33 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     public void autoCollect(double dist) throws InterruptedException {
         long iniTime = System.currentTimeMillis();
-        intake.moveSliderAuto(intake.getSliderMinSweep() - 50, 1.0, 600);
+        intake.moveSliderAuto(intake.getSliderMinSweep() - 50, 1.0, 500);
         intake.moveBox(false, false);
-        Thread.sleep(400);
+        Thread.sleep(200);
         intake.moveGate(false); // close gate
         int tar_pos = (int) (intake.getSliderMinSweep() + (dist - 8) * intake.slider_count_per_inch);
-        intake.moveSliderAuto(tar_pos, 1.0, 500);
+        intake.moveSliderAuto(tar_pos, 1.0, 300);
         tar_pos += 200;
         intake.sweeperIn();
-        intake.moveSliderAuto(tar_pos, 0.65, 600);
+        intake.moveSliderAuto(tar_pos, 0.7, 500);
         // intake.setSliderPower(orig_pw);
-//        if (!Thread.currentThread().isInterrupted())
-//            Thread.sleep(100);
+        if (!Thread.currentThread().isInterrupted())
+            Thread.sleep(300);
         intake.stopSweeper();
         intake.stopSlider();
     }
 
     @MenuEntry(label = "Extend Intake Park", group = "Test Auto")
     public void testExtendIntakeForParking(EventManager em) throws InterruptedException {
-        extendInakeForParking();
+        extendInakeForParking(750);
     }
 
-    public void extendInakeForParking() {
+    public void extendInakeForParking(long msec) {
 //        final String taskName = "extendIntakeParking";
 //        if (!TaskManager.isComplete(taskName)) return;
         intake.setSliderAutoPark();
         try {
-            Thread.sleep(750);
+            Thread.sleep(msec);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {

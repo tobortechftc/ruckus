@@ -88,9 +88,11 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     public double getDefaultScale() {
         return defaultScale;
     }
+
     public void setDefaultScale(double val) {
         defaultScale = val;
     }
+
     @Adjustable(min = 8.0, max = 18.0, step = 0.02)
     public double getTrack() {
         return track;
@@ -205,15 +207,20 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         DistanceSensor rangeSensor;
 
         switch (direction) {
-            case FRONT: rangeSensor = frontRangeSensor;
+            case FRONT:
+                rangeSensor = frontRangeSensor;
                 break;
-            case LEFT: rangeSensor = leftRangeSensor;
+            case LEFT:
+                rangeSensor = leftRangeSensor;
                 break;
-            case RIGHT: rangeSensor = rightRangeSensor;
+            case RIGHT:
+                rangeSensor = rightRangeSensor;
                 break;
-            case BACK: rangeSensor = backRangeSensor;
+            case BACK:
+                rangeSensor = backRangeSensor;
                 break;
-            default: rangeSensor = null;
+            default:
+                rangeSensor = null;
         }
 
         if (rangeSensor == null)
@@ -764,13 +771,13 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
     }
 
     public void rotateTo(double power, double finalHeading) throws InterruptedException {
-        rawRotateTo(power, finalHeading);
+        rawRotateTo(power, finalHeading, true);//!!! A very bold move
         sleep(200);
-        rawRotateTo(0.25, finalHeading);
+        rawRotateTo(0.25, finalHeading, false);
     }
 
     //final heading needs to be with in range(-180,180]
-    private void rawRotateTo(double power, double finalHeading) throws InterruptedException {
+    private void rawRotateTo(double power, double finalHeading, boolean stopEarly) throws InterruptedException {
         debug("rotateT0(pwr: %.3f, finalHeading: %.1f)", power, finalHeading);
         double iniHeading = orientationSensor.getHeading();
         double deltaD = finalHeading - iniHeading;
@@ -807,7 +814,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             }
             debug("currentHeading: %.1f, finalHeading: %.1f)", currentHeading, finalHeading);
             //if within acceptable range, terminate
-            if (Math.abs(finalHeading - currentHeading) < 0.5) break;
+            if (Math.abs(finalHeading - currentHeading) < (stopEarly ? 10.0 : 0.5)) break;
             //if overshoot, terminate
             if (deltaD > 0 && currentHeading - finalHeading > 0) break;
             if (deltaD < 0 && currentHeading - finalHeading < 0) break;
@@ -816,7 +823,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             //stop pressed, break
             if (Thread.currentThread().isInterrupted()) break;
             lastReading = currentHeading;
-            sleep(0);
+//            sleep(0);
             // yield handler
             this.core.yield();
         }
@@ -865,7 +872,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 return String.format("%.2f / %.1f", frontLeft.motor.getPower(), getDefaultScale());
             }
         });
-        if (frontLeft.motor!=null) {
+        if (frontLeft.motor != null) {
             line.addData("FL", "%d", new Func<Integer>() {
                 @Override
                 public Integer value() {
@@ -873,7 +880,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 }
             });
         }
-        if (frontRight.motor!=null) {
+        if (frontRight.motor != null) {
             line.addData("FR", "%d", new Func<Integer>() {
                 @Override
                 public Integer value() {
@@ -881,7 +888,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 }
             });
         }
-        if (backLeft.motor!=null) {
+        if (backLeft.motor != null) {
             line.addData("BL", "%d", new Func<Integer>() {
                 @Override
                 public Integer value() {
@@ -889,7 +896,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 }
             });
         }
-        if (backRight.motor!=null) {
+        if (backRight.motor != null) {
             line.addData("BR", "%d", new Func<Integer>() {
                 @Override
                 public Integer value() {

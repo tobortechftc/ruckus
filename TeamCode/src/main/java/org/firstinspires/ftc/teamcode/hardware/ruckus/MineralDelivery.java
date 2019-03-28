@@ -57,7 +57,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double wristInit = 0.02;
     private double wristBar = 0.52;
     private double wristReadyToDump = 0.85;
-    private double wristReadyToCollect = 0.06; // 0.09;
+    private double wristReadyToCollect = 0.09; // 0.09;
 
     private boolean gateIsOpened = false;
     private boolean armReadyToScore = false;
@@ -260,7 +260,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
         double adjustment = Math.abs(position - dumperArm.getPosition());
         dumperArm.setPosition(position);
         // 3.3ms per degree of rotation
-        final long doneBy = System.currentTimeMillis() + Math.round(adjustment * 1200);
+        final long doneBy = System.currentTimeMillis() + Math.round(adjustment * 900);
         return new Progress() {
             @Override
             public boolean isDone() {
