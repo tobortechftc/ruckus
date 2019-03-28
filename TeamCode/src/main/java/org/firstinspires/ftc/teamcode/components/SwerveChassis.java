@@ -627,6 +627,8 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
      *                  <code>false</code> to use front wheels only
      */
     public void driveAndSteer(double power, double heading, boolean allWheels) throws InterruptedException {
+        double leftPower = power;
+        double rightPower = power;
         debug("driveSteer(pwr: %.3f, head: %.1f)", power, heading);
         if (power < -1 || power > 1) {
             throw new IllegalArgumentException("Power must be between -1 and 1");
@@ -644,6 +646,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         if (Math.abs(power) > 0) {
             // only adjust servo positions if power is applied
             double[] newServoPositions = new double[4];
+
             if (allWheels) {
                 if (Math.abs(heading) == 90) {
                     // check whether all servos are already at 90 (or -90) degrees
@@ -658,34 +661,37 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                     }
                 }
                 Arrays.fill(newServoPositions, heading);
+                leftPower = power;
+                rightPower = power;
             } else {
                 // complement to angle between Y axis and line from the center of chassis,
                 //  which is assumed to be at (0, 0) to the center of the front right wheel
-                double maxTurnAngle = 90 - Math.atan2(track, wheelBase) / Math.PI * 180;
-                maxTurnAngle = Math.min(30, maxTurnAngle); // cap to 30 degree
-                // ensure actual turn angle does not exceed max. value so wheels don't slide sideways
-                double turnAngle = heading / 2;
-                if (Math.abs(turnAngle) > maxTurnAngle) {
-                    turnAngle = Math.signum(turnAngle) * maxTurnAngle;
-                }
-                if (power > 0) { // driving forward
-                    // front left and right
-                    newServoPositions[0] = newServoPositions[1] = turnAngle;
-                    // back left and right
-                    newServoPositions[2] = newServoPositions[3] = -1 * turnAngle;
-                } else if (power < 0) { // driving backward
-                    // back left and right
-                    newServoPositions[2] = newServoPositions[3] = turnAngle;
-                    // front left and right
-                    newServoPositions[0] = newServoPositions[1] = -1 * turnAngle;
-                }
+                double minTurnRadius = 20; //Somewhat arbitrarily determined minimum turning radius for car mode, in inches
+                double maxTurnRadius = 100; //Maximum turning radius for car mode, carried over from last year, in inches
+                double radius = Math.signum(heading)*(maxTurnRadius - ((maxTurnRadius - minTurnRadius) * Math.abs(heading/90))); //Converts a heading from -90 to 90 to a radius from -100 to 100
+                double innerAngle = Math.atan(wheelBase/(2*radius - track)) * 180/Math.PI; //Misnomer from first coding, negative radius will flip this from inner to outer
+                double outerAngle = Math.atan(wheelBase/(2*radius + track)) * 180/Math.PI; //Cont. from above: inner refers to right side, outer refers to left side
+                double innerRadius = Math.pow((Math.pow((0.5*wheelBase),2)+Math.pow((radius-0.5*track),2)),0.5);
+                double outerRadius = Math.pow((Math.pow((0.5*wheelBase),2)+Math.pow((radius+0.5*track),2)),0.5);
+                double innerPower = power * (innerRadius/outerRadius);
+                double outerPower = power;
+                // front left and right
+                newServoPositions[0] =outerAngle;
+                newServoPositions[1] = innerAngle;
+                // back left and right
+                newServoPositions[2] = -1 * outerAngle;
+                newServoPositions[3] = -1 * innerAngle;
+                // left and right powers
+                leftPower = outerPower;
+                rightPower = innerPower;
             }
             changeServoPositions(newServoPositions);
             curHeading = heading;
         }
-        for (WheelAssembly wheel : wheels) {
-            wheel.motor.setPower(scalePower(power));
-        }
+        wheels[0].motor.setPower(scalePower(leftPower));
+        wheels[1].motor.setPower(scalePower(rightPower));
+        wheels[2].motor.setPower(scalePower(leftPower));
+        wheels[3].motor.setPower(scalePower(rightPower));
     }
 
     @Deprecated
