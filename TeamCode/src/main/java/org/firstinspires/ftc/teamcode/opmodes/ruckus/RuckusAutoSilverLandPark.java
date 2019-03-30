@@ -100,7 +100,7 @@ public class RuckusAutoSilverLandPark extends LinearOpMode implements YieldHandl
 
 
         // Step-6: park on the rim
-        robot.goParking(ToboRuckus.Side.SILVER);
+        robot.goParking(ToboRuckus.Side.SILVER,false);
         robot.chassis.driveStraightAuto(.4, 10, 5, timeout);
 
 

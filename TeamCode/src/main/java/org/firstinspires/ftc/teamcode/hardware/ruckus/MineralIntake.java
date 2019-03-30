@@ -44,7 +44,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private boolean adjustmentMode = false;
     private boolean mineralTransfering = false;
 
-    private double sweeperInPower = 1.0;
+    private double sweeperInPower = 0.9;
     private double sweeperOutPower = 0.7;
     // encoder value for sweeper rotating half circle
     private int sweeperHalfRotation = 180;

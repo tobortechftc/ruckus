@@ -561,15 +561,17 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         GOLD, SILVER;
     }
 
-    public void goParking(Side side) throws InterruptedException {
+    public void goParking(Side side, boolean DoCollection) throws InterruptedException {
         if (side == side.GOLD) {
-            chassis.driveAlongTheWall(0.5, 145, 5, SwerveChassis.Wall.RIGHT, 4000);
-            extendInakeForParking(750);
-            chassis.driveStraightAuto(0.17, 10, 10, 500);
+            chassis.driveAlongTheWall(0.55, 125, 5, SwerveChassis.Wall.RIGHT, 4000);//power was 0.5
         } else {
-            chassis.driveAlongTheWall(0.5, 115, 5, SwerveChassis.Wall.LEFT, 4000);
+            chassis.driveAlongTheWall(0.55, 115, 5, SwerveChassis.Wall.LEFT, 4000);//power was 0.5
+        }
+        if (DoCollection) {
+            autoCollect(25);
+        } else {
             extendInakeForParking(750);
-            chassis.driveStraightAuto(0.17, 10, -10, 500);
+            chassis.driveStraightAuto(0.17, 10, side == side.GOLD ? 10 : -10, 500);
         }
     }
 
@@ -858,6 +860,27 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         autoTransfer();
     }
 
+    public void autoDelivery(MineralDetection.SampleLocation sam_loc, Side side) throws InterruptedException {
+        //add sensor to detect if mineral is indeed collected
+        if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
+            chassis.rotateTo(0.4, -90);
+        //**********
+        mineralDelivery.deliveryCombo(intake);
+        while (!TaskManager.isComplete("deliveryCombo")) {
+            TaskManager.processTasks();
+        }
+        //        robot.mineralDelivery.gateOpen();
+        Thread.sleep(100);//stop mineral momentum
+        mineralDelivery.gateDump();
+        Thread.sleep(500);//for mineral to drop
+        mineralDelivery.returnCombo();
+        while (!TaskManager.isComplete("returnCombo")) {
+            TaskManager.processTasks();
+        }
+        intake.moveSliderAuto(intake.getSliderContracted() + 50, 0.99, 600);
+        intake.moveGate(true);
+    }
+
     public void autoTransfer() throws InterruptedException {
         // mineralDelivery.armCollectPos();
         mineralDelivery.gateOpen();
@@ -866,7 +889,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         // Thread.sleep(500);
         // intake.mineralDumpCombo();
         // intake.stopSlider();
-        intake.moveSliderAuto(intake.getSliderContracted() + 50, 0.9, 1500);
+        intake.moveSliderAuto(intake.getSliderContracted() + 50, 0.9, 1000);
         //add sensor
         intake.moveGate(true);
     }
@@ -887,14 +910,14 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         intake.moveBox(false, false);
         Thread.sleep(200);
         intake.moveGate(false); // close gate
-        int tar_pos = (int) (intake.getSliderMinSweep() + (dist - 8) * intake.slider_count_per_inch);
+        int tar_pos = (int) (intake.getSliderMinSweep() + (dist - 6) * intake.slider_count_per_inch);
         intake.moveSliderAuto(tar_pos, 1.0, 300);
         tar_pos += 200;
         intake.sweeperIn();
         intake.moveSliderAuto(tar_pos, 0.7, 500);
         // intake.setSliderPower(orig_pw);
         if (!Thread.currentThread().isInterrupted())
-            Thread.sleep(300);
+            Thread.sleep(200);
         intake.stopSweeper();
         intake.stopSlider();
     }

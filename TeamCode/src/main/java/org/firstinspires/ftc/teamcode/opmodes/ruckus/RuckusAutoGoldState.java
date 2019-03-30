@@ -71,7 +71,7 @@ public class RuckusAutoGoldState  extends LinearOpMode implements YieldHandler {
         robot.core.yield_for(.2);
 
         // Step-6: parking on the crater rim
-        robot.goParking(ToboRuckus.Side.GOLD);
+        robot.goParking(ToboRuckus.Side.GOLD,false);
 
 
         /*

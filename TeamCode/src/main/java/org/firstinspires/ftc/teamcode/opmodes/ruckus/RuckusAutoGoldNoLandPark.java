@@ -77,7 +77,7 @@ public class RuckusAutoGoldNoLandPark extends LinearOpMode {
         }
         // Step-6: parking on the crater rim
         if (opModeIsActive()) {
-            robot.goParking(ToboRuckus.Side.GOLD);
+            robot.goParking(ToboRuckus.Side.GOLD,false);
         }
 
     }

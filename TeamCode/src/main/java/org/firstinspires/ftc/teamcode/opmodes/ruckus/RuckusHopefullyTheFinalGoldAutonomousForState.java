@@ -80,7 +80,7 @@ public class RuckusHopefullyTheFinalGoldAutonomousForState extends LinearOpMode 
         Thread.sleep(100);
         //step-5: go parking
         robot.chassis.driveStraightAuto(0.4, 20, 5, 500);
-        robot.goParking(ToboRuckus.Side.GOLD);
+        robot.goParking(ToboRuckus.Side.GOLD,false);
 
     }
 
