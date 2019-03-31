@@ -75,7 +75,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
         info("RoboRuck configure() after init Intake (run time = %.2f sec)", (runtime.seconds() - ini_time));
-        hanging = new Hanging().configureLogging("Hanging", logLevel);
+        hanging = new Hanging(this.core).configureLogging("Hanging", logLevel);
         hanging.configure(configuration, auto, chassis.orientationSensor);
         info("RoboRuck configure() after init Hanging (run time = %.2f sec)", (runtime.seconds() - ini_time));
         mineralDelivery = new MineralDelivery().configureLogging("Delivery", logLevel);

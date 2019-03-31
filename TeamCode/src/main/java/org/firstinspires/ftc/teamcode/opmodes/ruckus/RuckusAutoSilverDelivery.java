@@ -16,12 +16,12 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
  * Created by 28761 on 10/13/2018.
  */
 
-@Autonomous(name = "Silver-Collect", group = "Ruckus")
-public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandler {
+@Autonomous(name = "Silver-Delivery", group = "Ruckus")
+public class RuckusAutoSilverDelivery extends LinearOpMode implements YieldHandler {
     protected static int LOG_LEVEL = Log.INFO;
 
     private Configuration configuration;
-    private Logger<?> log;
+    private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
 
     int timeout = 10000; // timeout time
     double power = .4; // motor power
@@ -33,13 +33,14 @@ public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandle
 
     @Override
     public void runOpMode() throws InterruptedException {
+        ToboRuckus robot = null;
+
 
         telemetry.addData("Initializing Robot", "Please Wait ...");
         telemetry.update();
 
-        ToboRuckus robot = new ToboRuckus().configureLogging("ToboRuckus", LOG_LEVEL);
+        robot = new ToboRuckus().configureLogging("ToboRuckus", LOG_LEVEL);
         configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
-        this.log = robot;
 
         try {
             // configure robot and reset all hardware
@@ -64,25 +65,16 @@ public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandle
         resetStartTime();
         robot.core.set_yield_handler(this); // uses this class as yield handler
 
-        // LOGGER Testing
-        robot.info("LOGGING TEST #1 = %s", "this is an INFO message.");
-        robot.warn("LOGGING TEST #2 = %s", "this is a WARN message.");
-        robot.verbose("LOGGING TEST #3 = %s", "this is a VERBOSE message.");
-        robot.error("LOGGING TEST #4 = %s", "this is an ERROR message.");
-
         // Step-1: check random sample position
         ToboRuckus.MineralDetection.SampleLocation sam_loc = ToboRuckus.MineralDetection.SampleLocation.CENTER;
-        logStep("viewing sample positions");
         sam_loc = robot.cameraMineralDetector.getGoldPositionTF(true);
 
 
         // Step-2: landing mission
-        logStep("landing and detaching");
         robot.hopefullyTheLastLandAndDetachForState(null, false);
 
 
         // Step-3: collect and go to wall
-        logStep("collecing sample, going to wall");
         robot.collectSampleAndGoToWall(sam_loc, ToboRuckus.Side.SILVER);
         robot.chassis.rotateTo(power, -43);
 
@@ -96,18 +88,15 @@ public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandle
 
         // Step-4: marker mission
         // to depot
-        logStep("driving to depot");
         robot.chassis.driveAlongTheWall(power, -104, 5, SwerveChassis.Wall.LEFT, 5000);
 
         // drop marker
-        logStep("dropping marker");
         robot.hanging.markerDown();
         robot.core.yield_for(.5);
 
 
         // Step-5: park on the rim
-        logStep("driving to crater");
-        robot.goParking(ToboRuckus.Side.SILVER,false);
+        robot.goParking(ToboRuckus.Side.SILVER);
         robot.chassis.driveStraightAuto(.17, 10, 5, 500);
 
 
@@ -115,10 +104,6 @@ public class RuckusAutoSilverCollect extends LinearOpMode implements YieldHandle
 //        robot.core.yield_for(1);
 //        robot.hanging.latchDownInches(7.75);
 
-    }
-
-    void logStep(String message) {
-        log.info("runTime: %s; status: %s", getRuntime(), message);
     }
 
     protected void handleException(Throwable t) {

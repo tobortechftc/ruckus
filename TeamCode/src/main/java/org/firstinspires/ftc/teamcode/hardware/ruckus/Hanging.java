@@ -10,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.components.CombinedOrientationSensor;
+import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
@@ -27,6 +28,8 @@ import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
  * Orientation sensors (optional): imu, imu2
  */
 public class Hanging extends Logger<Hanging> implements Configurable {
+
+    final private CoreSystem core;
 
     private DcMotor latch;
     private Servo marker;
@@ -55,6 +58,13 @@ public class Hanging extends Logger<Hanging> implements Configurable {
     public void setAdjustmentMode(boolean on) {
         // this method does nothing since chassis has no hardware
         //  that would react to track / wheel base / radius adjustments
+    }
+
+    /**
+     * Hanging constructor
+     */
+    public Hanging(CoreSystem core) {
+        this.core = core;
     }
 
     public void reset(boolean Auto) {
