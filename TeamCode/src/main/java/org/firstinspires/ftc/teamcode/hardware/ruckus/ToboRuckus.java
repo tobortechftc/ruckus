@@ -861,16 +861,13 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     }
 
     public void autoDelivery(MineralDetection.SampleLocation sam_loc, Side side) throws InterruptedException {
-        //add sensor to detect if mineral is indeed collected
-        if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
-            chassis.rotateTo(0.4, -90);
-        //**********
+        //arm ready to dump
         mineralDelivery.deliveryCombo(intake);
         while (!TaskManager.isComplete("deliveryCombo")) {
             TaskManager.processTasks();
         }
         //        robot.mineralDelivery.gateOpen();
-        Thread.sleep(100);//stop mineral momentum
+        Thread.sleep(200);//stop mineral momentum
         mineralDelivery.gateDump();
         Thread.sleep(500);//for mineral to drop
         mineralDelivery.returnCombo();

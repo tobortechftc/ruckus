@@ -84,38 +84,21 @@ public class RuckusAutoGoldDelivery extends LinearOpMode implements YieldHandler
                 robot.autoCollect(20);
         }
         boolean gotMineral = robot.autoTransfer();
-        if (gotMineral) {
+        if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER) {
+            robot.chassis.rotateTo(0.4, -90);
+        } else {
             Thread.sleep(500);//for mineral to drop
+        }
+        if (gotMineral) {
             robot.autoDelivery(sam_loc, ToboRuckus.Side.GOLD);
         }
-//        robot.autoTransfer();
-//        sleep(500);//for mineral to drop
-//        //add sensor to detect if mineral is indeed collected
-//        if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
-//            robot.chassis.rotateTo(0.4, -90);
-//        //**********
-//        robot.mineralDelivery.deliveryCombo(robot.intake);
-//        while (!TaskManager.isComplete("deliveryCombo")) {
-//            TaskManager.processTasks();
-//        }
-////        robot.mineralDelivery.gateOpen();
-//        sleep(100);//stop mineral momentum
-//        robot.mineralDelivery.gateDump();
-//        sleep(500);//for mineral to drop
-//        robot.mineralDelivery.returnCombo();
-//        while (!TaskManager.isComplete("returnCombo")) {
-//            TaskManager.processTasks();
-//        }
-//        robot.intake.moveSliderAuto(robot.intake.getSliderContracted() + 50, 0.99, 600);
-//        robot.intake.moveGate(true);
-
-        //
+        //crab towards the wall
         robot.chassis.driveStraightAuto(0.4, 5, 0, 1000);
         robot.chassis.driveStraightAuto(0.5, 88, -71, 3000);//power was 0.4
-//        Thread.sleep(100);
+        Thread.sleep(100);
+
         //step-4: deliver marker
 //        robot.chassis.driveStraightAuto(0.4, 90, -64, 3000);
-        Thread.sleep(100);
         robot.chassis.rotateTo(0.45, +135);//power was 0.4
         Thread.sleep(200);
         robot.chassis.driveStraightAuto(0.2, robot.chassis.getDistance(SwerveChassis.Direction.RIGHT) - 6, +90, 500);
