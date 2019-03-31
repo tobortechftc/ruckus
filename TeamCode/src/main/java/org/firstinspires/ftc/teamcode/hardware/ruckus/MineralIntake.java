@@ -41,6 +41,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     private AdjustableServo boxLiftServo;
     private AdjustableServo boxGateServo;
     private DigitalChannel prox = null;
+    private DigitalChannel proxMD = null;
     private boolean adjustmentMode = false;
     private boolean mineralTransfering = false;
 
@@ -53,13 +54,13 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // slider encoder positions
     private int sliderOffset = 0; // offset will be set to sliderInitOut when manual reset
     private int iSliderContracted = 0; // contracted
-    private int iSliderExtended = 1830; // fully extended
+    private int iSliderExtended = 1930; // fully extended
     private int iSliderDump = 50; // position to dump minerals into delivery box
     private int iSliderInitOut = 250; // position for initial TeleOp out, lifter just out
     private int iSliderSafeLiftPos = 700; // safe pos to lift arm up/down
     private int iSliderMinSweep = 700; // pos for min sweeping
     private int iSliderAutoPark = 700;
-    public final double slider_count_per_inch = iSliderExtended / 28.5;
+    public final double slider_count_per_inch = iSliderExtended / 29;
 
     private int sliderContracted = iSliderContracted; // contracted
     private int sliderExtended = iSliderExtended; // fully extended
@@ -300,6 +301,9 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         prox = configuration.getHardwareMap().get(DigitalChannel.class, "prox");
         prox.setMode(DigitalChannel.Mode.INPUT);
 
+        proxMD = configuration.getHardwareMap().get(DigitalChannel.class, "proxMD");
+        proxMD.setMode(DigitalChannel.Mode.INPUT);
+
         configuration.register(this);
     }
 
@@ -307,6 +311,12 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         if (prox==null)
             return false;
         return !prox.getState();
+    }
+
+    public boolean proxDetectMineral() {
+        if (proxMD==null)
+            return true; // assume detecting mineral
+        return !proxMD.getState();
     }
 
     public void reset(boolean auto) {

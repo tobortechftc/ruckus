@@ -38,14 +38,14 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 
     private double armLowest = 0.000; // for configuration left most
     private double armHighest = 1.000; // for configuration right most
-    private double armInitPos = 0.07;
-    private double armDownPos = 0.081;
-    private double armSafePos = 0.10; // Safe for lift up/down
-    private double armCollectPos = 0.08; // 0.175; // ready to collect mineral
-    private double armBarPos = 0.3; // arm at the top bar position
-    private double armLowBarPos = 0.25; // arm at the bottom bar position
-    private double armDumpPos = 0.946; // Actual dump position
-    private double armUpPos = 0.946;   // Max arm up position
+    private double armInitPos = 0.091; // 0.07;
+    private double armDownPos = 0.111; // 0.081;
+    private double armSafePos = 0.157; // 0.10; // Safe for lift up/down
+    private double armCollectPos = 0.1; // 0.08; // ready to collect mineral
+    private double armBarPos = 0.4; // arm at the top bar position
+    private double armLowBarPos = 0.26; // arm at the bottom bar position
+    private double armDumpPos = 0.83; // 0.946; // Actual dump position
+    private double armUpPos = 0.83; // 0.946;   // Max arm up position
 
     private double liftPower = .90;
     private double liftDownPower = .50;
@@ -104,7 +104,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
 //        dumperArm.configure(configuration.getHardwareMap(), "sv_hp_dump");
 //        configuration.register(dumperArm);
         dumperArm = configuration.getHardwareMap().servo.get("sv_hp_dump");
-        dumperArm.setDirection(Servo.Direction.REVERSE);
+        // dumperArm.setDirection(Servo.Direction.REVERSE);
         dumperWrist = new AdjustableServo(wristDown, wristUp).configureLogging(
                 logTag + ":dumpWrist", logLevel
         );
