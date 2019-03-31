@@ -83,10 +83,11 @@ public class RuckusAutoGoldDelivery extends LinearOpMode implements YieldHandler
                 robot.chassis.rotateTo(0.4, -90);
                 robot.autoCollect(20);
         }
-        robot.autoTransfer();
-        Thread.sleep(500);//for mineral to drop
-        
-        robot.autoDelivery(sam_loc, ToboRuckus.Side.GOLD);
+        boolean gotMineral = robot.autoTransfer();
+        if (gotMineral) {
+            Thread.sleep(500);//for mineral to drop
+            robot.autoDelivery(sam_loc, ToboRuckus.Side.GOLD);
+        }
 //        robot.autoTransfer();
 //        sleep(500);//for mineral to drop
 //        //add sensor to detect if mineral is indeed collected

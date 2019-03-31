@@ -881,7 +881,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         intake.moveGate(true);
     }
 
-    public void autoTransfer() throws InterruptedException {
+    public boolean autoTransfer() throws InterruptedException {
         // mineralDelivery.armCollectPos();
         mineralDelivery.gateOpen();
         intake.moveBox(true, true);
@@ -890,8 +890,12 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         // intake.mineralDumpCombo();
         // intake.stopSlider();
         intake.moveSliderAuto(intake.getSliderContracted() + 50, 0.9, 1000);
-        //add sensor
-        intake.moveGate(true);
+        Thread.sleep(100); // wait for mineral detection
+        if (intake.proxDetectMineral()) {
+            intake.moveGate(true);
+            return true;
+        }
+        return false;
     }
 
     @MenuEntry(label = "Auto Collect", group = "Test Auto")
