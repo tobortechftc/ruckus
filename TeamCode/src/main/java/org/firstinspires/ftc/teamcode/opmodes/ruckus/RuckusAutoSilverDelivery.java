@@ -78,19 +78,19 @@ public class RuckusAutoSilverDelivery extends LinearOpMode implements YieldHandl
         switch (sam_loc) {
             case CENTER:
                 robot.chassis.rotateTo(0.4, -90);
-                robot.autoCollect(20);
+                robot.autoCollect(20, false);
                 break;
             case RIGHT:
-                robot.chassis.rotateTo(0.4, -61);
-                robot.autoCollect(28);
+                robot.chassis.rotateTo(0.4, -55);
+                robot.autoCollect(28, false);
                 break;
             case LEFT:
                 robot.chassis.rotateTo(0.4, -125);
-                robot.autoCollect(28);
+                robot.autoCollect(28, false);
                 break;
             default: // go straight like center
                 robot.chassis.rotateTo(0.4, -90);
-                robot.autoCollect(20);
+                robot.autoCollect(20, false);
         }
         boolean gotMineral = robot.autoTransfer();
         if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER) {
@@ -105,12 +105,13 @@ public class RuckusAutoSilverDelivery extends LinearOpMode implements YieldHandl
         robot.chassis.driveStraightAuto(0.4, 5, 0, 1000);
         robot.chassis.driveStraightAuto(0.5, 88, -71, 3000);//power was 0.4
         Thread.sleep(100);
-
+        robot.chassis.rotateTo(0.4, -43);
+        Thread.sleep(100);
 
 
         // Step-4: marker mission
         // to depot
-        robot.chassis.driveAlongTheWall(power, -104, 5, SwerveChassis.Wall.LEFT, 5000);
+        robot.chassis.driveAlongTheWall(power, -94, 5, SwerveChassis.Wall.LEFT, 5000);
 
         // drop marker
         robot.hanging.markerDown();

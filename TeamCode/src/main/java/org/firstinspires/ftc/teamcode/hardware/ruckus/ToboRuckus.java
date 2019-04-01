@@ -565,10 +565,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         if (side == side.GOLD) {
             chassis.driveAlongTheWall(0.55, 125, 5, SwerveChassis.Wall.RIGHT, 4000);//power was 0.5
         } else {
-            chassis.driveAlongTheWall(0.55, 115, 5, SwerveChassis.Wall.LEFT, 4000);//power was 0.5
+            chassis.driveAlongTheWall(0.55, 130, 5, SwerveChassis.Wall.LEFT, 4000);//power was 0.5
         }
         if (DoCollection) {
-            autoCollect(25);
+            autoCollect(25, true);
         } else {
             extendInakeForParking(750);
             chassis.driveStraightAuto(0.17, 10, side == side.GOLD ? 10 : -10, 500);
@@ -743,19 +743,19 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         switch (sam_loc) {//Gold:Silver
             case CENTER: // center
                 chassis.rotateTo(0.4, side == Side.GOLD ? -90 : -91);
-                autoCollect(20);
+                autoCollect(20, false);
                 break;
             case RIGHT:
                 chassis.rotateTo(0.4, side == Side.GOLD ? -61 : -62);
-                autoCollect(28);
+                autoCollect(28, false);
                 break;
             case LEFT:
                 chassis.rotateTo(0.4, side == Side.GOLD ? -125 : -126);
-                autoCollect(28);
+                autoCollect(28, false);
                 break;
             default: // go straight like center
                 chassis.rotateTo(0.4, side == Side.GOLD ? -90 : -91);
-                autoCollect(20);
+                autoCollect(20, false);
         }
         autoTransfer();
         if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
@@ -770,19 +770,19 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         switch (sam_loc) {//Gold:Silver
             case CENTER: // center
                 chassis.rotateTo(0.4, -90);
-                autoCollect(20);
+                autoCollect(20, false);
                 break;
             case RIGHT:
                 chassis.rotateTo(0.4, -61);
-                autoCollect(28);
+                autoCollect(28, false);
                 break;
             case LEFT:
                 chassis.rotateTo(0.4, -125);
-                autoCollect(28);
+                autoCollect(28, false);
                 break;
             default: // go straight like center
                 chassis.rotateTo(0.4, -90);
-                autoCollect(20);
+                autoCollect(20, false);
         }
         autoTransfer();
         if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER)
@@ -867,7 +867,11 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             TaskManager.processTasks();
         }
         //        robot.mineralDelivery.gateOpen();
-        Thread.sleep(200);//stop mineral momentum
+        if (side == Side.GOLD) {
+            Thread.sleep(200);//stop mineral momentum
+        } else {
+            chassis.driveStraightAuto(0.3, -15, +45, 1000);
+        }
         mineralDelivery.gateDump();
         Thread.sleep(500);//for mineral to drop
         mineralDelivery.returnCombo();
@@ -876,6 +880,9 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }
         intake.moveSliderAuto(intake.getSliderContracted() + 50, 0.99, 600);
         intake.moveGate(true);
+        if (side == Side.SILVER) {
+            chassis.driveStraightAuto(0.3, 15, +45, 1000);
+        }
     }
 
     public boolean autoTransfer() throws InterruptedException {
@@ -883,10 +890,10 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         mineralDelivery.gateOpen();
         intake.moveBox(true, true);
         mineralDelivery.wristReadyToCollect();
-        // Thread.sleep(500);
+        Thread.sleep(100);
         // intake.mineralDumpCombo();
         // intake.stopSlider();
-        intake.moveSliderAuto(intake.getSliderContracted() + 50, 0.9, 1000);
+        intake.moveSliderAuto(intake.getSliderContracted() + 50, 1.0, 1000);
         Thread.sleep(100); // wait for mineral detection
         if (intake.proxDetectMineral()) {
             intake.moveGate(true);
@@ -897,17 +904,21 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 
     @MenuEntry(label = "Auto Collect", group = "Test Auto")
     public void testAutoCollect(EventManager em) throws InterruptedException {
-        autoCollect(20);
+        autoCollect(20, false);
     }
 
     @MenuEntry(label = "Auto CollectLeft", group = "Test Auto")
     public void testAutoCollectLeft(EventManager em) throws InterruptedException {
-        autoCollect(28);
+        autoCollect(28, false);
     }
 
-    public void autoCollect(double dist) throws InterruptedException {
+    public void autoCollect(double dist, boolean duringParking) throws InterruptedException {
         long iniTime = System.currentTimeMillis();
-        intake.moveSliderAuto(intake.getSliderMinSweep() - 50, 1.0, 500);
+        if (duringParking) {
+            intake.moveSliderAuto(intake.getSliderMinSweep() + 400, 1.0, 800);
+        } else {
+            intake.moveSliderAuto(intake.getSliderMinSweep() - 50, 1.0, 500);
+        }
         intake.moveBox(false, false);
         Thread.sleep(200);
         intake.moveGate(false); // close gate

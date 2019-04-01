@@ -97,7 +97,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         ElapsedTime elapsedTime = new ElapsedTime();
         elapsedTime.startTime();
 
-        int minDistanceFromTop = isHanging ? 300 : 150;
+        int minDistanceFromTop = isHanging ? 360 : 150;
 
         ToboRuckus.MineralDetection.SampleLocation sampleLocation = ToboRuckus.MineralDetection.SampleLocation.UNKNOWN;
         int goldXCoord = -1;

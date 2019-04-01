@@ -69,19 +69,19 @@ public class RuckusAutoGoldDelivery extends LinearOpMode implements YieldHandler
         switch (sam_loc) {//Gold:Silver
             case CENTER: // center
                 robot.chassis.rotateTo(0.4, -90);
-                robot.autoCollect(20);
+                robot.autoCollect(20,false);
                 break;
             case RIGHT:
-                robot.chassis.rotateTo(0.4, -61);
-                robot.autoCollect(28);
+                robot.chassis.rotateTo(0.4, -55);
+                robot.autoCollect(28,false);
                 break;
             case LEFT:
                 robot.chassis.rotateTo(0.4, -125);
-                robot.autoCollect(28);
+                robot.autoCollect(28,false);
                 break;
             default: // go straight like center
                 robot.chassis.rotateTo(0.4, -90);
-                robot.autoCollect(20);
+                robot.autoCollect(20,false);
         }
         boolean gotMineral = robot.autoTransfer();
         if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER) {
