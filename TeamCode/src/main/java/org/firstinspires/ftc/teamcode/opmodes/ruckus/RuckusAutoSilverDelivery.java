@@ -74,16 +74,38 @@ public class RuckusAutoSilverDelivery extends LinearOpMode implements YieldHandl
         robot.hopefullyTheLastLandAndDetachForState(null, false);
 
 
-        // Step-3: collect and go to wall
-        robot.collectSampleAndGoToWall(sam_loc, ToboRuckus.Side.SILVER);
-        robot.chassis.rotateTo(power, -43);
+        // Step-3: collect and deliver sample
+        switch (sam_loc) {
+            case CENTER:
+                robot.chassis.rotateTo(0.4, -90);
+                robot.autoCollect(20);
+                break;
+            case RIGHT:
+                robot.chassis.rotateTo(0.4, -61);
+                robot.autoCollect(28);
+                break;
+            case LEFT:
+                robot.chassis.rotateTo(0.4, -125);
+                robot.autoCollect(28);
+                break;
+            default: // go straight like center
+                robot.chassis.rotateTo(0.4, -90);
+                robot.autoCollect(20);
+        }
+        boolean gotMineral = robot.autoTransfer();
+        if (sam_loc != ToboRuckus.MineralDetection.SampleLocation.CENTER) {
+            robot.chassis.rotateTo(0.4, -90); // face center to back up straight
+        } else {
+            Thread.sleep(500); // wait for mineral to drop
+        }
+        if (gotMineral) {
+            robot.autoDelivery(sam_loc, ToboRuckus.Side.SILVER);
+        }
+        //crab towards the wall
+        robot.chassis.driveStraightAuto(0.4, 5, 0, 1000);
+        robot.chassis.driveStraightAuto(0.5, 88, -71, 3000);//power was 0.4
+        Thread.sleep(100);
 
-        // 5cm away from wall
-        double driveDistance = robot.chassis.getDistance(SwerveChassis.Direction.LEFT) - 5;
-        robot.chassis.driveStraightAuto(.2, driveDistance, -90, 500);
-
-        midTime = getRuntime();
-        doTime = true;
 
 
         // Step-4: marker mission
@@ -96,7 +118,7 @@ public class RuckusAutoSilverDelivery extends LinearOpMode implements YieldHandl
 
 
         // Step-5: park on the rim
-        robot.goParking(ToboRuckus.Side.SILVER);
+        robot.goParking(ToboRuckus.Side.SILVER, true);
         robot.chassis.driveStraightAuto(.17, 10, 5, 500);
 
 
