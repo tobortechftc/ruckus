@@ -101,7 +101,7 @@ public class RuckusAutoGoldDelivery extends LinearOpMode implements YieldHandler
 //        robot.chassis.driveStraightAuto(0.4, 90, -64, 3000);
         robot.chassis.rotateTo(0.45, +135);//power was 0.4
         Thread.sleep(200);
-        robot.chassis.driveStraightAuto(0.2, robot.chassis.getDistance(SwerveChassis.Direction.RIGHT) - 6, +90, 500);
+        robot.chassis.driveStraightAuto(0.2, robot.chassis.getDistance(SwerveChassis.Direction.RIGHT) - 5, +90, 500);
         if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.RIGHT)
             robot.chassis.driveStraightAuto(0.6, -70, 0, 3000);//power was 0.4
         else if (sam_loc == ToboRuckus.MineralDetection.SampleLocation.CENTER)

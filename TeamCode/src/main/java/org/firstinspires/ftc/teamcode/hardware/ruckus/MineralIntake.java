@@ -574,8 +574,16 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
         this.sweeperMotor.setPower(sweeperInPower);
     }
 
+    public void sweeperInAuto() {
+        this.sweeperMotor.setPower(1.0);
+    }
+
     public void sweeperOut() {
         this.sweeperMotor.setPower(-1 * sweeperOutPower);
+    }
+
+    public void sweeperOutAuto() {
+        this.sweeperMotor.setPower(-1.0);
     }
 
     public void sweeperIn(double power) {

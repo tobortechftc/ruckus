@@ -868,7 +868,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         }
         //        robot.mineralDelivery.gateOpen();
         if (side == Side.GOLD) {
-            Thread.sleep(200);//stop mineral momentum
+            Thread.sleep(400);//stop mineral momentum
         } else {
             chassis.driveStraightAuto(0.3, -15, +45, 1000);
         }
@@ -925,11 +925,16 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         int tar_pos = (int) (intake.getSliderMinSweep() + (dist - 6) * intake.slider_count_per_inch);
         intake.moveSliderAuto(tar_pos, 1.0, 300);
         tar_pos += 200;
-        intake.sweeperIn();
+        if (duringParking) intake.sweeperInAuto();
+        else intake.sweeperIn();
         intake.moveSliderAuto(tar_pos, 0.7, 500);
         // intake.setSliderPower(orig_pw);
         if (!Thread.currentThread().isInterrupted())
             Thread.sleep(200);
+        if (duringParking){
+            intake.sweeperOutAuto();
+            Thread.sleep(200);
+        }
         intake.stopSweeper();
         intake.stopSlider();
     }
