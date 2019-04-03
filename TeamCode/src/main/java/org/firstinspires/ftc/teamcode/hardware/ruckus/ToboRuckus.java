@@ -478,7 +478,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (source.isPressed(Button.BACK)) {
-                    intake.syncSliderEncoder(100);
+                    intake.syncSliderEncoder(10);
                 } else if (!source.isPressed(Button.START)) {
                     mineralDelivery.wristDownInc();
                 }

@@ -471,7 +471,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                     @Override
                     public boolean isDone() {
                         return Math.abs(getSliderCurrent() - tar_pos) < 100 ||
-                                (System.currentTimeMillis()>doneBy && Math.abs(getSliderCurrent() - tar_pos) <300);
+                                (System.currentTimeMillis()>doneBy && Math.abs(getSliderCurrent() - tar_pos) <1000);
                     }
                 };
             }
@@ -482,7 +482,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                 setMineralTransfterDone();
                 // Auto sync encoder here
                 if (Math.abs(getSliderCurrent() - getSliderDump())>50) {
-                    syncSliderEncoder(80);
+                    syncSliderEncoder(10);
                     stopSlider();
                 }
                 return moveGate(true);
