@@ -106,8 +106,10 @@ public class RuckusAutoSilverDelivery extends LinearOpMode implements YieldHandl
         robot.chassis.driveStraightAuto(0.5, 88, -71, 3000);//power was 0.4
         Thread.sleep(100);
         robot.chassis.rotateTo(0.4, -43);
-        Thread.sleep(100);
-
+        // Thread.sleep(100);
+        // 5cm away from wall
+        double driveDistance = robot.chassis.getDistance(SwerveChassis.Direction.LEFT) - 5;
+        robot.chassis.driveStraightAuto(.2, driveDistance, -90, 500);
 
         // Step-4: marker mission
         // to depot
