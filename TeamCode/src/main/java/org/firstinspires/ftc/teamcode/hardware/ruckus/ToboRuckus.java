@@ -894,10 +894,12 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         // intake.mineralDumpCombo();
         // intake.stopSlider();
         intake.moveSliderAuto(intake.getSliderContracted() + 50, 1.0, 1000);
-        Thread.sleep(100); // wait for mineral detection
-        if (intake.proxDetectMineral()) {
-            intake.moveGate(true);
-            return true;
+        long iniTime = System.currentTimeMillis();
+        while (System.currentTimeMillis()-iniTime<300) { // time out 0.3 sec
+            if (intake.proxDetectMineral()) {
+                intake.moveGate(true);
+                return true;
+            }
         }
         return false;
     }

@@ -466,7 +466,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                 final int tar_pos = getSliderDump();
                 moveSliderFast(tar_pos, true);
                 int cur_pos = getSliderCurrent();
-                final long doneBy = System.currentTimeMillis() + Math.round(1.2 * Math.abs(cur_pos-tar_pos));
+                final long doneBy = System.currentTimeMillis() + Math.round(1.1 * Math.abs(cur_pos-tar_pos));
                 return new Progress() {
                     @Override
                     public boolean isDone() {
