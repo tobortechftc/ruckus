@@ -669,15 +669,15 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 double minTurnRadius = 20; //Somewhat arbitrarily determined minimum turning radius for car mode, in inches
                 double maxTurnRadius = 100; //Maximum turning radius for car mode, carried over from last year, in inches
                 // double radius = Math.signum(heading)*(maxTurnRadius - ((maxTurnRadius - minTurnRadius) * Math.abs(heading/90))); //Converts a heading from -90 to 90 to a radius from -100 to 100
-                double radius = Math.signum(heading) * Math.signum(power) * (maxTurnRadius - ((maxTurnRadius - minTurnRadius) * Math.abs(heading/90))); //Converts a heading from -90 to 90 to a radius from -100 to 100
-                double innerAngle = Math.atan(wheelBase/(2*radius - track)) * 180/Math.PI; //Misnomer from first coding, negative radius will flip this from inner to outer
-                double outerAngle = Math.atan(wheelBase/(2*radius + track)) * 180/Math.PI; //Cont. from above: inner refers to right side, outer refers to left side
-                double innerRadius = Math.pow((Math.pow((0.5*wheelBase),2)+Math.pow((radius-0.5*track),2)),0.5);
-                double outerRadius = Math.pow((Math.pow((0.5*wheelBase),2)+Math.pow((radius+0.5*track),2)),0.5);
-                double innerPower = power * (innerRadius/outerRadius);
+                double radius = Math.signum(heading) * Math.signum(power) * (maxTurnRadius - ((maxTurnRadius - minTurnRadius) * Math.abs(heading / 90))); //Converts a heading from -90 to 90 to a radius from -100 to 100
+                double innerAngle = Math.atan(wheelBase / (2 * radius - track)) * 180 / Math.PI; //Misnomer from first coding, negative radius will flip this from inner to outer
+                double outerAngle = Math.atan(wheelBase / (2 * radius + track)) * 180 / Math.PI; //Cont. from above: inner refers to right side, outer refers to left side
+                double innerRadius = Math.hypot(0.5 * wheelBase, radius - 0.5 * track);
+                double outerRadius = Math.hypot(0.5 * wheelBase, radius + 0.5 * track);
+                double innerPower = power * (innerRadius / outerRadius);
                 double outerPower = power;
                 // front left and right
-                newServoPositions[0] =outerAngle;
+                newServoPositions[0] = outerAngle;
                 newServoPositions[1] = innerAngle;
                 // back left and right
                 newServoPositions[2] = -1 * outerAngle;
