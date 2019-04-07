@@ -49,6 +49,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public CameraMineralDetector cameraMineralDetector;
     public CoreSystem core;
     public ElapsedTime runtime = new ElapsedTime();
+    public double rotateRatio = 0.7; // slow down ratio for rotation
 
     @Override
     public String getName() {
@@ -117,16 +118,26 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
-                if (source.getStick(Events.Side.LEFT, Events.Axis.BOTH) == 0) {
+                if (source.getStick(Events.Side.LEFT, Events.Axis.BOTH) < 0.1) {
                     // right stick with idle left stick operates robot in "crab" mode
                     double power = Math.abs(source.getStick(Events.Side.RIGHT, Events.Axis.BOTH));
                     power *= power; // square power to stick
                     double heading = toDegrees(currentX, currentY);
+                    double cur_heading = chassis.getCurHeading();
                     // invert headings less than -90 / more than 90
-                    if (Math.abs(chassis.getCurHeading() - heading) < 15 || Math.abs(currentX) + Math.abs(currentY) < 0.15) { // keep original heading
-                        heading = chassis.getCurHeading();
+                    if ((Math.abs(cur_heading - heading) < 10) || (Math.abs(currentX) + Math.abs(currentY) < 0.1)) { // keep original heading
+                        heading = cur_heading;
                     }
-                    if (Math.abs(heading) > 90) {
+                    // dead zone mapping: [-120, -75] to -90
+                    // dead zone mapping: [75, 120] to 90
+                    if (heading>-120 && heading<-75) heading = -90;
+                    if (heading>75 && heading<120) heading = 90;
+                    if ((Math.abs(cur_heading-heading)==180) && Math.abs(heading)<=90) {
+                        heading = cur_heading;
+                        power = -1 * power;
+                    }
+
+                    if (Math.abs(heading) > 90) { // reduce rotation angle
                         heading -= Math.signum(heading) * 180;
                         power = -1 * power;
                     }
@@ -142,6 +153,24 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Events.Axis.BOTH, Events.Side.RIGHT);
+        em.onStick(new Events.Listener() {
+            @Override
+            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
+                                   float currentY, float changeY) throws InterruptedException {
+                if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) < 0.2) {
+                    // left stick with idle right stick rotates robot in place
+                    chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source)*rotateRatio);
+                } else if (source.getTrigger(Events.Side.RIGHT) < 0.2) {
+                    // right stick with left stick operates robot in "car" mode
+                    double heading = currentX * 90;
+                    double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
+                    debug("sticksOnly(): left / steer, pwr: %.2f, head: %.2f", power, heading);
+                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
+                } else {
+                    chassis.stop();
+                }
+            }
+        }, Events.Axis.X_ONLY, Events.Side.LEFT);
 //        em.onButtonDown(new Events.Listener() {
 //            @Override
 //            public void buttonDown(EventManager source, Button button) throws InterruptedException {
@@ -227,23 +256,6 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Button.X);
-
-        em.onStick(new Events.Listener() {
-            @Override
-            public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
-                                   float currentY, float changeY) throws InterruptedException {
-                if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) == 0) {
-                    // left stick with idle right stick rotates robot in place
-                    chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source));
-                } else if (source.getTrigger(Events.Side.RIGHT) < 0.2) {
-                    // right stick with left stick operates robot in "car" mode
-                    double heading = currentX * 90;
-                    double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
-                    debug("sticksOnly(): left / steer, pwr: %.2f, head: %.2f", power, heading);
-                    chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
-                }
-            }
-        }, Events.Axis.X_ONLY, Events.Side.LEFT);
         em.onTrigger(new Events.Listener() {
             @Override
             public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {

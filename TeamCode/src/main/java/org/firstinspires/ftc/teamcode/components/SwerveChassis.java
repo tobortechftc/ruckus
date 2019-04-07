@@ -766,6 +766,12 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         backRight.motor.setPower(-1 * (useScalePower ? scalePower(power) : power));
     }
 
+    public void stop() {
+        frontLeft.motor.setPower(0);
+        frontRight.motor.setPower(0);
+        backLeft.motor.setPower(0);
+        backRight.motor.setPower(0);
+    }
     @Deprecated
     public void rotateDegree(double power, double deltaD) throws InterruptedException {
         double iniHeading = orientationSensor.getHeading();

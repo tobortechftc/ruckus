@@ -634,8 +634,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     public Progress moveSliderFast(int position, boolean useProx) {
         this.sliderMotor.setTargetPosition(position);
         this.sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        this.sliderMotor.setPower((useProx?this.sliderPower:0.9));
-
+        //this.sliderMotor.setPower((useProx?this.sliderPower:1.0));
+        this.sliderMotor.setPower(1);
         // this.sliderMotor.setPower(this.sliderPower);
         if (useProx && proxDetect15cm()) {
             this.sliderMotor.setPower(0);
