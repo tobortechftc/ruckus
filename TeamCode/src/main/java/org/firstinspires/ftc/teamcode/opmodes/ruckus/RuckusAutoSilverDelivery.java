@@ -24,7 +24,7 @@ public class RuckusAutoSilverDelivery extends LinearOpMode implements YieldHandl
     private Logger<Logger> log = new Logger<Logger>().configureLogging(getClass().getSimpleName(), LOG_LEVEL);
 
     int timeout = 10000; // timeout time
-    double power = .4; // motor power
+    double power = .55; // motor power
 
     double midTime = 0;
     boolean doTime = false;
