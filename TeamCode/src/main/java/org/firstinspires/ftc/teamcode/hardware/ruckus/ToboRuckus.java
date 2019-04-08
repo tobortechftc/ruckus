@@ -118,7 +118,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
-                if (source.getStick(Events.Side.LEFT, Events.Axis.BOTH) < 0.1) {
+                if (Math.abs(source.getStick(Events.Side.LEFT, Events.Axis.BOTH)) < 0.1) {
                     // right stick with idle left stick operates robot in "crab" mode
                     double power = Math.abs(source.getStick(Events.Side.RIGHT, Events.Axis.BOTH));
                     power *= power; // square power to stick
@@ -157,7 +157,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
-                if (source.getStick(Events.Side.RIGHT, Events.Axis.BOTH) < 0.2) {
+                if (Math.abs(source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)) < 0.2) {
                     // left stick with idle right stick rotates robot in place
                     chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source)*rotateRatio);
                 } else if (source.getTrigger(Events.Side.RIGHT) < 0.2) {
@@ -166,7 +166,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                     double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
                     debug("sticksOnly(): left / steer, pwr: %.2f, head: %.2f", power, heading);
                     chassis.driveAndSteer(power * powerAdjustment(source), heading, false);
-                } else {
+                }
+                else {
                     chassis.stop();
                 }
             }
