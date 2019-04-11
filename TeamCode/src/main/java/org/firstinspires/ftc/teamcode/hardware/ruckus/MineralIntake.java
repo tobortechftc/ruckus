@@ -28,7 +28,7 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
     // down and up positions for the box lift
     // actual servo positions are configured via <code>AdjustableServo</code>
     public static final double LIFT_DOWN = 0.0;
-    public static final double LIFT_CENTER = 0.62;
+    public static final double LIFT_CENTER = 0.46; //0.62;
     public static final double LIFT_UP = 1.0;
 
     // open and closed positions for the box gate
@@ -466,11 +466,11 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
                 final int tar_pos = getSliderDump();
                 moveSliderFast(tar_pos, true);
                 int cur_pos = getSliderCurrent();
-                final long doneBy = System.currentTimeMillis() + Math.round(1.1 * Math.abs(cur_pos-tar_pos));
+                final long doneBy = System.currentTimeMillis() + Math.round(1.15 * Math.abs(cur_pos-tar_pos));
                 return new Progress() {
                     @Override
                     public boolean isDone() {
-                        return Math.abs(getSliderCurrent() - tar_pos) < 100 ||
+                        return Math.abs(getSliderCurrent() - tar_pos) < 20 ||
                                 (System.currentTimeMillis()>doneBy && Math.abs(getSliderCurrent() - tar_pos) <1000);
                     }
                 };
@@ -481,8 +481,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
             public Progress start() {
                 setMineralTransfterDone();
                 // Auto sync encoder here
-                if (Math.abs(getSliderCurrent() - getSliderDump())>50) {
-                    syncSliderEncoder(10);
+                if ((getSliderCurrent() - getSliderDump())>50) {
+                    syncSliderEncoder(30);
                     stopSlider();
                 }
                 return moveGate(true);
