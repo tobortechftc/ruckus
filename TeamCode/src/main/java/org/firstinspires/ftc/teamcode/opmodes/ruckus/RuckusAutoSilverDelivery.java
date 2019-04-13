@@ -113,7 +113,7 @@ public class RuckusAutoSilverDelivery extends LinearOpMode implements YieldHandl
 
         // Step-4: marker mission
         // to depot
-        robot.chassis.driveAlongTheWall(power, -94, 5, SwerveChassis.Wall.LEFT, 5000);
+        robot.chassis.driveAlongTheWall(power, -95, 5, SwerveChassis.Wall.LEFT, 5000);
 
         // drop marker
         robot.hanging.markerDown();
