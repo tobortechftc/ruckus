@@ -885,7 +885,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         } else {
             chassis.driveStraightAuto(0.3, -15, +45, 1000);
         }
-        mineralDelivery.gateDump();
+        mineralDelivery.gateDumpAuto();
         Thread.sleep(500);//for mineral to drop
         mineralDelivery.returnCombo();
         while (!TaskManager.isComplete("returnCombo")) {

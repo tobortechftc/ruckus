@@ -27,8 +27,8 @@ public class MineralIntake extends Logger<MineralIntake> implements Configurable
 
     // down and up positions for the box lift
     // actual servo positions are configured via <code>AdjustableServo</code>
-    public static final double LIFT_DOWN = 0.0;
-    public static final double LIFT_CENTER = 0.46; //0.62;
+    public static final double LIFT_DOWN = 0.05;
+    public static final double LIFT_CENTER = 0.46; //0.46;
     public static final double LIFT_UP = 1.0;
 
     // open and closed positions for the box gate

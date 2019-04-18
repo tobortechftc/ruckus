@@ -52,6 +52,7 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     private double wristDown = 0;
     private double writeCenter = 0.5;
     private double wristUp = 1.0;
+    private double wristDumpAuto = 0.61;
     private double wristDump = 0.56;
     private double wristDumpUp = 0.56;
     private double wristInit = 0.02;
@@ -124,6 +125,13 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
     public void gateDump(){
         if (isArmReadyToScore()) { // move wrist to dump
             wristDumpAuto();
+        }
+        dumperGate.setPosition(gateODumpPos);
+        gateIsOpened=true;
+    }
+    public void gateDumpAuto(){
+        if (isArmReadyToScore()) { // move wrist to dump
+            wristDumpAutoAuto();
         }
         dumperGate.setPosition(gateODumpPos);
         gateIsOpened=true;
@@ -237,6 +245,13 @@ public class MineralDelivery extends Logger<MineralDelivery> implements Configur
             return moveWrist(wristDumpUp);
         } else {
             return moveWrist(wristDump);
+        }
+    }
+    public Progress wristDumpAutoAuto() {
+        if (isArmUp()) {
+            return moveWrist(wristDumpAuto);
+        } else {
+            return moveWrist(wristDumpAuto);
         }
     }
     public Progress wristDump() {
