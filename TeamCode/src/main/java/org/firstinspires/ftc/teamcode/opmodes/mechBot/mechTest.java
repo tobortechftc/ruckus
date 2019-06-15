@@ -26,15 +26,15 @@ public class mechTest  extends LinearOpMode {
 
         while(true){
             if(gamepad1.dpad_up){
-                mc.yMove(+1);
+                mc.yMove(+1,0.5);
             }else if(gamepad1.dpad_down){
-                mc.yMove(-1);
+                mc.yMove(-1,0.5);
             }else if(gamepad1.dpad_right){
-                mc.xMove(+1);
+                mc.xMove(+1,0.7);
             }else if(gamepad1.dpad_left){
-                mc.xMove(-1);
+                mc.xMove(-1,0.7);
             }else{
-                mc.yMove(0);
+                mc.yMove(0,0);
             }
         }
     }
