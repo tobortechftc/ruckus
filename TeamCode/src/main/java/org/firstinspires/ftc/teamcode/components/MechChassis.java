@@ -11,6 +11,8 @@ import org.firstinspires.ftc.teamcode.support.hardware.Adjustable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configurable;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
+import java.util.Arrays;
+
 import static java.lang.Thread.sleep;
 
 /**
@@ -215,6 +217,126 @@ public class MechChassis extends Logger<MechChassis> implements Configurable {
         motorBR.setPower(-sgn * power);
     }
 
+    public void driveStraightAuto(double power, double cm, int timeout) throws InterruptedException {
+        if (Thread.currentThread().isInterrupted()) return;
+
+        if (power < 0 || power > 1) {
+            throw new IllegalArgumentException("Power must be between 0 and 1");
+        }
+
+        double distance = TICKS_PER_CM * cm;
+
+        if (power == 0) {
+            //driveMode = SwerveChassis.DriveMode.STOP;
+            targetHeading = 0;
+            headingDeviation = 0;
+            servoCorrection = 0;
+            //for (SwerveChassis.WheelAssembly wheel : wheels) wheel.motor.setPower(0);
+            orientationSensor.enableCorrections(false);
+            return;
+        }
+
+        if (distance < 0) {
+            power = -power;
+            distance = -distance;
+        }
+
+        //motor settings
+        //driveMode = SwerveChassis.DriveMode.STRAIGHT;
+        int[] startingCount = new int[4];
+        for (int i = 0; i < 4; i++) {
+            //wheels[i].motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //wheels[i].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            //startingCount[i] = wheels[i].motor.getCurrentPosition();
+        }
+
+        //imu initialization
+        orientationSensor.enableCorrections(true);
+        targetHeading = orientationSensor.getHeading();
+
+        //start powering wheels
+        yMove(cm > 0 ? +1 : -1, power);
+        //record time
+        long iniTime = System.currentTimeMillis();
+
+        //waiting loop
+        while (true) {
+            // check and correct heading as needed
+            double sensorHeading = orientationSensor.getHeading();
+            headingDeviation = targetHeading - sensorHeading;
+
+            //determine if target distance is reached
+            int maxTraveled = Integer.MIN_VALUE;
+            for (int i = 0; i < 4; i++) {
+                //maxTraveled = Math.abs(Math.max(maxTraveled, wheels[i].motor.getCurrentPosition() - startingCount[i]));
+            }
+            if (distance - maxTraveled < 10)
+                break;
+            //determine if time limit is reached
+            if (System.currentTimeMillis() - iniTime > timeout)
+                break;
+            if (Thread.currentThread().isInterrupted())
+                break;
+            // yield handler
+            this.core.yield();
+        }
+        stop();
+        driveMode = DriveMode.STOP;
+    }
+
+    public void rotateTo(double power, double finalHeading) throws InterruptedException {
+        rawRotateTo(power, finalHeading, true);//!!! A very bold move
+        sleep(200);
+        rawRotateTo(0.25, finalHeading, false);
+    }
+
+    private void rawRotateTo(double power, double finalHeading, boolean stopEarly) throws InterruptedException {
+        double iniHeading = orientationSensor.getHeading();
+        double deltaD = finalHeading - iniHeading;
+        //do not turn if the heading is close enough the target
+        if (Math.abs(deltaD) < 0.5)
+            return;
+        //resolve the issue with +-180 mark
+        if (Math.abs(deltaD) > 180) {
+            finalHeading = finalHeading + (deltaD > 0 ? -360 : +360);
+            deltaD = 360 - Math.abs(deltaD);
+            deltaD = -deltaD;
+        }
+        //break on reaching the target
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //ensure the condition before calling rotate()
+        driveMode = DriveMode.STOP;
+        useScalePower = false;
+        //***** routine to start the wheels ******//
+        turn((int) Math.signum(deltaD), power);
+        //record heading for checking in while loop
+        double lastReading = orientationSensor.getHeading();
+        long iniTime = System.currentTimeMillis();
+        while (true) {
+            double currentHeading = orientationSensor.getHeading();
+            //we cross the +-180 mark if and only if the product below is a very negative number
+            if ((currentHeading * lastReading < -100.0) || (Math.abs(currentHeading - lastReading) > 180.0)) {
+                //deltaD>0 => cross the mark clockwise; deltaD<0 => cross the mark anticlockwise
+                finalHeading = finalHeading + (deltaD > 0 ? -360.0 : +360.0);
+            }
+            //if within acceptable range, terminate
+            if (Math.abs(finalHeading - currentHeading) < (stopEarly ? 10.0 : 0.5)) break;
+            //if overshoot, terminate
+            if (deltaD > 0 && currentHeading - finalHeading > 0) break;
+            if (deltaD < 0 && currentHeading - finalHeading < 0) break;
+            //timeout, break. default timeout: 3s
+            if (System.currentTimeMillis() - iniTime > 3000) break;
+            //stop pressed, break
+            if (Thread.currentThread().isInterrupted()) break;
+            lastReading = currentHeading;
+            // yield handler
+            this.core.yield();
+        }
+        stop();
+        driveMode = DriveMode.STOP;
+        useScalePower = true;
+    }
+
     /**
      * turning while driving
      *
@@ -222,13 +344,13 @@ public class MechChassis extends Logger<MechChassis> implements Configurable {
      * @param turningFactor int range [-1,+1] (+1 for turning right, -1 for turning left)
      */
     public void carDrive(double power, double turningFactor) {
-        if (turningFactor>0){
+        if (turningFactor > 0) {
             turningFactor = 1 - turningFactor;
             motorFL.setPower(power);
             motorFR.setPower(turningFactor * power);
             motorBL.setPower(power);
             motorBR.setPower(turningFactor * power);
-        }else {
+        } else {
             turningFactor = 1 + turningFactor;
             motorFL.setPower(turningFactor * power);
             motorFR.setPower(power);
@@ -238,12 +360,27 @@ public class MechChassis extends Logger<MechChassis> implements Configurable {
 
     }
 
+    public void setRunMode(DcMotor.RunMode rm) {
+        motorFL.setMode(rm);
+        motorFR.setMode(rm);
+        motorBL.setMode(rm);
+        motorBR.setMode(rm);
+    }
+
+    public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zpb) {
+        motorFL.setZeroPowerBehavior(zpb);
+        motorFR.setZeroPowerBehavior(zpb);
+        motorBL.setZeroPowerBehavior(zpb);
+        motorBR.setZeroPowerBehavior(zpb);
+    }
+
     public void stop() {
         motorFL.setPower(0);
         motorFR.setPower(0);
         motorBL.setPower(0);
         motorBR.setPower(0);
     }
+
     public void reset() {
         motorFL.setPower(0);
         motorFR.setPower(0);
