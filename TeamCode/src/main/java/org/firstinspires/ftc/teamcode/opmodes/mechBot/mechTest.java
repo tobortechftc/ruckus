@@ -41,7 +41,10 @@ public class mechTest  extends LinearOpMode {
         mc.configure(configuration, false);
 
         while(true){
-            if(gamepad1.dpad_up){
+
+            mc.carDrive(gamepad1.left_stick_y,gamepad1.right_stick_x);
+            /**
+            if(gamepad1.dpad_up){d
                 mc.yMove(+1,0.5);
             }else if(gamepad1.dpad_down){
                 mc.yMove(-1,0.5);
@@ -52,6 +55,7 @@ public class mechTest  extends LinearOpMode {
             }else{
                 mc.yMove(0,0);
             }
+            */
         }
     }
 }
