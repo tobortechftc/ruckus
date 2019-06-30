@@ -66,10 +66,10 @@ public class SigmaBot extends Logger<SigmaBot> implements Robot {
 //        cameraSystem.init(configuration.getHardwareMap());
 
         this.core = new CoreSystem();
-        info("RoboRuck configure() after new CoreSystem()(run time = %.2f sec)", (runtime.seconds() - ini_time));
+        info("RoboSigma configure() after new CoreSystem()(run time = %.2f sec)", (runtime.seconds() - ini_time));
         chassis = new SwerveChassis(this.core).configureLogging("Swerve", logLevel); // Log.DEBUG
         chassis.configure(configuration, auto);
-        info("RoboRuck configure() after init Chassis (run time = %.2f sec)", (runtime.seconds() - ini_time));
+        info("RoboSigma configure() after init Chassis (run time = %.2f sec)", (runtime.seconds() - ini_time));
 
     }
 
