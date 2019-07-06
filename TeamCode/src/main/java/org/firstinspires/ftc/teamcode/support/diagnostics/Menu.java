@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.support.diagnostics;
 
-import android.support.annotation.NonNull;
-
 import org.firstinspires.ftc.teamcode.support.events.EventManager;
 
 import java.lang.reflect.InvocationTargetException;
@@ -84,7 +82,7 @@ public class Menu {
         }
 
         @Override
-        public int compareTo(@NonNull Entry other) {
+        public int compareTo(Entry other) {
             int result = this.group.compareTo(other.group);
             if (result==0) return this.label.compareTo(other.label);
             if (this.group.length()==0) return 1;

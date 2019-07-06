@@ -15,9 +15,9 @@ import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
 
 import java.util.List;
 
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_GOLD_MINERAL;
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_SILVER_MINERAL;
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.TFOD_MODEL_ASSET;
+import org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus; //.LABEL_GOLD_MINERAL;
+//import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_SILVER_MINERAL;
+//import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.TFOD_MODEL_ASSET;
 
 /**
  * Swerve chassis consists of 4 wheels with a Servo and DcMotor attached to each.
@@ -69,7 +69,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
                 "tfodMonitorViewId", "id", configuration.getHardwareMap().appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+        tfod.loadModelFromAsset(TfodRoverRuckus.TFOD_MODEL_ASSET, TfodRoverRuckus.LABEL_GOLD_MINERAL, TfodRoverRuckus.LABEL_SILVER_MINERAL);
 
         logger.verbose("CameraMineralDetector status: %s", tfod);
 
@@ -122,11 +122,11 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
                         if (validRecognitions >= 2) {
                             for (Recognition recognition :
                                     updatedRecognitions) {
-                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                                if (recognition.getLabel().equals(TfodRoverRuckus.LABEL_GOLD_MINERAL) && recognition.getTop() > minDistanceFromTop) {
                                     goldXCoord = (int) recognition.getLeft();
                                     logger.verbose("Gold X = %d", (int) goldXCoord);
                                     logger.verbose("Gold -Y = %d", (int) recognition.getTop());
-                                } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                                } else if (recognition.getLabel().equals(TfodRoverRuckus.LABEL_SILVER_MINERAL) && recognition.getTop() > minDistanceFromTop) {
                                     silverXCoord = (int) recognition.getLeft();
                                     logger.verbose("Silver X = %d", (int) silverXCoord);
                                     logger.verbose("Silver -Y = %d", (int) recognition.getTop());
@@ -209,11 +209,11 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
                         if (validRecognitions >= 2) {
                             for (Recognition recognition :
                                     updatedRecognitions) {
-                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                                if (recognition.getLabel().equals(TfodRoverRuckus.LABEL_GOLD_MINERAL) && recognition.getTop() > minDistanceFromTop) {
                                     goldXCoord = (int) recognition.getLeft();
                                     logger.verbose("Gold X = %d", (int) goldXCoord);
                                     logger.verbose("Gold -Y = %d", (int) recognition.getTop());
-                                } else if (recognition.getLabel().equals(LABEL_SILVER_MINERAL) && recognition.getTop() > minDistanceFromTop) {
+                                } else if (recognition.getLabel().equals(TfodRoverRuckus.LABEL_SILVER_MINERAL) && recognition.getTop() > minDistanceFromTop) {
                                     silverXCoord = (int) recognition.getLeft();
                                     logger.verbose("Silver X = %d", (int) silverXCoord);
                                     logger.verbose("Silver -Y = %d", (int) recognition.getTop());

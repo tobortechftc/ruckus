@@ -1,24 +1,10 @@
 package org.firstinspires.ftc.teamcode.hardware.Sigma;
 
-import android.graphics.Bitmap;
-import android.util.Log;
-
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
-import org.firstinspires.ftc.teamcode.hardware.ruckus.CameraMineralDetector;
-import org.firstinspires.ftc.teamcode.hardware.ruckus.Hanging;
-import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralDelivery;
-import org.firstinspires.ftc.teamcode.hardware.ruckus.MineralIntake;
 import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.diagnostics.MenuEntry;
@@ -26,24 +12,8 @@ import org.firstinspires.ftc.teamcode.support.events.Button;
 import org.firstinspires.ftc.teamcode.support.events.EventManager;
 import org.firstinspires.ftc.teamcode.support.events.Events;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
-import org.firstinspires.ftc.teamcode.support.tasks.TaskManager;
-import org.opencv.android.Utils;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_GOLD_MINERAL;
-import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABEL_SILVER_MINERAL;
-
-public class SigmaBot extends Logger<SigmaBot> implements Robot {
+public class ToboSigma extends Logger<ToboSigma> implements Robot {
     private Telemetry telemetry;
     public SwerveChassis chassis;
 
@@ -158,7 +128,7 @@ public class SigmaBot extends Logger<SigmaBot> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (source.isPressed(Button.BACK)) { // default scale up
-                    chassis.setDefaultScale(0.8);
+                    chassis.setDefaultScale(1.0);
                     return;
                 }
                 if (!source.isPressed(Button.RIGHT_BUMPER)) return;
@@ -169,7 +139,7 @@ public class SigmaBot extends Logger<SigmaBot> implements Robot {
             @Override
             public void buttonDown(EventManager source, Button button) {
                 if (source.isPressed(Button.BACK)) { // default scale back to 0.5
-                    chassis.setDefaultScale(0.5);
+                    chassis.setDefaultScale(0.7);
                 }
             }
         }, Button.A);

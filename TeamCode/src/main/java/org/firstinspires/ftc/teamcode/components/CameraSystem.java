@@ -16,9 +16,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-import org.firstinspires.ftc.teamcode.hardware17.CoreSystem;
-import org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP;
-import org.firstinspires.ftc.teamcode.hardware17.TaintedAccess;
+import org.firstinspires.ftc.teamcode.support.CoreSystem;
+//import org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP;
+//import org.firstinspires.ftc.teamcode.hardware17.TaintedAccess;
 
 /**
  * Put brief class description here...
@@ -29,8 +29,6 @@ public class CameraSystem {
     public boolean use_camera = false;
     public boolean use_OpenCV = true;
 
-    public org.firstinspires.ftc.teamcode.hardware17.SwerveUtilLOP.TeamColor leftJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
-    public SwerveUtilLOP.TeamColor rightJewelColorCamera = SwerveUtilLOP.TeamColor.UNKNOWN;
     public Bitmap bitmap = null;
     public boolean camReady = false;
 
@@ -46,12 +44,6 @@ public class CameraSystem {
     // Central core of robot
     CoreSystem core;
     ElapsedTime runtime;
-
-    private TaintedAccess taintedAccess;
-
-    void setTaintedAccess(TaintedAccess taintedAccess) {
-        this.taintedAccess = taintedAccess;
-    }
 
     public CameraSystem(CoreSystem core) {
         this.core = core;

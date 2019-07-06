@@ -5,8 +5,7 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.hardware.Sigma.SigmaBot;
-import org.firstinspires.ftc.teamcode.hardware.ruckus.ToboRuckus;
+import org.firstinspires.ftc.teamcode.hardware.Sigma.ToboSigma;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.events.EventManager;
 import org.firstinspires.ftc.teamcode.support.hardware.Configuration;
@@ -31,8 +30,8 @@ public class SigmaTeleOp extends LinearOpMode {
         telemetry.addData("Initializing Robot", "Please Wait ...");
         telemetry.update();
 
-        SigmaBot robot = new SigmaBot();
-        robot.configureLogging(robot.getName(),LOG_LEVEL);
+        ToboSigma robot = new ToboSigma();
+        robot.configureLogging("ToboSigma",LOG_LEVEL);
         configuration = new Configuration(hardwareMap, robot.getName()).configureLogging("Config", LOG_LEVEL);
         log.info("RoboSigma TeleOp finished configuration (CPU_time = %.2f sec)", getRuntime());
 
