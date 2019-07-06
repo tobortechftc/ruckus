@@ -32,8 +32,8 @@
     "right": 0.45
   },
   "sv_box_lift": {
-    "center": 0.6,
-    "left": 0.06,
+    "center": 0.6, //0.6
+    "left": 0.01, // 0.06
     "right": 0.94
   },
   "intake": {
