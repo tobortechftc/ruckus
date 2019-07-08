@@ -57,8 +57,6 @@ public class SigmaTeleOp extends LinearOpMode {
         waitForStart();
 
 
-
-
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             try {

@@ -694,6 +694,23 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         wheels[2].motor.setPower(scalePower(leftPower));
         wheels[3].motor.setPower(scalePower(rightPower));
     }
+    public double driveStraightSec(double power, double sec) throws InterruptedException {
+        double[] startingCount = new double[4];
+        for (int i = 0; i < 4; i++) {
+            startingCount[i] = wheels[i].motor.getCurrentPosition();
+            wheels[i].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+        long startTime = System.currentTimeMillis();
+        driveAndSteer(power, 0, true);
+        sleep((long) (sec*1000.0));
+        driveAndSteer(0, 0, true);
+        double ave = 0;
+        for (int i = 0; i < 4; i++) {
+            startingCount[i] = (wheels[i].motor.getCurrentPosition()-startingCount[i])/sec;
+            ave += startingCount[i];
+        }
+        return (ave/4.0); // return average count per second
+    }
 
     @Deprecated
     public void driveAndSteerAuto(double power, double distance, double angle) throws InterruptedException {
@@ -917,7 +934,6 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
                 }
             });
         }
-
 
         //set up imu telemetry
         if (orientationSensor != null && setImuTelemetry) {

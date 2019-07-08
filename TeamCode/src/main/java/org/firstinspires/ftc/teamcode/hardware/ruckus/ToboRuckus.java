@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.corningrobotics.enderbots.endercv.OpenCVPipeline;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.components.CameraSystem;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -50,6 +51,8 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public CoreSystem core;
     public ElapsedTime runtime = new ElapsedTime();
     public double rotateRatio = 0.7; // slow down ratio for rotation
+    public double motor_count = 0;
+
 
     @Override
     public String getName() {
@@ -105,6 +108,12 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 .addData("(RS) + (LS)", "2WD / Steer").setRetained(true);
         telemetry.addLine().addData("< (LS) >", "Rotate").setRetained(true)
                 .addData("[LB]/[LT]", "Slow / Fast").setRetained(true);
+        telemetry.addLine().addData("motor_count=", new Func<String>() {
+            @Override
+            public String value() {
+                return String.format("%2.0f", motor_count);
+            }
+        });
         chassis.setupTelemetry(telemetry);
         intake.setupTelemetry(telemetry);
         hanging.setupTelemetry(telemetry);
@@ -451,8 +460,15 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         // em: [RB] + [Y] for mineral dump combo (move slider to dump, intake box up, open box gate)
         em.onButtonDown(new Events.Listener() {
             @Override
-            public void buttonDown(EventManager source, Button button) {
-                if (source.isPressed(Button.BACK)) { // default scale up
+            public void buttonDown(EventManager source, Button button) throws InterruptedException {
+                if (source.isPressed(Button.START) && source.isPressed(Button.BACK)) { // testing chassis speed
+                    motor_count = chassis.driveStraightSec(1.0, 10);
+                    return;
+                } else if (source.isPressed(Button.LEFT_BUMPER) && source.isPressed(Button.RIGHT_BUMPER)) { // testing chassis speed
+                    motor_count = chassis.driveStraightSec(1.0, 2);
+                    return;
+                }
+                else if (source.isPressed(Button.BACK)) { // default scale up
                     chassis.setDefaultScale(0.8);
                     return;
                 }
