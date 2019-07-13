@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.components.Robot;
 import org.firstinspires.ftc.teamcode.components.SwerveChassis;
+import org.firstinspires.ftc.teamcode.opmodes.ruckus.CenaPlayer;
 import org.firstinspires.ftc.teamcode.support.CoreSystem;
 import org.firstinspires.ftc.teamcode.support.Logger;
 import org.firstinspires.ftc.teamcode.support.events.Button;
@@ -42,6 +43,7 @@ import static org.firstinspires.ftc.robotcore.external.tfod.TfodRoverRuckus.LABE
 
 public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     private Telemetry telemetry;
+    public Configuration configuration;
     public SwerveChassis chassis;
     public MineralIntake intake;
     public MineralDelivery mineralDelivery;
@@ -52,7 +54,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
     public ElapsedTime runtime = new ElapsedTime();
     public double rotateRatio = 0.7; // slow down ratio for rotation
     public double motor_count = 0;
-
+    public boolean playingSong = false;
 
     @Override
     public String getName() {
@@ -64,6 +66,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         runtime.reset();
         double ini_time = runtime.seconds();
         this.telemetry = telemetry;
+        this.configuration = configuration;
 
 //        cameraSystem = new CameraSystem(null);
 //        cameraSystem.init(configuration.getHardwareMap());
@@ -283,6 +286,20 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
                 }
             }
         }, Events.Side.LEFT);
+        em.onTrigger(new Events.Listener() {
+            @Override
+            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
+                // 0.2 is a dead zone threshold for the trigger
+                if (current > 0.2) {
+                    if (playingSong) {
+                        CenaPlayer.stop();
+                    } else {
+                        CenaPlayer.start(configuration.getHardwareMap().appContext, telemetry);
+                    }
+                    playingSong = !playingSong;
+                }
+            }
+        }, Events.Side.RIGHT);
 //        em.onTrigger(new Events.Listener() {
 //            @Override
 //            public void triggerMoved(EventManager source, Events.Side side, float current, float change) throws InterruptedException {
