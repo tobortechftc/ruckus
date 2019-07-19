@@ -114,10 +114,11 @@ public class ToboSigma extends Logger<ToboSigma> implements Robot {
             @Override
             public void stickMoved(EventManager source, Events.Side side, float currentX, float changeX,
                                    float currentY, float changeY) throws InterruptedException {
-                if (Math.abs(source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)) < 0.2) {
+                if (Math.abs(source.getStick(Events.Side.RIGHT, Events.Axis.BOTH)) < 0.2 &&
+                        Math.abs(currentX) > 0.1) {
                     // left stick with idle right stick rotates robot in place
                     chassis.rotate(currentX * Math.abs(currentX) * powerAdjustment(source)*rotateRatio);
-                } else if (source.getTrigger(Events.Side.RIGHT) < 0.2) {
+                } else if (source.getTrigger(Events.Side.RIGHT) < 0.2 && Math.abs(currentX) > 0.1) {
                     // right stick with left stick operates robot in "car" mode
                     double heading = currentX * 90;
                     double power = source.getStick(Events.Side.RIGHT, Events.Axis.Y_ONLY);
