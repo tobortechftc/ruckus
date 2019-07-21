@@ -1,23 +1,23 @@
 {
   "servoBackLeft": {
-    "center": 0.50,
+    "center": 0.507,
     "left": 0.197,
     "right": 0.796
   },
   "servoFrontLeft": {
-    "center": 0.496,
-    "left": 0.181,
-    "right": 0.784
+    "center": 0.495,
+    "left": 0.184,
+    "right": 0.785
   },
   "servoBackRight": {
     "center": 0.536,
     "left": 0.231,
-    "right": 0.827
+    "right": 0.830
   },
   "servoFrontRight": {
-    "center": 0.492,
-    "left": 0.182,
-    "right": 0.778
+    "center": 0.491,
+    "left": 0.183,
+    "right": 0.782
   },
   "chassis": {
     "track": 14.0,

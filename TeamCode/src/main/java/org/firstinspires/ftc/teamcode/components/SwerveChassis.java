@@ -694,6 +694,51 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         wheels[2].motor.setPower(scalePower(leftPower));
         wheels[3].motor.setPower(scalePower(rightPower));
     }
+
+    public void orbit(double power, double curvature) throws InterruptedException {
+        double leftPower = power;
+        double rightPower = power;
+        double radius = 6.5; // should be changed according to curvature
+
+        double thetaF = (Math.atan(radius / (0.5 * track))) * (180/Math.PI);
+        double thetaB = (Math.atan((radius+wheelBase) / (0.5 * track))) * (180/Math.PI);
+        double SERVO_FL_ORBIT_POSITION = 0 - (thetaF / 180.0);
+        double SERVO_FR_ORBIT_POSITION = 0 + (thetaF / 180.0);
+        double SERVO_BL_ORBIT_POSITION = 0 - (thetaB / 180.0);
+        double SERVO_BR_ORBIT_POSITION = 0 + (thetaB / 180.0);
+
+
+        debug("orbit(pwr: %.3f, theta(F/B): %.1f/%.1f)", power, thetaF, thetaB);
+        if (power < -1 || power > 1) {
+            throw new IllegalArgumentException("Power must be between -1 and 1");
+        }
+
+        if (driveMode != DriveMode.STEER) {
+            if (driveMode != DriveMode.STOP) reset();
+            driveMode = DriveMode.STEER;
+            for (WheelAssembly wheel : wheels)
+                wheel.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+
+        if (Math.abs(power) > 0) {
+            // only adjust servo positions if power is applied
+            double[] newServoPositions = new double[4];
+            newServoPositions[0] = SERVO_FL_ORBIT_POSITION;
+            newServoPositions[1] = SERVO_FR_ORBIT_POSITION;
+            newServoPositions[2] = SERVO_BL_ORBIT_POSITION;
+            newServoPositions[3] = SERVO_BR_ORBIT_POSITION;
+            changeServoPositions(newServoPositions);
+        }
+
+        leftPower = -power;
+        rightPower = power;
+
+        wheels[0].motor.setPower(scalePower(leftPower));
+        wheels[1].motor.setPower(scalePower(rightPower));
+        wheels[2].motor.setPower(scalePower(leftPower));
+        wheels[3].motor.setPower(scalePower(rightPower));
+    }
+
     public double driveStraightSec(double power, double sec) throws InterruptedException {
         double[] startingCount = new double[4];
         for (int i = 0; i < 4; i++) {
