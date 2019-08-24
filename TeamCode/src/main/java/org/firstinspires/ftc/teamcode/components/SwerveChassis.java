@@ -164,7 +164,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
         //  that would react to track / wheel base / radius adjustments
     }
 
-    public void configure(Configuration configuration, boolean auto) {
+    public void configure(Configuration configuration, boolean auto, boolean enableSensors) {
         // set up motors / sensors as wheel assemblies
         wheels[0] = frontLeft = new WheelAssembly(
                 configuration, "FrontLeft", DcMotor.Direction.FORWARD
@@ -184,7 +184,7 @@ public class SwerveChassis extends Logger<SwerveChassis> implements Configurable
             orientationSensor.configure(configuration.getHardwareMap(), "imu", "imu2");
         }
 
-        if (auto || setRangeSensorTelemetry) {
+        if ((auto || setRangeSensorTelemetry)&& enableSensors) {
             frontRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "front_range");
             backRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "back_range");
             leftRangeSensor = configuration.getHardwareMap().get(DistanceSensor.class, "left_range");

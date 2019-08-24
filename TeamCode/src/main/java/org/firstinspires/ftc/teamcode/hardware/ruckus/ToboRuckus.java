@@ -77,7 +77,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
         this.core = new CoreSystem();
         info("RoboRuck configure() after new CoreSystem()(run time = %.2f sec)", (runtime.seconds() - ini_time));
         chassis = new SwerveChassis(this.core).configureLogging("Swerve", logLevel); // Log.DEBUG
-        chassis.configure(configuration, auto);
+        chassis.configure(configuration, auto, true);
         info("RoboRuck configure() after init Chassis (run time = %.2f sec)", (runtime.seconds() - ini_time));
         intake = new MineralIntake().configureLogging("Intake", logLevel);
         intake.configure(configuration);
@@ -1290,29 +1290,5 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
             return SampleLocation.UNKNOWN;
         }
 
-//        public synchronized List<MatOfPoint> getGoldContours() {
-//            return goldContours;
-//        }
-//        public synchronized  List<MatOfPoint> getSilverContours(){
-//            return silverContours;
-//        }
-//        public Point[] findSilver(){
-//            List<Moments> mu = new ArrayList<>(silverContours.size());
-//            Point[] coordCenter = new Point[mu.size()];
-//            for (int i = 0; i < silverContours.size(); i++) {
-//                mu.add(Imgproc.moments(silverContours.get(i)));
-//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
-//            }
-//            return coordCenter;
-//        }
-//        public Point[] findGold(){
-//            List<Moments> mu = new ArrayList<>(goldContours.size());
-//            Point[] coordCenter = new Point[mu.size()];
-//            for (int i = 0; i < goldContours.size(); i++) {
-//                mu.add(Imgproc.moments(goldContours.get(i)));
-//                coordCenter[i] = new Point((int)(mu.get(i).m10 / mu.get(i).m00), (int)(mu.get(i).m01 / mu.get(i).m00));
-//            }
-//            return coordCenter;
-//        }
     }
 }

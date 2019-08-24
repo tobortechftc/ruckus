@@ -64,7 +64,7 @@ public class ToboTitan extends Logger<ToboTitan> implements Robot {
         }
         this.core = new CoreSystem();
         chassis = new SwerveChassis(this.core).configureLogging("Swerve", logLevel); // Log.DEBUG
-        chassis.configure(configuration, auto);
+        chassis.configure(configuration, auto, true);
         landing = new LandingLatch(this.core).configureLogging("LandingLatch", logLevel);
         landing.configure(configuration, auto);
         mineralArm = new MineralArm(this.core).configureLogging("MineralArm", logLevel);
