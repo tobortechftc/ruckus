@@ -72,7 +72,7 @@ public class ToboRuckus extends Logger<ToboRuckus> implements Robot {
 //        cameraSystem.init(configuration.getHardwareMap());
         if (auto) {
             cameraMineralDetector = new CameraMineralDetector().configureLogging("CameraMineralDetector", logLevel);
-            cameraMineralDetector.configure(configuration);
+            cameraMineralDetector.configure(configuration, true);
         }
         this.core = new CoreSystem();
         info("RoboRuck configure() after new CoreSystem()(run time = %.2f sec)", (runtime.seconds() - ini_time));

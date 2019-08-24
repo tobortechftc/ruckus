@@ -5,6 +5,7 @@ import android.util.Log;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
@@ -50,7 +51,7 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         return "CameraMineralDetector";
     }
 
-    public void configure(Configuration configuration) {
+    public void configure(Configuration configuration, boolean useExtCam) {
         logger.verbose("Start Configuration");
         /*
          * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
@@ -58,8 +59,11 @@ public class CameraMineralDetector extends Logger<CameraMineralDetector> impleme
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-
+        if (useExtCam) {
+            parameters.cameraName = configuration.getHardwareMap().get(WebcamName.class, "Webcam 1");
+        } else {
+            parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        }
         //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
